@@ -1,1 +1,1 @@
-https://cute-papagena-java-service-ee92622f.koyeb.app/ - connect to this url(paused)
+https://favourable-rodie-java-service-b82e5859.koyeb.app/ - connect to this url(paused)
