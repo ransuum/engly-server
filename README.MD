@@ -1,1 +1,1 @@
-https://cute-papagena-java-service-ee92622f.koyeb.app/ - connect to this usl
+https://cute-papagena-java-service-ee92622f.koyeb.app/ - connect to this url(paused)
