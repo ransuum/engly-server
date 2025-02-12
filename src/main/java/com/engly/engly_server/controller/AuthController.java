@@ -32,28 +32,28 @@ public class AuthController {
 
     @PostMapping("/sign-in")
     @Operation(summary = "Authenticate user", security = @SecurityRequirement(name = "basicAuth"))
-    public ResponseEntity<?> authenticateUser(Authentication authentication,HttpServletResponse response){
-        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication,response));
+    public ResponseEntity<?> authenticateUser(Authentication authentication, HttpServletResponse response) {
+        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication, response));
     }
 
     @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
-    @PostMapping ("/refresh-token")
-    public ResponseEntity<?> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader){
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(authorizationHeader));
     }
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest,
-                                          BindingResult bindingResult, HttpServletResponse httpServletResponse){
+                                          BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
         log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequest.username());
         if (bindingResult.hasErrors()) {
             List<String> errorMessage = bindingResult.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .toList();
-            log.error("[AuthController:registerUser]Errors in user:{}",errorMessage);
+            log.error("[AuthController:registerUser]Errors in user:{}", errorMessage);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
         }
-        return ResponseEntity.ok(authService.registerUser(signUpRequest,httpServletResponse));
+        return ResponseEntity.ok(authService.registerUser(signUpRequest, httpServletResponse));
     }
 }
