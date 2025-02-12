@@ -2,6 +2,8 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.request.SignUpRequest;
 import com.engly.engly_server.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/sign-in")
+    @Operation(summary = "Authenticate user", security = @SecurityRequirement(name = "basicAuth"))
     public ResponseEntity<?> authenticateUser(Authentication authentication,HttpServletResponse response){
         return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication,response));
     }
