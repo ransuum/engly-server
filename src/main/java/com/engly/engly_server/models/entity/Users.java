@@ -1,6 +1,7 @@
 package com.engly.engly_server.models.entity;
 
 
+import com.engly.engly_server.models.enums.Provider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -50,6 +51,11 @@ public class Users implements Serializable {
 
     @CreatedDate
     private Instant createdAt;
+
+    @Enumerated(EnumType.STRING)
+    private Provider provider;
+
+    private String providerId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RefreshToken> refreshTokens;
