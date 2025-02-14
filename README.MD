@@ -6,7 +6,7 @@ sign up example:
 {
     "username": "username",
     "email": "example@gmail.com",
-    "password": "Example@",
+    "password": "Example@123",
     "role": "ROLE_ADMIN",
     "firstname": "Firstname",
     "lastname": "Lastname",
