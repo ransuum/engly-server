@@ -27,7 +27,7 @@ import java.io.IOException;
 @Slf4j
 public class JwtRefreshTokenFilter extends OncePerRequestFilter {
 
-    private  final RSAKeyRecord rsaKeyRecord;
+    private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
 
@@ -46,6 +46,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started ");
 
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
+
 
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
@@ -85,9 +86,9 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             }
             log.info("[JwtRefreshTokenFilter:doFilterInternal] Completed");
             filterChain.doFilter(request, response);
-        }catch (JwtValidationException jwtValidationException){
-            log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}",jwtValidationException.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,jwtValidationException.getMessage());
+        } catch (JwtValidationException jwtValidationException) {
+            log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}", jwtValidationException.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, jwtValidationException.getMessage());
         }
     }
 }

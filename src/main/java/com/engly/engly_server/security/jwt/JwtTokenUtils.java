@@ -22,9 +22,11 @@ public class JwtTokenUtils {
         return jwtToken.getSubject();
     }
 
-    public boolean isTokenValid(Jwt jwtToken, UserDetails userDetails) {
-        return !getIfTokenIsExpired(jwtToken) && getUserName(jwtToken).equals(userDetails.getUsername());
-
+    public boolean isTokenValid(Jwt jwtToken, UserDetails userDetails){
+        final String userName = getUserName(jwtToken);
+        boolean isTokenExpired = getIfTokenIsExpired(jwtToken);
+        boolean isTokenUserSameAsDatabase = userName.equals(userDetails.getUsername());
+        return !isTokenExpired  && isTokenUserSameAsDatabase;
     }
 
     private boolean getIfTokenIsExpired(Jwt jwtToken) {

@@ -1,8 +1,10 @@
 package com.engly.engly_server.service.impl;
 
 import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
+import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.models.request.SignUpRequest;
 import com.engly.engly_server.repo.RefreshTokenRepo;
@@ -44,7 +46,6 @@ public class AuthServiceImpl implements AuthService {
                         return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
                     });
 
-
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
 
@@ -65,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
 
         } catch (Exception e) {
-            log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :" + e.getMessage());
+            log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :{}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
         }
     }
@@ -99,18 +100,29 @@ public class AuthServiceImpl implements AuthService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exist");
             });
 
-            var users = userRepo.save(Users.builder()
-                    .phone(signUpRequest.phone())
-                    .roles(signUpRequest.role())
+            var users = Users.builder()
+                    .roles("ROLE_USER")
                     .createdAt(Instant.now())
                     .email(signUpRequest.email())
-                    .firstName(signUpRequest.firstname())
                     .username(signUpRequest.username())
-                    .lastName(signUpRequest.lastname())
                     .password(passwordEncoder.encode(signUpRequest.password()))
-                    .build());
+                    .provider(Provider.LOCAL)
+                    .build();
 
-            Authentication authentication = jwtTokenGenerator.createAuthenticationObject(users);
+            var addInfo = AdditionalInfo.builder()
+                    .goals(signUpRequest.goals())
+                    .englishLevel(signUpRequest.englishLevel())
+                    .gender(signUpRequest.gender())
+                    .dateOfBirth(signUpRequest.dateOfBirth())
+                    .nativeLanguage(signUpRequest.nativeLanguage())
+                    .build();
+
+            users.setAdditionalInfo(addInfo);
+            addInfo.setUsers(users);
+
+            var savedUser = userRepo.save(users);
+
+            Authentication authentication = jwtTokenGenerator.createAuthenticationObject(savedUser);
 
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);

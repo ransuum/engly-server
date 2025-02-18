@@ -3,7 +3,12 @@ package com.engly.engly_server.controller;
 import com.engly.engly_server.models.request.SignUpRequest;
 import com.engly.engly_server.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +28,7 @@ import java.util.Optional;
 
 @RestController
 @Slf4j
+@Tag(name = "Аутентификация и Авторизация", description = "Контроллер для регистрации, входа и обновления токена")
 public class AuthController {
     private final AuthService authService;
 
@@ -30,18 +36,61 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @Operation(
+            summary = "Аутентификация пользователя",
+            description = """
+            Используйте Basic Auth в Postman:
+            1. Перейдите во вкладку Authorization и выберите `Basic Auth`
+            2. Введите email и пароль
+            3. Укажите URL: `http://localhost:8000/sign-in`\s
+            4. Выберите метод `POST` и нажмите `Send`
+           \s
+            Если swagger то сверху есть кнопка Authorize.
+            В ответе придёт access-токен. Используйте его для последующих запросов, передавая в заголовке `Authorization: Bearer {token}`.
+       \s""",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Успешная аутентификация. Возвращает access и refresh токены."),
+                    @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
+            }
+    )
     @PostMapping("/sign-in")
-    @Operation(summary = "Authenticate user", security = @SecurityRequirement(name = "basicAuth"))
     public ResponseEntity<?> authenticateUser(Authentication authentication, HttpServletResponse response) {
         return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(authentication, response));
     }
 
+    @Operation(
+            summary = "Обновление Access-токена",
+            description = """
+            Используйте Refresh-токен для получения нового Access-токена.
+            В запросе передайте `Authorization: Bearer {refresh_token}`.
+        """,
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Новый Access-токен успешно получен"),
+                    @ApiResponse(responseCode = "403", description = "Refresh-токен недействителен или истёк")
+            }
+    )
     @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
     @PostMapping("/refresh-token")
     public ResponseEntity<?> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
         return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(authorizationHeader));
     }
 
+    @Operation(
+            summary = "Регистрация нового пользователя",
+            description = """
+            Позволяет зарегистрировать нового пользователя.
+            В теле запроса передавайте JSON с необходимыми данными.
+        """,
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Данные пользователя для регистрации",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = SignUpRequest.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Пользователь успешно зарегистрирован"),
+                    @ApiResponse(responseCode = "400", description = "Ошибка валидации входных данных")
+            }
+    )
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest,
                                           BindingResult bindingResult, HttpServletResponse httpServletResponse) {

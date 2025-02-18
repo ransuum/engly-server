@@ -27,12 +27,16 @@ public class JwtTokenGenerator {
     }
 
     public Authentication createAuthenticationObject(Users users) {
-        String[] roleArray = users.getRoles().split(",");
+        String username = users.getEmail();
+        String password = users.getPassword();
+        String roles = users.getRoles();
+
+        String[] roleArray = roles.split(",");
         GrantedAuthority[] authorities = Arrays.stream(roleArray)
                 .map(role -> (GrantedAuthority) role::trim)
                 .toArray(GrantedAuthority[]::new);
 
-        return new UsernamePasswordAuthenticationToken(users.getEmail(), users.getPassword(), Arrays.asList(authorities));
+        return new UsernamePasswordAuthenticationToken(username, password, Arrays.asList(authorities));
     }
 
     public String generateAccessToken(Authentication authentication) {
@@ -86,9 +90,17 @@ public class JwtTokenGenerator {
 
     private String getPermissionsFromRoles(String roles) {
         Set<String> permissions = new HashSet<>();
-        if (roles.contains("ROLE_ADMIN")) permissions.addAll(List.of("READ", "WRITE", "DELETE"));
-        if (roles.contains("ROLE_MANAGER")) permissions.addAll(List.of("READ", "WRITE", "DELETE"));
-        if (roles.contains("ROLE_USER")) permissions.addAll(List.of("READ", "WRITE", "DELETE"));
+
+        if (roles.contains("ROLE_ADMIN")) {
+            permissions.addAll(List.of("READ", "WRITE", "DELETE"));
+        }
+        if (roles.contains("ROLE_MANAGER")) {
+            permissions.addAll(List.of("READ", "WRITE", "DELETE"));
+        }
+        if (roles.contains("ROLE_USER")) {
+            permissions.addAll(List.of("READ", "WRITE", "DELETE"));
+        }
+
         return String.join(" ", permissions);
     }
 

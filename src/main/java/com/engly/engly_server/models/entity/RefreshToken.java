@@ -15,9 +15,8 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table(name = "REFRESH_TOKENS")
 public class RefreshToken {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "REFRESH_TOKEN", nullable = false, length = 10000)
     private String refreshToken;
@@ -28,5 +27,4 @@ public class RefreshToken {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
-
 }
