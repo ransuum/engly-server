@@ -7,6 +7,7 @@ import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.security.user_configuration.UserManagerConfig;
 import com.engly.engly_server.service.LogoutHandlerService;
+import com.engly.engly_server.service.impl.AuthServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -101,6 +102,23 @@ public class SecurityConfig {
 
     @Order(3)
     @Bean
+    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, AuthServiceImpl oauth2SuccessHandler) throws Exception {
+        return http
+                .securityMatcher(new OrRequestMatcher(
+                        new AntPathRequestMatcher("/oauth2/**"),
+                        new AntPathRequestMatcher("/login/oauth2/**")))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .oauth2Login(oauth2 -> oauth2
+                        .successHandler(oauth2SuccessHandler)
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
+                .build();
+    }
+
+
+    @Order(4)
+    @Bean
     public SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/refresh-token/**"))
@@ -118,7 +136,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Order(4)
+    @Order(5)
     @Bean
     public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -141,7 +159,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Order(5)
+    @Order(6)
     @Bean
     public SecurityFilterChain registerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
@@ -153,7 +171,7 @@ public class SecurityConfig {
                 .build();
     }
 
-    @Order(6)
+    @Order(7)
     @Bean
     public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity

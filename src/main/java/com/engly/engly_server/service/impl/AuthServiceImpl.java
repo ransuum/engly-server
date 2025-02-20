@@ -4,37 +4,49 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.models.enums.TokenType;
+import com.engly.engly_server.models.enums.*;
 import com.engly.engly_server.models.request.SignUpRequest;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.service.AuthService;
+import com.engly.engly_server.utils.mapper.registration_chooser.RegistrationChooser;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.graalvm.collections.Pair;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandler {
     private final UserRepo userRepo;
     private final JwtTokenGenerator jwtTokenGenerator;
     private final RefreshTokenRepo refreshTokenRepo;
-    private final PasswordEncoder passwordEncoder;
+    private final Map<Provider, RegistrationChooser> chooserMap;
 
     public AuthServiceImpl(UserRepo userRepo, JwtTokenGenerator jwtTokenGenerator,
-                           RefreshTokenRepo refreshTokenRepo, PasswordEncoder passwordEncoder) {
+                           RefreshTokenRepo refreshTokenRepo,
+                           List<RegistrationChooser> choosers) {
         this.userRepo = userRepo;
         this.jwtTokenGenerator = jwtTokenGenerator;
         this.refreshTokenRepo = refreshTokenRepo;
-        this.passwordEncoder = passwordEncoder;
+        this.chooserMap = choosers.stream()
+                .collect(Collectors.toMap(RegistrationChooser::getProvider, o -> o));
     }
 
     @Override
@@ -59,6 +71,7 @@ public class AuthServiceImpl implements AuthService {
             log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
+                    .refreshToken(refreshToken)
                     .accessTokenExpiry(15 * 60)
                     .username(users.getUsername())
                     .tokenType(TokenType.Bearer)
@@ -95,40 +108,15 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto registerUser(SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
         try {
-            log.info("[AuthService:registerUser]User Registration Started with :::{}", signUpRequest);
-            userRepo.findByEmail(signUpRequest.email()).ifPresent(users -> {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exist");
-            });
+            Pair<Users, AdditionalInfo> registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
 
-            var users = Users.builder()
-                    .roles("ROLE_USER")
-                    .createdAt(Instant.now())
-                    .email(signUpRequest.email())
-                    .username(signUpRequest.username())
-                    .password(passwordEncoder.encode(signUpRequest.password()))
-                    .provider(Provider.LOCAL)
-                    .build();
-
-            var addInfo = AdditionalInfo.builder()
-                    .goals(signUpRequest.goals())
-                    .englishLevel(signUpRequest.englishLevel())
-                    .gender(signUpRequest.gender())
-                    .dateOfBirth(signUpRequest.dateOfBirth())
-                    .nativeLanguage(signUpRequest.nativeLanguage())
-                    .build();
-
-            users.setAdditionalInfo(addInfo);
-            addInfo.setUsers(users);
-
-            var savedUser = userRepo.save(users);
-
-            Authentication authentication = jwtTokenGenerator.createAuthenticationObject(savedUser);
+            Authentication authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
 
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
             refreshTokenRepo.save(RefreshToken.builder()
-                    .user(users)
+                    .user(registration.getLeft())
                     .refreshToken(refreshToken)
                     .revoked(false)
                     .build());
@@ -137,6 +125,7 @@ public class AuthServiceImpl implements AuthService {
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(5 * 60)
+                    .refreshToken(refreshToken)
                     .username(signUpRequest.username())
                     .tokenType(TokenType.Bearer)
                     .build();
@@ -146,5 +135,50 @@ public class AuthServiceImpl implements AuthService {
             log.error("[AuthService:registerUser]Exception while registering the user due to :{}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
+        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        String email = oauth2User.getAttribute("email");
+        String name = oauth2User.getAttribute("name");
+        Users user;
+
+        Optional<Users> existingUser = userRepo.findByEmail(email);
+        if (existingUser.isPresent()) user = existingUser.get();
+         else {
+            Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)
+                    .registration(new SignUpRequest(name, email,
+                            "Password123@",
+                            LocalDate.now(),
+                            EnglishLevels.A1,
+                            NativeLanguage.ENGLISH,
+                            Goals.DEFAULT,
+                            Gender.OTHER
+                    ));
+
+            user = additionalInfoPair.getLeft();
+        }
+
+        Authentication userAuth = jwtTokenGenerator.createAuthenticationObject(user);
+        String accessToken = jwtTokenGenerator.generateAccessToken(userAuth);
+        String refreshToken = jwtTokenGenerator.generateRefreshToken(userAuth);
+
+        refreshTokenRepo.save(RefreshToken.builder()
+                .user(user)
+                .refreshToken(refreshToken)
+                .revoked(false)
+                .build());
+
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        new ObjectMapper().writeValue(response.getWriter(),
+                AuthResponseDto.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .accessTokenExpiry(15 * 60)
+                        .username(user.getUsername())
+                        .tokenType(TokenType.Bearer)
+                        .build());
     }
 }

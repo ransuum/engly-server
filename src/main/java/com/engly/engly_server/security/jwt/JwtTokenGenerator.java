@@ -100,6 +100,9 @@ public class JwtTokenGenerator {
         if (roles.contains("ROLE_USER")) {
             permissions.addAll(List.of("READ", "WRITE", "DELETE"));
         }
+        if (roles.contains("ROLE_GOOGLE")) {
+            permissions.add("ADDITIONAL_INFO");
+        }
 
         return String.join(" ", permissions);
     }
