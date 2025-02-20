@@ -1,4 +1,4 @@
-package com.engly.engly_server.service;
+package com.engly.engly_server.service.impl;
 
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repo.RefreshTokenRepo;
@@ -23,12 +23,12 @@ public class LogoutHandlerService implements LogoutHandler {
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if(!authHeader.startsWith(TokenType.Bearer.name())) return;
+        if (!authHeader.startsWith(TokenType.Bearer.name())) return;
 
         final String refreshToken = authHeader.substring(7);
 
         var storedRefreshToken = refreshTokenRepo.findByRefreshToken(refreshToken)
-                .map(token->{
+                .map(token -> {
                     token.setRevoked(true);
                     refreshTokenRepo.save(token);
                     return token;

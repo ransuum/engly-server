@@ -35,8 +35,8 @@ public class GoogleRegistration implements RegistrationChooser {
 
         Users user = Users.builder()
                 .roles("ROLE_GOOGLE")
-                .createdAt(Instant.now())
                 .email(signUpRequest.email())
+                .emailVerified(Boolean.TRUE)
                 .username(signUpRequest.username())
                 .password(passwordEncoder.encode(
                         PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username())

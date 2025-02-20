@@ -6,7 +6,7 @@ import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.security.user_configuration.UserManagerConfig;
-import com.engly.engly_server.service.LogoutHandlerService;
+import com.engly.engly_server.service.impl.LogoutHandlerService;
 import com.engly.engly_server.service.impl.AuthServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -72,10 +72,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .userDetailsService(userManagerConfig)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(ex -> {
-                    ex.authenticationEntryPoint((request, response, authException) ->
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()));
-                })
+                .exceptionHandling(ex ->
+                    ex.authenticationEntryPoint((request, response, authException)
+                            -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage())))
                 .httpBasic(withDefaults())
                 .build();
     }

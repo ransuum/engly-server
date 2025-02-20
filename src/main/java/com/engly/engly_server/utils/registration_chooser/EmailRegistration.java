@@ -34,8 +34,8 @@ public class EmailRegistration implements RegistrationChooser {
 
         var users = Users.builder()
                 .roles("ROLE_USER")
-                .createdAt(Instant.now())
                 .email(signUpRequest.email())
+                .emailVerified(Boolean.FALSE)
                 .username(signUpRequest.username())
                 .password(passwordEncoder.encode(signUpRequest.password()))
                 .provider(Provider.LOCAL)
