@@ -1,11 +1,11 @@
-package com.engly.engly_server.utils.mapper.registration_chooser;
+package com.engly.engly_server.utils.registration_chooser;
 
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.request.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
-import com.engly.engly_server.utils.mapper.password_generate_util.PasswordGeneratorUtil;
+import com.engly.engly_server.utils.password_generate_util.PasswordGeneratorUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.collections.Pair;
 import org.springframework.http.HttpStatus;

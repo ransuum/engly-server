@@ -10,7 +10,7 @@ import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.service.AuthService;
-import com.engly.engly_server.utils.mapper.registration_chooser.RegistrationChooser;
+import com.engly.engly_server.utils.registration_chooser.RegistrationChooser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
