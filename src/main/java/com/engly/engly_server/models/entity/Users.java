@@ -55,6 +55,7 @@ public class Users implements Serializable {
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
+    @Column(name = "provider_id")
     private String providerId;
 
     @OneToOne(cascade = CascadeType.ALL)

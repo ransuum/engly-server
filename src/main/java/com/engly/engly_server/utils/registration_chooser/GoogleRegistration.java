@@ -42,6 +42,7 @@ public class GoogleRegistration implements RegistrationChooser {
                         PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username())
                 ))
                 .provider(Provider.GOOGLE)
+                .providerId(signUpRequest.providerId())
                 .build();
 
         return Pair.create(userRepo.save(user), null);

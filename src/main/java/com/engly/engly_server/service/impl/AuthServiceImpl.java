@@ -144,6 +144,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
+        String providerId = oauth2User.getAttribute("sub");
         Users user;
 
         Optional<Users> existingUser = userRepo.findByEmail(email);
@@ -156,7 +157,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                             EnglishLevels.A1,
                             NativeLanguage.ENGLISH,
                             Goals.DEFAULT,
-                            Gender.OTHER
+                            Gender.OTHER,
+                            providerId
                     ));
 
             user = additionalInfoPair.getLeft();

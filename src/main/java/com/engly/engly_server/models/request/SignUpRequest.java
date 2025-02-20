@@ -39,5 +39,7 @@ public record SignUpRequest(@NotBlank(message = "Username is blank")
                             Goals goals,
 
                             @NotNull(message = "Gender is required")
-                            Gender gender) {
+                            Gender gender,
+
+                            String providerId) {
 }
