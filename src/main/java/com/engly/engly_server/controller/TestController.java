@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/test")
 public class TestController {
     private final UserRepo userRepo;
 
@@ -28,7 +28,7 @@ public class TestController {
 
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     @SecurityRequirement(name = "bearerAuth")
-    @GetMapping("/test")
+    @GetMapping("/default")
     public ResponseEntity<AuthResponseDto> response() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return new ResponseEntity<>(AuthResponseDto.builder()

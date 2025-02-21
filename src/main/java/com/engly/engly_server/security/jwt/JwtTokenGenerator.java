@@ -103,6 +103,9 @@ public class JwtTokenGenerator {
         if (roles.contains("ROLE_GOOGLE")) {
             permissions.add("ADDITIONAL_INFO");
         }
+        if (roles.contains("ROLE_SYSADMIN")) {
+            permissions.addAll(List.of("READ", "WRITE", "DELETE", "CREATE_CATEGORY", "UPDATE_CATEGORY", "DELETE_CATEGORY"));
+        }
 
         return String.join(" ", permissions);
     }

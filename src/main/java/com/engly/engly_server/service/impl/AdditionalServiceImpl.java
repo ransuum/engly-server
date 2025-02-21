@@ -11,6 +11,7 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.security.user_configuration.UserConfig;
 import com.engly.engly_server.service.AdditionalService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,9 @@ public class AdditionalServiceImpl implements AdditionalService {
     private final RefreshTokenRepo refreshTokenRepo;
     private final UserRepo userRepo;
     private final JwtTokenGenerator jwtTokenGenerator;
+
+    @Value("${sysadmin.email}")
+    private String sysadminEmail;
 
     public AdditionalServiceImpl(RefreshTokenRepo refreshTokenRepo, UserRepo userRepo, JwtTokenGenerator jwtTokenGenerator) {
         this.refreshTokenRepo = refreshTokenRepo;
@@ -36,7 +40,7 @@ public class AdditionalServiceImpl implements AdditionalService {
         Users user = userRepo.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        user.setRoles("ROLE_USER");
+        user.setRoles(user.getEmail().equals(sysadminEmail) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
         AdditionalInfo additionalInfo = AdditionalInfo.builder()
                 .user(user)
