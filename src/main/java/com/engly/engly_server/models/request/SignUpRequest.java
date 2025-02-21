@@ -4,20 +4,23 @@ import com.engly.engly_server.models.enums.EnglishLevels;
 import com.engly.engly_server.models.enums.Gender;
 import com.engly.engly_server.models.enums.Goals;
 import com.engly.engly_server.models.enums.NativeLanguage;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 
 public record SignUpRequest(@NotBlank(message = "Username is blank")
-                            @Size(max = 18, message = "Username is too long")
+                            @Size(max = 50, message = "Username cannot exceed 50 characters. Please shorten your input.")
+                            @Pattern(
+                                    regexp = "^[a-zA-Z][a-zA-Z0-9._-]{2,}$",
+                                    message = "Username must start with a letter and can contain only letters, numbers, dots, underscores and hyphens"
+                            )
                             String username,
 
                             @Valid
                             @Email(message = "Isn't email")
                             @NotBlank(message = "Email is blank")
-                            @Size(max = 40, message = "Email is too long")
+                            @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
                             String email,
 
                             @Valid
@@ -26,6 +29,7 @@ public record SignUpRequest(@NotBlank(message = "Username is blank")
                             @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_-])[A-Za-z\\d@$!%*#?&_-]+$",
                                     message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
                             String password,
+
                             @NotNull(message = "Date of birth is required")
                             LocalDate dateOfBirth,
 

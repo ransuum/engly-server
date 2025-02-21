@@ -32,6 +32,7 @@ public class ChatParticipants {
     private Users user;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private Instant joinedAt;
 
     private Instant leaveAt;

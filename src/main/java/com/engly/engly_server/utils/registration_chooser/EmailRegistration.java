@@ -12,8 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-
 @Component
 @Slf4j
 public class EmailRegistration implements RegistrationChooser {
@@ -42,7 +40,7 @@ public class EmailRegistration implements RegistrationChooser {
                 .build();
 
         var addInfo = AdditionalInfo.builder()
-                .goals(signUpRequest.goals())
+                .goal(signUpRequest.goals())
                 .englishLevel(signUpRequest.englishLevel())
                 .gender(signUpRequest.gender())
                 .dateOfBirth(signUpRequest.dateOfBirth())
@@ -50,7 +48,7 @@ public class EmailRegistration implements RegistrationChooser {
                 .build();
 
         users.setAdditionalInfo(addInfo);
-        addInfo.setUsers(users);
+        addInfo.setUser(users);
 
         Users save = userRepo.save(users);
 

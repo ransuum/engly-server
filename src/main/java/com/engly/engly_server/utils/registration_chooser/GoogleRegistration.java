@@ -13,8 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-
 @Component
 @Slf4j
 public class GoogleRegistration implements RegistrationChooser {

@@ -39,8 +39,8 @@ public class AdditionalServiceImpl implements AdditionalService {
         user.setRoles("ROLE_USER");
 
         AdditionalInfo additionalInfo = AdditionalInfo.builder()
-                .users(user)
-                .goals(additionalRequestForGoogleUser.goals())
+                .user(user)
+                .goal(additionalRequestForGoogleUser.goals())
                 .nativeLanguage(additionalRequestForGoogleUser.nativeLanguage())
                 .gender(additionalRequestForGoogleUser.gender())
                 .englishLevel(additionalRequestForGoogleUser.englishLevel())

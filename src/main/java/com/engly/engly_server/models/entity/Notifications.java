@@ -32,5 +32,6 @@ public class Notifications {
     private Boolean isRead;
 
     @CreationTimestamp
+    @Column(nullable = false)
     private Instant createdAt;
 }

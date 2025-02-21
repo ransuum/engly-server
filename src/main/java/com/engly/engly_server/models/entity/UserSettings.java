@@ -21,7 +21,7 @@ public class UserSettings {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
 

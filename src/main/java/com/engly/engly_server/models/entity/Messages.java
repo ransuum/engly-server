@@ -27,8 +27,8 @@ public class Messages {
     @JoinColumn(name = "room_id", referencedColumnName = "id")
     private Rooms room;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @ManyToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private Users user;
 
     @Column(nullable = false)
@@ -38,10 +38,10 @@ public class Messages {
     @Column(nullable = false, name = "created_at")
     private Instant createdAt;
 
-    @CreationTimestamp
-    @Column(nullable = false, name = "updated_at")
+    @UpdateTimestamp
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
-    private Boolean is_edited;
-    private Boolean is_deleted;
+    private Boolean isEdited;
+    private Boolean isDeleted;
 }

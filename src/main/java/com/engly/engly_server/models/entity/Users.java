@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
@@ -44,8 +45,8 @@ public class Users implements Serializable {
     @Column(nullable = false, name = "created_at")
     private Instant createdAt;
 
-    @CreationTimestamp
-    @Column(nullable = false, name = "updated_at")
+    @UpdateTimestamp
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
     private Instant lastLogin;
@@ -72,10 +73,12 @@ public class Users implements Serializable {
     @OneToMany(mappedBy = "moder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Moderation> moderations;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<UserSettings> userSettings;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserSettings userSettings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notifications> notifications;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Messages> messages;
 }

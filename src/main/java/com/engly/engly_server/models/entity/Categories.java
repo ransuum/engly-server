@@ -36,8 +36,8 @@ public class Categories {
     @Column(nullable = false, name = "created_at")
     private Instant createdAt;
 
-    @CreationTimestamp
-    @Column(nullable = false, name = "updated_at")
+    @UpdateTimestamp
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

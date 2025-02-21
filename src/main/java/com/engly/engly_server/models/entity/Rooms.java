@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
@@ -36,8 +37,8 @@ public class Rooms {
     @Column(nullable = false, name = "created_at")
     private Instant createdAt;
 
-    @CreationTimestamp
-    @Column(nullable = false, name = "updated_at")
+    @UpdateTimestamp
+    @Column(name = "updated_at")
     private Instant updatedAt;
 
     @ManyToOne
