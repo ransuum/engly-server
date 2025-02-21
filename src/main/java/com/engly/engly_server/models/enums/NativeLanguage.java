@@ -10,5 +10,7 @@ public enum NativeLanguage {
     RUSSIAN,
     ARABIC,
     PORTUGUESE,
-    HINDI
+    HINDI,
+    UKRAINIAN,
+    POLISH
 }

@@ -24,7 +24,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@Tag(name = "Аутентификация и Авторизация", description = "Контроллер для регистрации, входа и обновления токена")
+@Tag(name = "Автентифікація та Авторизація", description = "Контролер для реєстрації, входу та оновлення токену")
 public class AuthController {
     private final AuthService authService;
 
@@ -33,36 +33,37 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Аутентификация пользователя",
+            summary = "Автентифікація користувача",
             description = """
-            Используйте Basic Auth в Postman:
-            1. Перейдите во вкладку Authorization и выберите `Basic Auth`
-            2. Введите email и пароль
-            3. Укажите URL: `http://localhost:8000/sign-in`\s
-            4. Выберите метод `POST` и нажмите `Send`
+            Використовуйте Basic Auth у Postman:
+            1. Перейдіть до вкладки Authorization та оберіть `Basic Auth`
+            2. Введіть email та пароль
+            3. Вкажіть URL: `http://localhost:8000/sign-in` або `https://favourable-rodie-java-service-b82e5859.koyeb.app/sign-in`
+            4. Оберіть метод `POST` та натисніть `Send`
            \s
-            Если swagger то сверху есть кнопка Authorize.
-            В ответе придёт access-токен. Используйте его для последующих запросов, передавая в заголовке `Authorization: Bearer {token}`.
+            Якщо використовуєте swagger, зверху є кнопка Authorize.
+            У відповіді прийде access-токен. Використовуйте його для наступних запитів, передаючи в заголовку `Authorization: Bearer {token}`.
        \s""",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Успешная аутентификация. Возвращает access и refresh токены."),
-                    @ApiResponse(responseCode = "401", description = "Неверные учетные данные")
+                    @ApiResponse(responseCode = "201", description = "Успішна автентифікація. Повертає access та refresh токени."),
+                    @ApiResponse(responseCode = "401", description = "Невірні облікові дані")
             }
     )
+
     @PostMapping("/sign-in")
     public ResponseEntity<AuthResponseDto> authenticateUser(Authentication authentication, HttpServletResponse response) {
         return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(authentication, response), HttpStatus.CREATED);
     }
 
     @Operation(
-            summary = "Обновление Access-токена",
+            summary = "Оновлення Access-токену",
             description = """
-            Используйте Refresh-токен для получения нового Access-токена.
-            В запросе передайте `Authorization: Bearer {refresh_token}`.
+            Використовуйте Refresh-токен для отримання нового Access-токену.
+            У запиті передайте `Authorization: Bearer {refresh_token}`.
         """,
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Новый Access-токен успешно получен"),
-                    @ApiResponse(responseCode = "403", description = "Refresh-токен недействителен или истёк")
+                    @ApiResponse(responseCode = "201", description = "Новий Access-токен успішно отримано"),
+                    @ApiResponse(responseCode = "403", description = "Refresh-токен недійсний або закінчився термін дії")
             }
     )
     @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
@@ -72,19 +73,19 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Регистрация нового пользователя",
+            summary = "Реєстрація нового користувача",
             description = """
-            Позволяет зарегистрировать нового пользователя.
-            В теле запроса передавайте JSON с необходимыми данными.
-        """,
+        Дозволяє зареєструвати нового користувача.
+        У тілі запиту передавайте JSON з необхідними даними.
+    """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Данные пользователя для регистрации",
+                    description = "Дані користувача для реєстрації",
                     required = true,
                     content = @Content(schema = @Schema(implementation = SignUpRequest.class))
             ),
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Пользователь успешно зарегистрирован"),
-                    @ApiResponse(responseCode = "400", description = "Ошибка валидации входных данных")
+                    @ApiResponse(responseCode = "201", description = "Користувача успішно зареєстровано"),
+                    @ApiResponse(responseCode = "400", description = "Помилка валідації вхідних даних")
             }
     )
     @PostMapping("/sign-up")

@@ -28,7 +28,7 @@ public class Messages {
     private Rooms room;
 
     @OneToOne
-    @JoinColumn(name = "room_id", referencedColumnName = "id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
 
     @Column(nullable = false)

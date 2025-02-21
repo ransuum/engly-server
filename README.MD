@@ -15,7 +15,7 @@ local machine: http://localhost:8000/swagger-ui/index.html#
 ### 1. Автентифікація через Google OAuth2
 1. Перейдіть за посиланням OAuth2:
    ```
-   https://favourable-rodie-java-service-b82e5859.koyeb.app/oauth2/redirect/google
+   https://favourable-rodie-java-service-b82e5859.koyeb.app/oauth2/login/google
    ```
 2. Оберіть свій обліковий запис Google, коли з'явиться вікно вибору
 3. Після успішної автентифікації ви отримаєте access token та додаткову інформацію про автентифікацію
