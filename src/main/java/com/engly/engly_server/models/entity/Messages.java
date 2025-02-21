@@ -16,7 +16,7 @@ import java.time.Instant;
 @Data
 @Builder
 @Entity
-@Table(name = "categories")
+@Table(name = "messages")
 public class Messages {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -27,7 +27,7 @@ public class Messages {
     @JoinColumn(name = "room_id", referencedColumnName = "id")
     private Rooms room;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
 
