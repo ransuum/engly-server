@@ -1,13 +1,13 @@
 package com.engly.engly_server.models.entity;
 
 import com.engly.engly_server.models.enums.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.io.Serializable;
@@ -38,12 +38,23 @@ public class Users implements Serializable {
     @Column(nullable = false, name = "ROLES")
     private String roles;
 
-    @CreatedDate
+    @Column(nullable = false)
+    private Boolean emailVerified;
+
+    @CreationTimestamp
+    @Column(nullable = false, name = "created_at")
     private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Instant updatedAt;
+
+    private Instant lastLogin;
 
     @Enumerated(EnumType.STRING)
     private Provider provider;
 
+    @Column(name = "provider_id")
     private String providerId;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -53,4 +64,21 @@ public class Users implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RefreshToken> refreshTokens;
 
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Rooms> rooms;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ActivityLogs> activityLogs;
+
+    @OneToMany(mappedBy = "moder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Moderation> moderations;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserSettings userSettings;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Notifications> notifications;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Messages> messages;
 }

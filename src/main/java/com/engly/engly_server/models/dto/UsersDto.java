@@ -1,5 +1,24 @@
 package com.engly.engly_server.models.dto;
 
-import java.time.Instant;
+import com.engly.engly_server.models.enums.Provider;
 
-public record UsersDto(String id, String firstName, String lastName, String username, String email, Instant createdAt) { }
+import java.time.Instant;
+import java.util.List;
+
+public record UsersDto(String id,
+                       String username,
+                       String email,
+                       Instant createdAt,
+                       String roles,
+                       Boolean emailVerified,
+                       Instant updatedAt,
+                       Instant lastLogin,
+                       Provider provider,
+                       AdditionalInfoDto additionalInfo,
+                       List<RoomsDto> rooms,
+                       List<ActivityLogsDto> activityLogs,
+                       List<ModerationDto> moderations,
+                       UserSettingsDto userSettings,
+                       List<NotificationsDto> notifications,
+                       List<MessagesDto> messages) {
+}

@@ -11,17 +11,23 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.security.user_configuration.UserConfig;
 import com.engly.engly_server.service.AdditionalService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 public class AdditionalServiceImpl implements AdditionalService {
     private final RefreshTokenRepo refreshTokenRepo;
     private final UserRepo userRepo;
     private final JwtTokenGenerator jwtTokenGenerator;
+
+    @Value("#{'${sysadmin.email}'.split(',\\s*')}")
+    private Set<String> sysadminEmails;
 
     public AdditionalServiceImpl(RefreshTokenRepo refreshTokenRepo, UserRepo userRepo, JwtTokenGenerator jwtTokenGenerator) {
         this.refreshTokenRepo = refreshTokenRepo;
@@ -36,11 +42,11 @@ public class AdditionalServiceImpl implements AdditionalService {
         Users user = userRepo.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        user.setRoles("ROLE_USER");
+        user.setRoles(sysadminEmails.contains(user.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
         AdditionalInfo additionalInfo = AdditionalInfo.builder()
-                .users(user)
-                .goals(additionalRequestForGoogleUser.goals())
+                .user(user)
+                .goal(additionalRequestForGoogleUser.goals())
                 .nativeLanguage(additionalRequestForGoogleUser.nativeLanguage())
                 .gender(additionalRequestForGoogleUser.gender())
                 .englishLevel(additionalRequestForGoogleUser.englishLevel())

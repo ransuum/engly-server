@@ -13,8 +13,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
-
 @Component
 @Slf4j
 public class GoogleRegistration implements RegistrationChooser {
@@ -35,13 +33,14 @@ public class GoogleRegistration implements RegistrationChooser {
 
         Users user = Users.builder()
                 .roles("ROLE_GOOGLE")
-                .createdAt(Instant.now())
                 .email(signUpRequest.email())
+                .emailVerified(Boolean.TRUE)
                 .username(signUpRequest.username())
                 .password(passwordEncoder.encode(
-                        PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username())
-                ))
+                        PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username()))
+                )
                 .provider(Provider.GOOGLE)
+                .providerId(signUpRequest.providerId())
                 .build();
 
         return Pair.create(userRepo.save(user), null);

@@ -7,18 +7,22 @@ import com.engly.engly_server.models.request.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.collections.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.Instant;
+import java.util.Set;
 
 @Component
 @Slf4j
 public class EmailRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("#{'${sysadmin.email}'.split(',\\s*')}")
+    private Set<String> sysadminEmails;
 
     public EmailRegistration(UserRepo userRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
@@ -33,16 +37,16 @@ public class EmailRegistration implements RegistrationChooser {
         });
 
         var users = Users.builder()
-                .roles("ROLE_USER")
-                .createdAt(Instant.now())
+                .roles(sysadminEmails.contains(signUpRequest.email()) ? "ROLE_SYSADMIN" : "ROLE_USER")
                 .email(signUpRequest.email())
+                .emailVerified(Boolean.FALSE)
                 .username(signUpRequest.username())
                 .password(passwordEncoder.encode(signUpRequest.password()))
                 .provider(Provider.LOCAL)
                 .build();
 
         var addInfo = AdditionalInfo.builder()
-                .goals(signUpRequest.goals())
+                .goal(signUpRequest.goals())
                 .englishLevel(signUpRequest.englishLevel())
                 .gender(signUpRequest.gender())
                 .dateOfBirth(signUpRequest.dateOfBirth())
@@ -50,7 +54,7 @@ public class EmailRegistration implements RegistrationChooser {
                 .build();
 
         users.setAdditionalInfo(addInfo);
-        addInfo.setUsers(users);
+        addInfo.setUser(users);
 
         Users save = userRepo.save(users);
 

@@ -35,11 +35,11 @@ public class AdditionalInfo {
     private NativeLanguage nativeLanguage;
 
     @Enumerated(EnumType.STRING)
-    private Goals goals;
+    private Goals goal;
 
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
     @OneToOne(mappedBy = "additionalInfo")
-    private Users users;
+    private Users user;
 }

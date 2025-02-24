@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                         log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
                         return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
                     });
-
+            users.setLastLogin(Instant.now());
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
 
@@ -143,6 +144,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
+        String providerId = oauth2User.getAttribute("sub");
         Users user;
 
         Optional<Users> existingUser = userRepo.findByEmail(email);
@@ -155,7 +157,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                             EnglishLevels.A1,
                             NativeLanguage.ENGLISH,
                             Goals.DEFAULT,
-                            Gender.OTHER
+                            Gender.OTHER,
+                            providerId
                     ));
 
             user = additionalInfoPair.getLeft();
