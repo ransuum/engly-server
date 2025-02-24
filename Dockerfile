@@ -1,12 +1,10 @@
-FROM maven:3.8.8-amazoncorretto-21 AS build
+FROM container-registry.oracle.com/graalvm/native-image:21 AS build
 WORKDIR /app
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean install -DskipTests
+RUN microdnf install maven && mvn clean install -DskipTests
 
-FROM amazoncorretto:21
+FROM container-registry.oracle.com/graalvm/jdk:21
 WORKDIR /app
-RUN ls
 COPY --from=build /app/target/*.jar ./app.jar
-RUN ls
 ENTRYPOINT ["java", "-jar", "app.jar"]
