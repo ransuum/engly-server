@@ -37,8 +37,8 @@ public class GoogleRegistration implements RegistrationChooser {
                 .emailVerified(Boolean.TRUE)
                 .username(signUpRequest.username())
                 .password(passwordEncoder.encode(
-                        PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username())
-                ))
+                        PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username()))
+                )
                 .provider(Provider.GOOGLE)
                 .providerId(signUpRequest.providerId())
                 .build();

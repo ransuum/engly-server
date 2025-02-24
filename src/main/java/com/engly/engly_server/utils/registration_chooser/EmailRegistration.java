@@ -13,14 +13,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Set;
+
 @Component
 @Slf4j
 public class EmailRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${sysadmin.email}")
-    private String sysadminEmail;
+    @Value("#{'${sysadmin.email}'.split(',\\s*')}")
+    private Set<String> sysadminEmails;
 
     public EmailRegistration(UserRepo userRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
@@ -35,7 +37,7 @@ public class EmailRegistration implements RegistrationChooser {
         });
 
         var users = Users.builder()
-                .roles(signUpRequest.email().equals(sysadminEmail) ? "ROLE_SYSADMIN" : "ROLE_USER")
+                .roles(sysadminEmails.contains(signUpRequest.email()) ? "ROLE_SYSADMIN" : "ROLE_USER")
                 .email(signUpRequest.email())
                 .emailVerified(Boolean.FALSE)
                 .username(signUpRequest.username())
