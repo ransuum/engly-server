@@ -18,14 +18,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 public class AdditionalServiceImpl implements AdditionalService {
     private final RefreshTokenRepo refreshTokenRepo;
     private final UserRepo userRepo;
     private final JwtTokenGenerator jwtTokenGenerator;
 
-    @Value("${sysadmin.email}")
-    private String sysadminEmail;
+    @Value("#{'${sysadmin.email}'.split(',\\s*')}")
+    private Set<String> sysadminEmails;
 
     public AdditionalServiceImpl(RefreshTokenRepo refreshTokenRepo, UserRepo userRepo, JwtTokenGenerator jwtTokenGenerator) {
         this.refreshTokenRepo = refreshTokenRepo;
@@ -40,7 +42,7 @@ public class AdditionalServiceImpl implements AdditionalService {
         Users user = userRepo.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        user.setRoles(user.getEmail().equals(sysadminEmail) ? "ROLE_SYSADMIN" : "ROLE_USER");
+        user.setRoles(sysadminEmails.contains(user.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
         AdditionalInfo additionalInfo = AdditionalInfo.builder()
                 .user(user)
