@@ -106,6 +106,9 @@ public class JwtTokenGenerator {
         if (roles.contains("ROLE_SYSADMIN")) {
             permissions.addAll(List.of("READ", "WRITE", "DELETE", "CREATE_CATEGORY", "UPDATE_CATEGORY", "DELETE_CATEGORY"));
         }
+        if (roles.contains("ROLE_NOT_VERIFIED")) {
+            permissions.add("NOT_VERIFIED");
+        }
 
         return String.join(" ", permissions);
     }

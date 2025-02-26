@@ -26,7 +26,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,11 +152,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
             Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)
                     .registration(new SignUpRequest(name, email,
                             "Password123@",
-                            LocalDate.now(),
                             EnglishLevels.A1,
                             NativeLanguage.ENGLISH,
                             Goals.DEFAULT,
-                            Gender.OTHER,
                             providerId
                     ));
 

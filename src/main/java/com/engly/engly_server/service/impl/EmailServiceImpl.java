@@ -11,7 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 public class EmailServiceImpl implements EmailService {
-    private JavaMailSender mailSender;
+    private final JavaMailSender mailSender;
 
     @Value("${app.email.notification.subject}")
     private String SUBJECT;

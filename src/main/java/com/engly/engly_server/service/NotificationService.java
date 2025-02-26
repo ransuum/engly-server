@@ -1,8 +1,11 @@
 package com.engly.engly_server.service;
 
-public interface NotificationService {
-    void sendNotifyMessage(String email);
+import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.dto.EmailSendInfo;
 
-    void checkToken(String token, String email);
+public interface NotificationService {
+    EmailSendInfo sendNotifyMessage();
+
+    AuthResponseDto checkToken(String token);
 
 }

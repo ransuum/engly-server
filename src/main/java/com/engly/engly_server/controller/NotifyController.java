@@ -1,6 +1,8 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.service.impl.NotificationServiceImpl;
+import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.dto.EmailSendInfo;
+import com.engly.engly_server.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,16 +10,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/notify")
+@RequestMapping("/api/notify")
 @Slf4j
 @Tag(name = "Підтвердження email", description = "Контроллер для підтвердження email")
 public class NotifyController {
 
-    @Autowired
-    private NotificationServiceImpl notificationService;
+    private final NotificationService notificationService;
+
+    public NotifyController(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     @Operation(
             summary = "Надсилання посилання на email",
@@ -33,15 +39,13 @@ public class NotifyController {
                     @ApiResponse(responseCode = "409", description = "Посилання не було надіслано або token не був згенерований коректно")
             }
     )
+    @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @PostMapping
-    public ResponseEntity<?> notifyUser(@RequestParam("email") String email) {
+    public ResponseEntity<EmailSendInfo> notifyUser() {
         try {
-            notificationService.sendNotifyMessage(email);
-
-            return ResponseEntity.ok().body("Message was sent succesfully");
+            return new ResponseEntity<>(notificationService.sendNotifyMessage(), HttpStatus.CREATED);
         } catch (Exception e) {
-            // Check the status of the notification service
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Message was not send try it again");
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -59,14 +63,8 @@ public class NotifyController {
             }
     )
     @GetMapping("/check")
-    public ResponseEntity<?> checkToken(@RequestParam("token") String token, @RequestParam("email") String email) {
-        try {
-            notificationService.checkToken(token, email);
-
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body("email verified successfully");
-        } catch (Exception e) {
-            // Check the status of the notification service
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("token is invalid for this email address");
-        }
+    @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
+    public ResponseEntity<AuthResponseDto> checkToken(@RequestParam("token") String token) {
+        return new ResponseEntity<>(notificationService.checkToken(token), HttpStatus.OK);
     }
 }

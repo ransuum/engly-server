@@ -48,9 +48,7 @@ public class AdditionalServiceImpl implements AdditionalService {
                 .user(user)
                 .goal(additionalRequestForGoogleUser.goals())
                 .nativeLanguage(additionalRequestForGoogleUser.nativeLanguage())
-                .gender(additionalRequestForGoogleUser.gender())
                 .englishLevel(additionalRequestForGoogleUser.englishLevel())
-                .dateOfBirth(additionalRequestForGoogleUser.dateOfBirth())
                 .build();
 
         user.setAdditionalInfo(additionalInfo);

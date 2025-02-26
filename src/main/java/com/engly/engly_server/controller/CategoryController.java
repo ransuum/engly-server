@@ -54,10 +54,4 @@ public class CategoryController {
     public ResponseEntity<CategoriesDto> getCategoryById(@PathVariable String id) {
         return ResponseEntity.ok(categoriesService.getCategoryById(id));
     }
-
-    @PreAuthorize("hasAuthority('SCOPE_READ')")
-    @GetMapping("/{name}")
-    public ResponseEntity<CategoriesDto> getCategoryByName(@PathVariable CategoryType name) {
-        return ResponseEntity.ok(categoriesService.findByName(name));
-    }
 }
