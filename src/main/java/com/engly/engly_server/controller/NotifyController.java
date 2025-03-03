@@ -29,10 +29,10 @@ public class NotifyController {
             summary = "Надсилання посилання на email",
             description = """
                          1. Введіть email
-                         2. Вкажіть URL: `http://localhost:8000/notify`\s
+                         2. Вкажіть URL: `http://localhost:8000/api/notify`\s
                          4. Выберите метод `POST` и нажмите `Send`
                         \s
-                         Вам на пошту прийде лист з посиланням для підтвердження email перейдіть по ньому і виконається запит `http://localhost:8000/notify/check`
+                         Вам на пошту прийде лист з посиланням для підтвердження email перейдіть по ньому і виконається запит `http://localhost:8000/api/notify/check`
                     \s""",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Посилання було надіслано на email"),
