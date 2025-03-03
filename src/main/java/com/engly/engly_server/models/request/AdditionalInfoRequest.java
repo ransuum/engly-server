@@ -8,18 +8,12 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record AdditionalInfoRequest(@NotNull(message = "Date of birth is required")
-                                    LocalDate dateOfBirth,
-
-                                    @NotNull(message = "English level is required")
+public record AdditionalInfoRequest(@NotNull(message = "English level is required")
                                     EnglishLevels englishLevel,
 
                                     @NotNull(message = "Native language is required")
                                     NativeLanguage nativeLanguage,
 
                                     @NotNull(message = "Goals are required")
-                                    Goals goals,
-
-                                    @NotNull(message = "Gender is required")
-                                    Gender gender) {
+                                    Goals goals) {
 }

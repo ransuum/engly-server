@@ -25,9 +25,6 @@ public class AdditionalInfo {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @Column(nullable = false)
-    private LocalDate dateOfBirth;
-
     @Enumerated(EnumType.STRING)
     private EnglishLevels englishLevel;
 
@@ -36,9 +33,6 @@ public class AdditionalInfo {
 
     @Enumerated(EnumType.STRING)
     private Goals goal;
-
-    @Enumerated(EnumType.STRING)
-    private Gender gender;
 
     @OneToOne(mappedBy = "additionalInfo")
     private Users user;

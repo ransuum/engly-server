@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.graalvm.collections.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -26,7 +27,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,11 +153,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
             Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)
                     .registration(new SignUpRequest(name, email,
                             "Password123@",
-                            LocalDate.now(),
                             EnglishLevels.A1,
                             NativeLanguage.ENGLISH,
                             Goals.DEFAULT,
-                            Gender.OTHER,
                             providerId
                     ));
 
@@ -183,5 +181,21 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                         .username(user.getUsername())
                         .tokenType(TokenType.Bearer)
                         .build());
+    }
+
+    public void delete(String id) {
+        userRepo.deleteById(id);
+    }
+
+    @Override
+    public Map<String, Boolean> checkUsernameAvailability(String username) {
+        Boolean isAvailable = !userRepo.existsByUsername(username);
+        return Map.of("available", isAvailable);
+    }
+
+    @Override
+    public Map<String, Boolean> checkEmailAvailability(String email) {
+        Boolean isAvailable = !userRepo.existsByEmail(email);
+        return Map.of("available", isAvailable);
     }
 }

@@ -8,9 +8,7 @@ import com.engly.engly_server.models.enums.NativeLanguage;
 import java.time.LocalDate;
 
 public record AdditionalInfoDto(String id,
-                                LocalDate dateOfBirth,
                                 EnglishLevels englishLevel,
                                 NativeLanguage nativeLanguage,
-                                Goals goal,
-                                Gender gender) {
+                                Goals goal) {
 }

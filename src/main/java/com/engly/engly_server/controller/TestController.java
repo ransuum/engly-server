@@ -11,9 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -47,5 +45,13 @@ public class TestController {
                 .stream()
                 .map(UserMapper.INSTANCE::toUsersDto)
                 .toList());
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @SecurityRequirement(name = "bearerAuth")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public ResponseEntity<String> deleteUser(@PathVariable String id) {
+        userRepo.deleteById(id);
+        return ResponseEntity.ok(id);
     }
 }

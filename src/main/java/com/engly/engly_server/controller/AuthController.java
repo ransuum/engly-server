@@ -21,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -101,5 +102,27 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
         }
         return new ResponseEntity<>(authService.registerUser(signUpRequest, httpServletResponse), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Перевірка при реєстрації на username live",
+            description = """
+        Дозволяє перевіряти в живую юзернейм - це для фронтенду, треба додати listener
+    """
+    )
+    @GetMapping("/check-username")
+    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@RequestParam String username) {
+        return new ResponseEntity<>(authService.checkUsernameAvailability(username), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Перевірка при реєстрації на email live",
+            description = """
+        Дозволяє перевіряти в живую email - це для фронтенду, треба додати listener
+    """
+    )
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@RequestParam String email) {
+        return new ResponseEntity<>(authService.checkEmailAvailability(email), HttpStatus.OK);
     }
 }

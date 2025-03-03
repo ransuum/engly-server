@@ -80,8 +80,8 @@ public class SecurityConfig {
                 .userDetailsService(userManagerConfig)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex ->
-                    ex.authenticationEntryPoint((request, response, authException)
-                            -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage())))
+                        ex.authenticationEntryPoint((request, response, authException)
+                                -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage())))
                 .httpBasic(withDefaults())
                 .build();
     }
@@ -99,7 +99,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
-                    log.error("[SecurityConfig:apiSecurityFilterChain] Exception due to :{}",ex);
+                    log.error("[SecurityConfig:apiSecurityFilterChain] Exception due to :{}", ex);
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
                     ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
                 })
@@ -135,9 +135,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtRefreshTokenFilter(rsaKeyRecord,jwtTokenUtils,refreshTokenRepo), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtRefreshTokenFilter(rsaKeyRecord, jwtTokenUtils, refreshTokenRepo), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
-                    log.error("[SecurityConfig:refreshTokenSecurityFilterChain] Exception due to :{}",ex);
+                    log.error("[SecurityConfig:refreshTokenSecurityFilterChain] Exception due to :{}", ex);
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
                     ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
                 })
@@ -155,14 +155,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord,jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .addLogoutHandler(logoutHandlerService)
                         .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
                 )
                 .exceptionHandling(ex -> {
-                    log.error("[SecurityConfig:logoutSecurityFilterChain] Exception due to :{}",ex);
+                    log.error("[SecurityConfig:logoutSecurityFilterChain] Exception due to :{}", ex);
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
                     ex.accessDeniedHandler(new BearerTokenAccessDeniedHandler());
                 })
@@ -173,7 +173,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain registerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new AntPathRequestMatcher("/sign-up/**"))
+                .securityMatcher(new OrRequestMatcher(
+                        new AntPathRequestMatcher("/sign-up/**"),
+                        new AntPathRequestMatcher("/check-username"),
+                        new AntPathRequestMatcher("/check-email")))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->

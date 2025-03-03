@@ -21,7 +21,8 @@ public class SwaggerConfig implements WebMvcConfigurer {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .servers(List.of(new Server().url("http://localhost:8000")))
-                .info(new Info().title("Your API").version("1.0.0"))
+
+                .info(new Info().title("EnglyChat API").version("1.0.0"))
                 .components(new Components()
                         .addSecuritySchemes("basicAuth", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
