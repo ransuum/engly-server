@@ -50,7 +50,7 @@ public class JwtTokenGenerator {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
+                .expiresAt(Instant.now().plus(25, ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
                 .build();
@@ -74,7 +74,7 @@ public class JwtTokenGenerator {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(15, ChronoUnit.DAYS))
+                .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", "REFRESH_TOKEN")
                 .build();
@@ -108,6 +108,9 @@ public class JwtTokenGenerator {
         }
         if (roles.contains("ROLE_NOT_VERIFIED")) {
             permissions.add("NOT_VERIFIED");
+        }
+        if (roles.contains("ROLE_ADMIN")) {
+            permissions.addAll(List.of("ADMIN", "READ", "WRITE", "DELETE", "CREATE_CATEGORY", "UPDATE_CATEGORY", "DELETE_CATEGORY"));
         }
 
         return String.join(" ", permissions);

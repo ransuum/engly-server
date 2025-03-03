@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.relational.core.mapping.Table;
 
+import java.time.Instant;
+
 @Entity
 @Data
 @Builder
@@ -27,4 +29,10 @@ public class RefreshToken {
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
+
+    @Column(name = "CREATED_AT")
+    private Instant createdAt;
+
+    @Column(name = "EXPIRES_AT")
+    private Instant expiresAt;
 }

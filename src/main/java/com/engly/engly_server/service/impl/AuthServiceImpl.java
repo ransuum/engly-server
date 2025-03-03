@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.graalvm.collections.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -27,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,6 +66,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .user(users)
                     .refreshToken(refreshToken)
                     .revoked(false)
+                    .createdAt(Instant.now())
+                    .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
                     .build());
 
             jwtTokenGenerator.creatRefreshTokenCookie(response, refreshToken);
@@ -120,6 +122,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .user(registration.getLeft())
                     .refreshToken(refreshToken)
                     .revoked(false)
+                    .createdAt(Instant.now())
+                    .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
                     .build());
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequest.username());
@@ -132,7 +136,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .build();
 
 
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             log.error("[AuthService:registerUser]Exception while registering the user due to :{}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
@@ -170,6 +174,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                 .user(user)
                 .refreshToken(refreshToken)
                 .revoked(false)
+                .createdAt(Instant.now())
+                .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
                 .build());
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
