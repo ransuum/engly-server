@@ -50,7 +50,7 @@ public class JwtTokenGenerator {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(25, ChronoUnit.MINUTES))
+                .expiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
                 .build();
@@ -74,7 +74,7 @@ public class JwtTokenGenerator {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
+                .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", "REFRESH_TOKEN")
                 .build();

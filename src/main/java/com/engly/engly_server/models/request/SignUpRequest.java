@@ -3,6 +3,7 @@ package com.engly.engly_server.models.request;
 import com.engly.engly_server.models.enums.EnglishLevels;
 import com.engly.engly_server.models.enums.Goals;
 import com.engly.engly_server.models.enums.NativeLanguage;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
@@ -37,5 +38,5 @@ public record SignUpRequest(@NotBlank(message = "Username is blank")
                             @NotNull(message = "Goals are required")
                             Goals goals,
 
-                            String providerId) {
+                            @JsonIgnore String providerId) {
 }

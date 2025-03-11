@@ -5,7 +5,7 @@ import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
 import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
-import com.engly.engly_server.security.user_configuration.UserManagerConfig;
+import com.engly.engly_server.security.userconfiguration.UserManagerConfig;
 import com.engly.engly_server.service.impl.LogoutHandlerService;
 import com.engly.engly_server.service.impl.AuthServiceImpl;
 import com.nimbusds.jose.jwk.JWK;

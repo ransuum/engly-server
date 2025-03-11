@@ -52,7 +52,8 @@ public class AuthController {
     )
 
     @PostMapping("/sign-in")
-    public ResponseEntity<AuthResponseDto> authenticateUser(Authentication authentication, HttpServletResponse response) {
+    public ResponseEntity<Object> authenticateUser(Authentication authentication,
+                                                   HttpServletResponse response) {
         return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(authentication, response), HttpStatus.CREATED);
     }
 

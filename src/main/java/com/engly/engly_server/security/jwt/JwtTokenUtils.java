@@ -1,7 +1,7 @@
 package com.engly.engly_server.security.jwt;
 
 import com.engly.engly_server.repo.UserRepo;
-import com.engly.engly_server.security.user_configuration.UserConfig;
+import com.engly.engly_server.security.userconfiguration.UserConfig;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;

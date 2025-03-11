@@ -10,10 +10,11 @@ import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.service.AuthService;
-import com.engly.engly_server.utils.registration_chooser.RegistrationChooser;
+import com.engly.engly_server.utils.registrationchooser.RegistrationChooser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.collections.Pair;
 import org.springframework.http.HttpStatus;
@@ -67,7 +68,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .refreshToken(refreshToken)
                     .revoked(false)
                     .createdAt(Instant.now())
-                    .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
+                    .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
                     .build());
 
             jwtTokenGenerator.creatRefreshTokenCookie(response, refreshToken);
@@ -80,7 +81,6 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .tokenType(TokenType.Bearer)
                     .build();
 
-
         } catch (Exception e) {
             log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :{}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
@@ -89,22 +89,29 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
 
     @Override
     public Object getAccessTokenUsingRefreshToken(String authorizationHeader) {
-        if (!authorizationHeader.startsWith(TokenType.Bearer.name()))
-            return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please verify your token type");
+        if (authorizationHeader == null || !authorizationHeader.startsWith(TokenType.Bearer.name()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
         final String refreshToken = authorizationHeader.substring(7);
 
         var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
 
+
         Users users = refreshTokenEntity.getUser();
         Authentication authentication = jwtTokenGenerator.createAuthenticationObject(users);
         String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+
+        refreshTokenEntity.setRevoked(true);
+        refreshTokenRepo.save(refreshTokenEntity);
+
+        String refreshedToken = jwtTokenGenerator.generateRefreshToken(authentication);
         return AuthResponseDto.builder()
                 .accessToken(accessToken)
                 .accessTokenExpiry(5 * 60)
                 .username(users.getUsername())
                 .tokenType(TokenType.Bearer)
+                .refreshToken(refreshedToken)
                 .build();
     }
 
@@ -114,7 +121,6 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
             Pair<Users, AdditionalInfo> registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
 
             Authentication authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
-
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
@@ -136,9 +142,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .build();
 
 
-        } catch (RuntimeException e) {
+        } catch (ValidationException e) {
             log.error("[AuthService:registerUser]Exception while registering the user due to :{}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getMessage());
         }
     }
 
@@ -149,11 +155,15 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
         String providerId = oauth2User.getAttribute("sub");
+
+        if (email == null || name == null || providerId == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
+
         Users user;
 
         Optional<Users> existingUser = userRepo.findByEmail(email);
         if (existingUser.isPresent()) user = existingUser.get();
-         else {
+        else {
             Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)
                     .registration(new SignUpRequest(name, email,
                             "Password123@",

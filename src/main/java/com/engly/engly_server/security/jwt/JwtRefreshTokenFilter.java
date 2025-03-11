@@ -26,7 +26,6 @@ import java.io.IOException;
 
 @Slf4j
 public class JwtRefreshTokenFilter extends OncePerRequestFilter {
-
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
@@ -41,34 +40,25 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
-
         try {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started ");
-
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
-
-
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-            JwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
-
-            if (!authHeader.startsWith("Bearer ")) {
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
+            JwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
             final String token = authHeader.substring(7);
             final Jwt jwtRefreshToken = jwtDecoder.decode(token);
-
-
             final String userName = jwtTokenUtils.getUserName(jwtRefreshToken);
-
 
             if (!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
                 var isRefreshTokenValidInDatabase = refreshTokenRepo.findByRefreshToken(jwtRefreshToken.getTokenValue())
                         .map(refreshTokenEntity -> !refreshTokenEntity.isRevoked())
                         .orElse(false);
-
                 UserDetails userDetails = jwtTokenUtils.userDetails(userName);
                 if (jwtTokenUtils.isTokenValid(jwtRefreshToken, userDetails) && isRefreshTokenValidInDatabase) {
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
@@ -85,10 +75,12 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
                 }
             }
             log.info("[JwtRefreshTokenFilter:doFilterInternal] Completed");
-            filterChain.doFilter(request, response);
         } catch (JwtValidationException jwtValidationException) {
             log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}", jwtValidationException.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, jwtValidationException.getMessage());
+            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid refresh token");
+            return;
         }
+
+        filterChain.doFilter(request, response);
     }
 }
