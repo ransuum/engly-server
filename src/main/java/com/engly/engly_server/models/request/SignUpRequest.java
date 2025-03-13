@@ -24,7 +24,7 @@ public record SignUpRequest(@NotBlank(message = "Username is blank")
 
                             @Valid
                             @NotBlank(message = "Password is blank")
-                            @Size(min = 8, max = 50, message = "Password size should be from 8 to 50 characters")
+                            @Size(min = 8, max = 50, message = "Password must be between 8 and 50 characters")
                             @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&_-])[A-Za-z\\d@$!%*#?&_-]+$",
                                     message = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character")
                             String password,
