@@ -1,12 +1,14 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.dto.RefreshTokenDto;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.models.request.SignUpRequest;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.utils.mapper.RefreshTokenMapper;
 import com.engly.engly_server.utils.mapper.UserMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -86,7 +88,10 @@ public class TestController {
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "Для розробника")
-    public ResponseEntity<List<RefreshToken>> getAllRefresh() {
-        return ResponseEntity.ok(refreshTokenRepo.findAll());
+    public ResponseEntity<List<RefreshTokenDto>> getAllRefresh() {
+        return ResponseEntity.ok(refreshTokenRepo.findAll()
+                .stream()
+                .map(RefreshTokenMapper.INSTANCE::toDisplayDto)
+                .toList());
     }
 }

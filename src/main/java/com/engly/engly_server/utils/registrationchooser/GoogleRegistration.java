@@ -19,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class GoogleRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
+
     @Value("${dev.email}")
     private String devEmail;
 

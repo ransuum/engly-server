@@ -9,6 +9,7 @@ import com.engly.engly_server.repo.UserRepo;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.collections.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,9 @@ import org.springframework.web.server.ResponseStatusException;
 public class EmailRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${dev.email}")
+    private String devEmail;
 
     public EmailRegistration(UserRepo userRepo, PasswordEncoder passwordEncoder) {
         this.userRepo = userRepo;
@@ -34,7 +38,7 @@ public class EmailRegistration implements RegistrationChooser {
             });
 
             var users = Users.builder()
-                    .roles("ROLE_NOT_VERIFIED")
+                    .roles(signUpRequest.email().equals(devEmail) ? "ROLE_ADMIN" :"ROLE_NOT_VERIFIED")
                     .email(signUpRequest.email())
                     .emailVerified(Boolean.FALSE)
                     .username(signUpRequest.username())
