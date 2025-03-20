@@ -8,10 +8,11 @@ import java.util.Map;
 
 public class PageConfig<T> {
 
-    public Map<String, Object> response(Page<T> page) {
+    public Map<String, Object> response(Page<T> page, Class<T> type) {
         Map<String, Object> result = new HashMap<>();
         List<T> list = page.getContent();
-        result.put(list.getFirst().getClass().getSimpleName()
+
+        result.put(type.getSimpleName()
                 .toLowerCase().replace("dto", ""), list);
         result.put("totalElements", page.getTotalElements());
         result.put("totalPages", page.getTotalPages());

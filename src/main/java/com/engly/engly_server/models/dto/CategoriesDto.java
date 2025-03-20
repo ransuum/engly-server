@@ -10,5 +10,7 @@ public record CategoriesDto(String id,
                             String description,
                             Instant createdAt,
                             Instant updatedAt,
-                            List<RoomsDto> rooms) {
+                            List<RoomsDto> rooms,
+                            Integer activeRoomsCount) {
+
 }
