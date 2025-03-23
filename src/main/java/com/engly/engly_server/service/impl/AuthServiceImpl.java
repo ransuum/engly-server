@@ -5,7 +5,7 @@ import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
-import com.engly.engly_server.models.request.SignUpRequest;
+import com.engly.engly_server.models.request.createrequests.SignUpRequest;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
@@ -30,7 +30,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,8 +97,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
 
 
-        Users users = refreshTokenEntity.getUser();
-        Authentication authentication = jwtTokenGenerator.createAuthenticationObject(users);
+        var users = refreshTokenEntity.getUser();
+        var authentication = jwtTokenGenerator.createAuthenticationObject(users);
         String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
 
         refreshTokenEntity.setRevoked(true);
@@ -118,9 +117,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     @Override
     public AuthResponseDto registerUser(SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
         try {
-            Pair<Users, AdditionalInfo> registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
+            var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
 
-            Authentication authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
+            var authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
@@ -151,7 +150,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        var oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
         String providerId = oauth2User.getAttribute("sub");
@@ -161,7 +160,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
 
         Users user;
 
-        Optional<Users> existingUser = userRepo.findByEmail(email);
+        var existingUser = userRepo.findByEmail(email);
         if (existingUser.isPresent()) user = existingUser.get();
         else {
             Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)

@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.CategoriesDto;
-import com.engly.engly_server.models.request.CategoryRequest;
+import com.engly.engly_server.models.request.createrequests.CategoryRequest;
 import com.engly.engly_server.service.CategoriesService;
 import com.engly.engly_server.utils.pagging.PageConfig;
 import org.springframework.data.domain.PageRequest;

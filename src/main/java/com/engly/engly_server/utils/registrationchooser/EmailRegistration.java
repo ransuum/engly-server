@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.FieldValidationException;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.models.request.SignUpRequest;
+import com.engly.engly_server.models.request.createrequests.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +55,7 @@ public class EmailRegistration implements RegistrationChooser {
             users.setAdditionalInfo(addInfo);
             addInfo.setUser(users);
 
-            Users save = userRepo.save(users);
+            var save = userRepo.save(users);
 
             return Pair.create(save, save.getAdditionalInfo());
         } catch (ValidationException e) {

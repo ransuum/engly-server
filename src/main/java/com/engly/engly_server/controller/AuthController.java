@@ -1,7 +1,6 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.request.SignUpRequest;
+import com.engly.engly_server.models.request.createrequests.SignUpRequest;
 import com.engly.engly_server.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

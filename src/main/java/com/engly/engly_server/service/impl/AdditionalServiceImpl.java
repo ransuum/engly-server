@@ -3,9 +3,8 @@ package com.engly.engly_server.service.impl;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.models.request.AdditionalRequestForGoogleUser;
+import com.engly.engly_server.models.request.createrequests.AdditionalRequestForGoogleUser;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
@@ -37,14 +36,14 @@ public class AdditionalServiceImpl implements AdditionalService {
 
     @Override
     public AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUser additionalRequestForGoogleUser) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        Users user = userRepo.findByEmail(authentication.getName())
+        var user = userRepo.findByEmail(authentication.getName())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         user.setRoles(sysadminEmails.contains(user.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
-        AdditionalInfo additionalInfo = AdditionalInfo.builder()
+        var additionalInfo = AdditionalInfo.builder()
                 .user(user)
                 .goal(additionalRequestForGoogleUser.goals())
                 .nativeLanguage(additionalRequestForGoogleUser.nativeLanguage())
@@ -53,7 +52,7 @@ public class AdditionalServiceImpl implements AdditionalService {
 
         user.setAdditionalInfo(additionalInfo);
 
-        Users save = userRepo.save(user);
+        var save = userRepo.save(user);
 
         Authentication newAuth = new UsernamePasswordAuthenticationToken(save.getEmail(), null,
                 new UserConfig(save).getAuthorities());

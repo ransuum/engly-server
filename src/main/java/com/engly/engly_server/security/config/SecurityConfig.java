@@ -225,8 +225,8 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:8000p");
+        var configuration = new CorsConfiguration();
+        configuration.addAllowedOrigin("http://localhost:8000");
         configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://engly-chats.vercel.app"));
 
         configuration.setAllowedMethods(Arrays.asList(

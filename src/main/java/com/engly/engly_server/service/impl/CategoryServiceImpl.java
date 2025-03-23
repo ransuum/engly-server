@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.request.CategoryRequest;
+import com.engly.engly_server.models.request.createrequests.CategoryRequest;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.service.CategoriesService;
 import com.engly.engly_server.utils.mapper.CategoryMapper;

@@ -17,7 +17,6 @@ public class PageConfig<T> {
         result.put("totalElements", page.getTotalElements());
         result.put("totalPages", page.getTotalPages());
         result.put("current_page", page.getNumber());
-
         return result;
     }
 }

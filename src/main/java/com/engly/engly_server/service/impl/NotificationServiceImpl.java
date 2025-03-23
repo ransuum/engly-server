@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
-// This class is responsible for sending email notifications to users
 public class NotificationServiceImpl implements NotificationService {
     private final VerifyTokenRepo tokenRepo;
     private final EmailService emailService;
@@ -54,15 +53,15 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public EmailSendInfo sendNotifyMessage() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
             if (!userRepo.existsByEmail(email))
                 throw new NotFoundException("User not found exception email %s".formatted(email));
 
-            String token = RandomStringUtils.random(32, true, true);
+            var token = RandomStringUtils.random(32, true, true);
             tokenRepo.save(new VerifyToken(token, email));
 
-            String message = messageGenerator.generate(token, email);
+            var message = messageGenerator.generate(token, email);
 
             emailService.sendEmail(email, message);
 
@@ -77,8 +76,8 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public AuthResponseDto checkToken(String token) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Optional<VerifyToken> optionalToken = tokenRepo.findByTokenAndEmail(token, email);
+        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var optionalToken = tokenRepo.findByTokenAndEmail(token, email);
 
         if (optionalToken.isPresent()) {
             VerifyToken verifyToken = optionalToken.get();
@@ -88,12 +87,12 @@ public class NotificationServiceImpl implements NotificationService {
 
             tokenRepo.delete(verifyToken);
 
-            Authentication authentication = generator.createAuthenticationObject(userRepo.save(user));
-            String accessToken = generator.generateAccessToken(authentication);
-            String refreshToken = generator.generateRefreshToken(authentication);
+            var authentication = generator.createAuthenticationObject(userRepo.save(user));
+            var accessToken = generator.generateAccessToken(authentication);
+            var refreshToken = generator.generateRefreshToken(authentication);
             log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
 
-            RefreshToken savedRefreshToken = refreshTokenRepo.save(RefreshToken.builder()
+            var savedRefreshToken = refreshTokenRepo.save(RefreshToken.builder()
                     .user(user)
                     .refreshToken(refreshToken)
                     .revoked(false)

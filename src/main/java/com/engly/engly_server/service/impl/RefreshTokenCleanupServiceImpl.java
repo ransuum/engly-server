@@ -22,7 +22,7 @@ public class RefreshTokenCleanupServiceImpl implements RefreshTokenCleanupServic
     @Scheduled(cron = "0 0 */6 * * *")
     @Transactional
     public void cleanupExpiredAndRevokedTokens() {
-        Instant now = Instant.now();
+        var now = Instant.now();
 
         refreshTokenRepo.findAllByExpiresAtBeforeOrRevokedIsTrue(now).forEach(refreshToken -> {
             refreshTokenRepo.delete(refreshToken);

@@ -6,7 +6,7 @@ import java.util.Base64;
 
 public class PasswordGeneratorUtil {
     public static String generatePassword(String email, String name) {
-        String hashed = Sha512DigestUtils.shaHex(email + name);
+        var hashed = Sha512DigestUtils.shaHex(email + name);
         return Base64.getEncoder().encodeToString(hashed.getBytes()).substring(0, 16);
     }
 }

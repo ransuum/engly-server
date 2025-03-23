@@ -28,8 +28,8 @@ public class ScheduledTokenWorker {
 
     @Scheduled(cron = "0 0 0 * * ?")
     private void notificateAfter15days() {
-        LocalDateTime now = LocalDateTime.now();
-        List<VerifyToken> toNotificate = verifyTokenRepo.findAllByDeleteDateBetween(now.plusDays(15), now.plusDays(16));
+        var now = LocalDateTime.now();
+        var toNotificate = verifyTokenRepo.findAllByDeleteDateBetween(now.plusDays(15), now.plusDays(16));
         toNotificate.forEach((verifyToken) ->
                 emailService.sendEmail(verifyToken.getEmail(),
                         messageGenerator.generate(verifyToken.getToken(), verifyToken.getEmail())
