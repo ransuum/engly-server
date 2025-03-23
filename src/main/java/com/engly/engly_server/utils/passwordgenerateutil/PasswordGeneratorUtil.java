@@ -1,4 +1,4 @@
-package com.engly.engly_server.utils.password_generate_util;
+package com.engly.engly_server.utils.passwordgenerateutil;
 
 import org.springframework.security.core.token.Sha512DigestUtils;
 

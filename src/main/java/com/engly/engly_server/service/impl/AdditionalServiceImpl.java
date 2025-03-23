@@ -9,7 +9,7 @@ import com.engly.engly_server.models.request.AdditionalRequestForGoogleUser;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
-import com.engly.engly_server.security.user_configuration.UserConfig;
+import com.engly.engly_server.security.userconfiguration.UserConfig;
 import com.engly.engly_server.service.AdditionalService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

@@ -1,4 +1,4 @@
-package com.engly.engly_server.security.user_configuration;
+package com.engly.engly_server.security.userconfiguration;
 
 import com.engly.engly_server.repo.UserRepo;
 import org.springframework.security.core.userdetails.UserDetails;

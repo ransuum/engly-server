@@ -21,12 +21,12 @@ public class ScheduledTokenWorker {
         this.messageGenerator = messageGenerator;
     }
 
-    @Scheduled(cron = "0 0 0 1/1 * ? *")
+    @Scheduled(cron = "0 0 0 * * ?")
     private void deleteExpiredTokens() {
         verifyTokenRepo.deleteAllByDeleteDateLessThanEqual(LocalDateTime.now());
     }
 
-    @Scheduled(cron = "0 0 0 1/1 * ? *")
+    @Scheduled(cron = "0 0 0 * * ?")
     private void notificateAfter15days() {
         LocalDateTime now = LocalDateTime.now();
         List<VerifyToken> toNotificate = verifyTokenRepo.findAllByDeleteDateBetween(now.plusDays(15), now.plusDays(16));

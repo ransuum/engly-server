@@ -26,7 +26,7 @@ public class AdditionalInfoController {
             summary = "Додавання додаткової інформації для Google користувача",
             description = """
         Ендпоінт доступний тільки для користувачів, що автентифіковані через Google.
-        Потрібна роль ROL_GOOGLE та scope ADDITIONAL_INFO.
+        Потрібна роль ROLE_GOOGLE та scope ADDITIONAL_INFO.
     """,
             responses = {
                     @ApiResponse(responseCode = "201", description = "Інформацію успішно додано"),
@@ -35,7 +35,7 @@ public class AdditionalInfoController {
             }
     )
     @PreAuthorize("hasAuthority('SCOPE_ADDITIONAL_INFO')")
-    @PostMapping("/additional-info")
+    @PostMapping("/for-google")
     public ResponseEntity<AuthResponseDto> addInfo(@RequestBody AdditionalRequestForGoogleUser additionalRequestForGoogleUser) {
         return new ResponseEntity<>(additionalService.additionalRegistration(additionalRequestForGoogleUser), HttpStatus.CREATED);
     }
