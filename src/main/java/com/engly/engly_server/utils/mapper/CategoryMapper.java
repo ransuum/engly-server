@@ -7,14 +7,9 @@ import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
 @Mapper
-public abstract class CategoryMapper {
-    public static CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
+public interface CategoryMapper {
+    CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
-    @Mapping(target = "activeRoomsCount", source = "activeRoomsCount")
-    protected abstract CategoriesDto toCategoriesDto(Categories categories, Integer activeRoomsCount);
-
-
-    public CategoriesDto toCategoriesDto(Categories categories) {
-        return toCategoriesDto(categories, categories.getRooms().size());
-    }
+    @Mapping(target = "activeRoomsCount", expression = "java(categories.getRooms() != null ? categories.getRooms().size() : 0)")
+    CategoriesDto toCategoriesDto(Categories categories);
 }
