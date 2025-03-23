@@ -1,7 +1,6 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.CategoriesDto;
-import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.request.CategoryRequest;
 import com.engly.engly_server.service.CategoriesService;
 import com.engly.engly_server.utils.pagging.PageConfig;
@@ -46,7 +45,7 @@ public class CategoryController {
     public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "0", required = false) Integer page,
                                                       @RequestParam(defaultValue = "10", required = false) Integer size) {
         return new ResponseEntity<>(new PageConfig<CategoriesDto>()
-                .response(categoriesService.getAllCategories(PageRequest.of(page, size))), HttpStatus.OK);
+                .response(categoriesService.getAllCategories(PageRequest.of(page, size)), CategoriesDto.class), HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('SCOPE_READ')")
