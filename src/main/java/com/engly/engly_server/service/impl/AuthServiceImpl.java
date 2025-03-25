@@ -14,7 +14,12 @@ import com.engly.engly_server.utils.registrationchooser.RegistrationChooser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.graalvm.collections.Pair;
 import org.springframework.http.HttpStatus;
@@ -203,13 +208,22 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
-    public Map<String, Boolean> checkUsernameAvailability(String username) {
+    public Map<String, Boolean> checkUsernameAvailability(@NotBlank(message = "Username is blank")
+                                                          @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters.")
+                                                          @Pattern(
+                                                                  regexp = "^[a-zA-Z]{2,50}$",
+                                                                  message = "Username must contain only letters (a-z, A-Z) and be between 2 and 50 characters long."
+                                                          ) String username) {
         Boolean isAvailable = !userRepo.existsByUsername(username);
         return Map.of("available", isAvailable);
     }
 
     @Override
-    public Map<String, Boolean> checkEmailAvailability(String email) {
+    public Map<String, Boolean> checkEmailAvailability(@Valid
+                                                       @Email(message = "Isn't email")
+                                                       @NotBlank(message = "Email is blank")
+                                                       @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
+                                                       String email) {
         Boolean isAvailable = !userRepo.existsByEmail(email);
         return Map.of("available", isAvailable);
     }

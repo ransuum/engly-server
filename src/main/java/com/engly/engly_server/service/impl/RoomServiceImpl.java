@@ -59,7 +59,6 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Transactional
     public void deleteRoomById(String id) {
         var room = roomRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("You can't delete this room"));
