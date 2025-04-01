@@ -5,7 +5,7 @@ import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
-import com.engly.engly_server.models.request.createrequests.SignUpRequest;
+import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;

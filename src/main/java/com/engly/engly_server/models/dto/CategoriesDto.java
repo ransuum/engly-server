@@ -6,10 +6,11 @@ import java.time.Instant;
 import java.util.List;
 
 public record CategoriesDto(String id,
-                            CategoryType name,
+                            String name,
                             String description,
                             Instant createdAt,
                             Instant updatedAt,
                             int activeRoomsCount,
+                            String icon,
                             List<RoomsDto> rooms) {
 }

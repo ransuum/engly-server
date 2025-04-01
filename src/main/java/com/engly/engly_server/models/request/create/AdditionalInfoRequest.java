@@ -1,4 +1,4 @@
-package com.engly.engly_server.models.request.createrequests;
+package com.engly.engly_server.models.request.create;
 
 import com.engly.engly_server.models.enums.EnglishLevels;
 import com.engly.engly_server.models.enums.Goals;

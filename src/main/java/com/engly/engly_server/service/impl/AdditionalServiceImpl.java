@@ -4,7 +4,7 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.models.request.createrequests.AdditionalRequestForGoogleUser;
+import com.engly.engly_server.models.request.create.AdditionalRequestForGoogleUser;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;

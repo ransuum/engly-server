@@ -5,13 +5,13 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ApiError {
+public class ApiErrorResponse {
     private int status;
     private String message;
     private String details;
     private LocalDateTime timestamp;
 
-    public ApiError(int status, String message, String details) {
+    public ApiErrorResponse(int status, String message, String details) {
         this.status = status;
         this.message = message;
         this.details = details;

@@ -1,4 +1,4 @@
-package com.engly.engly_server.models.request.createrequests;
+package com.engly.engly_server.models.request.create;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

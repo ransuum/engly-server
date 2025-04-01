@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -176,7 +177,8 @@ public class SecurityConfig {
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/sign-up/**"),
                         new AntPathRequestMatcher("/check-username"),
-                        new AntPathRequestMatcher("/check-email")))
+                        new AntPathRequestMatcher("/check-email"),
+                        new AntPathRequestMatcher("/get-all-categories")))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->

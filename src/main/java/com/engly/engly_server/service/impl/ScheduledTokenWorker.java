@@ -1,13 +1,11 @@
 package com.engly.engly_server.service.impl;
 
-import com.engly.engly_server.models.entity.VerifyToken;
 import com.engly.engly_server.repo.VerifyTokenRepo;
 import com.engly.engly_server.service.EmailService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Component
 public class ScheduledTokenWorker {

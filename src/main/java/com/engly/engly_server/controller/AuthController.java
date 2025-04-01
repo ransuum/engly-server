@@ -1,7 +1,10 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.request.createrequests.SignUpRequest;
+import com.engly.engly_server.models.dto.CategoriesDto;
+import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.service.AuthService;
+import com.engly.engly_server.service.CategoriesService;
+import com.engly.engly_server.utils.pagging.PageConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,8 +12,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,23 +35,25 @@ import java.util.Map;
 @Tag(name = "Автентифікація та Авторизація", description = "Контролер для реєстрації, входу та оновлення токену")
 public class AuthController {
     private final AuthService authService;
+    private final CategoriesService categoriesService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, CategoriesService categoriesService) {
         this.authService = authService;
+        this.categoriesService = categoriesService;
     }
 
     @Operation(
             summary = "Автентифікація користувача",
             description = """
-            Використовуйте Basic Auth у Postman:
-            1. Перейдіть до вкладки Authorization та оберіть `Basic Auth`
-            2. Введіть email та пароль
-            3. Вкажіть URL: `http://localhost:8000/sign-in` або `https://favourable-rodie-java-service-b82e5859.koyeb.app/sign-in`
-            4. Оберіть метод `POST` та натисніть `Send`
-           \s
-            Якщо використовуєте swagger, зверху є кнопка Authorize.
-            У відповіді прийде access-токен. Використовуйте його для наступних запитів, передаючи в заголовку `Authorization: Bearer {token}`.
-       \s""",
+                         Використовуйте Basic Auth у Postman:
+                         1. Перейдіть до вкладки Authorization та оберіть `Basic Auth`
+                         2. Введіть email та пароль
+                         3. Вкажіть URL: `http://localhost:8000/sign-in` або `https://favourable-rodie-java-service-b82e5859.koyeb.app/sign-in`
+                         4. Оберіть метод `POST` та натисніть `Send`
+                        \s
+                         Якщо використовуєте swagger, зверху є кнопка Authorize.
+                         У відповіді прийде access-токен. Використовуйте його для наступних запитів, передаючи в заголовку `Authorization: Bearer {token}`.
+                    \s""",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Успішна автентифікація. Повертає access та refresh токени."),
                     @ApiResponse(responseCode = "401", description = "Невірні облікові дані")
@@ -51,17 +61,16 @@ public class AuthController {
     )
 
     @PostMapping("/sign-in")
-    public ResponseEntity<Object> authenticateUser(Authentication authentication,
-                                                   HttpServletResponse response) {
+    public ResponseEntity<Object> authenticateUser(Authentication authentication, HttpServletResponse response) {
         return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(authentication, response), HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Оновлення Access-токену",
             description = """
-            Використовуйте Refresh-токен для отримання нового Access-токену.
-            У запиті передайте `Authorization: Bearer {refresh_token}`.
-        """,
+                        Використовуйте Refresh-токен для отримання нового Access-токену.
+                        У запиті передайте `Authorization: Bearer {refresh_token}`.
+                    """,
             responses = {
                     @ApiResponse(responseCode = "201", description = "Новий Access-токен успішно отримано"),
                     @ApiResponse(responseCode = "403", description = "Refresh-токен недійсний або закінчився термін дії")
@@ -76,9 +85,9 @@ public class AuthController {
     @Operation(
             summary = "Реєстрація нового користувача",
             description = """
-        Дозволяє зареєструвати нового користувача.
-        У тілі запиту передавайте JSON з необхідними даними.
-    """,
+                        Дозволяє зареєструвати нового користувача.
+                        У тілі запиту передавайте JSON з необхідними даними.
+                    """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Дані користувача для реєстрації",
                     required = true,
@@ -107,22 +116,40 @@ public class AuthController {
     @Operation(
             summary = "Перевірка при реєстрації на username live",
             description = """
-        Дозволяє перевіряти в живую юзернейм - це для фронтенду, треба додати listener
-    """
+                        Дозволяє перевіряти в живую юзернейм - це для фронтенду, треба додати listener
+                    """
     )
     @GetMapping("/check-username")
-    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@RequestParam String username) {
+    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@NotBlank(message = "Username is blank")
+                                                                          @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters.")
+                                                                          @Pattern(
+                                                                                  regexp = "^[a-zA-Z]{2,50}$",
+                                                                                  message = "Username must contain only letters (a-z, A-Z) and be between 2 and 50 characters long."
+                                                                          )
+                                                                          @RequestParam
+                                                                          String username) {
         return new ResponseEntity<>(authService.checkUsernameAvailability(username), HttpStatus.OK);
     }
 
     @Operation(
             summary = "Перевірка при реєстрації на email live",
             description = """
-        Дозволяє перевіряти в живую email - це для фронтенду, треба додати listener
-    """
+                        Дозволяє перевіряти в живую email - це для фронтенду, треба додати listener
+                    """
     )
     @GetMapping("/check-email")
-    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@RequestParam String email) {
+    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@RequestParam
+                                                                       @Email(message = "Isn't email")
+                                                                       @NotBlank(message = "Email is blank")
+                                                                       @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
+                                                                       String email) {
         return new ResponseEntity<>(authService.checkEmailAvailability(email), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-all-categories")
+    public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "0", required = false) Integer page,
+                                                      @RequestParam(defaultValue = "10", required = false) Integer size) {
+        return new ResponseEntity<>(new PageConfig<CategoriesDto>()
+                .response(categoriesService.getAllCategories(PageRequest.of(page, size)), CategoriesDto.class), HttpStatus.OK);
     }
 }

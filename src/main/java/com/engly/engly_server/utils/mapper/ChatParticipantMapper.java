@@ -3,11 +3,13 @@ package com.engly.engly_server.utils.mapper;
 import com.engly.engly_server.models.dto.ChatParticipantsDto;
 import com.engly.engly_server.models.entity.ChatParticipants;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses = {UserMapper.class, RoomMapper.class, CategoryMapper.class})
 public interface ChatParticipantMapper {
     ChatParticipantMapper INSTANCE = Mappers.getMapper(ChatParticipantMapper.class);
 
-    ChatParticipantsDto toChatParticipantsDto(ChatParticipants chatParticipants);
+    @Mapping(target = "room", ignore = true)
+    ChatParticipantsDto toDtoForRooms(ChatParticipants chatParticipants);
 }

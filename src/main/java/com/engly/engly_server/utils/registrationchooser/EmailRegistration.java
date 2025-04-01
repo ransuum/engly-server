@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.FieldValidationException;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.models.request.createrequests.SignUpRequest;
+import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;

@@ -2,7 +2,7 @@ package com.engly.engly_server.service;
 
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.request.createrequests.CategoryRequest;
+import com.engly.engly_server.models.request.create.CategoryRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
