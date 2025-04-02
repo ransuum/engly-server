@@ -1,10 +1,7 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.service.AuthService;
-import com.engly.engly_server.service.CategoriesService;
-import com.engly.engly_server.utils.pagging.PageConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,7 +15,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,11 +31,9 @@ import java.util.Map;
 @Tag(name = "Автентифікація та Авторизація", description = "Контролер для реєстрації, входу та оновлення токену")
 public class AuthController {
     private final AuthService authService;
-    private final CategoriesService categoriesService;
 
-    public AuthController(AuthService authService, CategoriesService categoriesService) {
+    public AuthController(AuthService authService) {
         this.authService = authService;
-        this.categoriesService = categoriesService;
     }
 
     @Operation(
@@ -144,12 +138,5 @@ public class AuthController {
                                                                        @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
                                                                        String email) {
         return new ResponseEntity<>(authService.checkEmailAvailability(email), HttpStatus.OK);
-    }
-
-    @GetMapping("/get-all-categories")
-    public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "0", required = false) Integer page,
-                                                      @RequestParam(defaultValue = "10", required = false) Integer size) {
-        return new ResponseEntity<>(new PageConfig<CategoriesDto>()
-                .response(categoriesService.getAllCategories(PageRequest.of(page, size)), CategoriesDto.class), HttpStatus.OK);
     }
 }

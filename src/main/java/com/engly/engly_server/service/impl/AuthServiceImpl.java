@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.impl;
 
+import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
@@ -61,14 +62,14 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
             var users = userRepo.findByEmail(authentication.getName())
                     .orElseThrow(() -> {
                         log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
-                        return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
+                        return new NotFoundException("USER NOT FOUND");
                     });
             users.setLastLogin(Instant.now());
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
 
             refreshTokenRepo.save(RefreshToken.builder()
-                    .user(users)
+                    .user(userRepo.save(users))
                     .refreshToken(refreshToken)
                     .revoked(false)
                     .createdAt(Instant.now())
@@ -104,12 +105,12 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
 
         var users = refreshTokenEntity.getUser();
         var authentication = jwtTokenGenerator.createAuthenticationObject(users);
-        String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+        final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
 
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepo.save(refreshTokenEntity);
 
-        String refreshedToken = jwtTokenGenerator.generateRefreshToken(authentication);
+        final String refreshedToken = jwtTokenGenerator.generateRefreshToken(authentication);
         return AuthResponseDto.builder()
                 .accessToken(accessToken)
                 .accessTokenExpiry(5 * 60)
@@ -166,7 +167,10 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         Users user;
 
         var existingUser = userRepo.findByEmail(email);
-        if (existingUser.isPresent()) user = existingUser.get();
+        if (existingUser.isPresent()) {
+            user = existingUser.get();
+            user.setLastLogin(Instant.now());
+        }
         else {
             Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)
                     .registration(new SignUpRequest(name, email,
@@ -185,7 +189,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         String refreshToken = jwtTokenGenerator.generateRefreshToken(userAuth);
 
         refreshTokenRepo.save(RefreshToken.builder()
-                .user(user)
+                .user(userRepo.save(user))
                 .refreshToken(refreshToken)
                 .revoked(false)
                 .createdAt(Instant.now())

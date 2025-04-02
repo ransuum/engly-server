@@ -1,6 +1,7 @@
 package com.engly.engly_server.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleGeneralExceptions(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred", ex);
+    }
+
+    @ExceptionHandler(TypeMismatchException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(TypeMismatchException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getPropertyName(), ex.getMessage());
     }
 
     @ExceptionHandler(ResponseStatusException.class)

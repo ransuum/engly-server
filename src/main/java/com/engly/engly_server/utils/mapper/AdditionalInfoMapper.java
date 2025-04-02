@@ -5,7 +5,7 @@ import com.engly.engly_server.models.entity.AdditionalInfo;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses = UserMapper.class)
 public interface AdditionalInfoMapper {
     AdditionalInfoMapper INSTANCE = Mappers.getMapper(AdditionalInfoMapper.class);
 

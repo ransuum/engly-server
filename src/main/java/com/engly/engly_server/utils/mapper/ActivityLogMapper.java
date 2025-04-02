@@ -5,7 +5,7 @@ import com.engly.engly_server.models.entity.ActivityLogs;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses = UserMapper.class)
 public interface ActivityLogMapper {
     ActivityLogMapper INSTANCE = Mappers.getMapper(ActivityLogMapper.class);
 

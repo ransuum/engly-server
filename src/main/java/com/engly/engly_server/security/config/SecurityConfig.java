@@ -178,7 +178,7 @@ public class SecurityConfig {
                         new AntPathRequestMatcher("/sign-up/**"),
                         new AntPathRequestMatcher("/check-username"),
                         new AntPathRequestMatcher("/check-email"),
-                        new AntPathRequestMatcher("/get-all-categories")))
+                        new AntPathRequestMatcher("/public/**")))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->

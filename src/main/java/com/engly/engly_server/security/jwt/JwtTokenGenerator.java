@@ -48,7 +48,7 @@ public class JwtTokenGenerator {
 
         String permissions = getPermissionsFromRoles(roles);
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        var claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
@@ -72,7 +72,7 @@ public class JwtTokenGenerator {
 
         log.info("[JwtTokenGenerator:generateRefreshToken] Token Creation Started for:{}", authentication.getName());
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        var claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
@@ -90,7 +90,7 @@ public class JwtTokenGenerator {
     }
 
     private String getPermissionsFromRoles(String roles) {
-        List<String> roleList = Arrays.stream(roles.split(","))
+        var roleList = Arrays.stream(roles.split(","))
                 .map(String::trim)
                 .toList();
 

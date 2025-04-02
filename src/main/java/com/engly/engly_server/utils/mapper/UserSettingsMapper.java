@@ -5,7 +5,7 @@ import com.engly.engly_server.models.entity.UserSettings;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(uses = UserMapper.class)
 public interface UserSettingsMapper {
     UserSettingsMapper INSTANCE = Mappers.getMapper(UserSettingsMapper.class);
 

@@ -28,4 +28,8 @@ public class FieldUtil {
     public static boolean check(Long duration) {
         return duration != null;
     }
+
+    public static boolean check(Object o) {
+        return o != null;
+    }
 }

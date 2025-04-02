@@ -17,7 +17,7 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "messages")
-public class Messages {
+public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
