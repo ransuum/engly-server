@@ -14,7 +14,7 @@ public class EmailServiceImpl implements EmailService {
     private final JavaMailSender mailSender;
 
     @Value("${app.email.notification.subject}")
-    private String SUBJECT;
+    private String subject;
 
     public EmailServiceImpl(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -25,7 +25,7 @@ public class EmailServiceImpl implements EmailService {
         CompletableFuture.runAsync(() -> {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(to);
-            message.setSubject(SUBJECT);
+            message.setSubject(subject);
             message.setText(body);
             mailSender.send(message);
         });

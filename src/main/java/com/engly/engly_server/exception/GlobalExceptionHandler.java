@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -35,6 +34,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFoundException(NotFoundException ex) {
         return buildResponse(HttpStatus.NOT_FOUND, "Resource not found", ex);
+    }
+
+    @ExceptionHandler(GenerateTokenException.class)
+    public ResponseEntity<ApiErrorResponse> handleNotificationException(GenerateTokenException ex) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot generate token for verify email", ex);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
@@ -63,7 +67,7 @@ public class GlobalExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         return buildResponse("Validation failed", errors);
     }
@@ -73,7 +77,7 @@ public class GlobalExceptionHandler {
         var errors = ex.getConstraintViolations()
                 .stream()
                 .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
-                .collect(Collectors.toList());
+                .toList();
 
         return buildResponse("Constraint violation", errors);
     }

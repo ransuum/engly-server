@@ -1,5 +1,6 @@
 package com.engly.engly_server.security.jwt;
 
+import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Roles;
 import jakarta.servlet.http.Cookie;
@@ -95,6 +96,16 @@ public class JwtTokenGenerator {
                 .toList();
 
         return String.join(" ", Roles.getPermissionsForRoles(roleList));
+    }
+
+    public RefreshToken createRefreshToken(Users users, Authentication authentication) {
+        return RefreshToken.builder()
+                .user(users)
+                .refreshToken(generateRefreshToken(authentication))
+                .createdAt(Instant.now())
+                .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
+                .revoked(false)
+                .build();
     }
 
 }

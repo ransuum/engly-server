@@ -101,22 +101,20 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
-
-
         var users = refreshTokenEntity.getUser();
-        var authentication = jwtTokenGenerator.createAuthenticationObject(users);
-        final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepo.save(refreshTokenEntity);
 
-        final String refreshedToken = jwtTokenGenerator.generateRefreshToken(authentication);
+        var authentication = jwtTokenGenerator.createAuthenticationObject(users);
+        final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+
         return AuthResponseDto.builder()
                 .accessToken(accessToken)
                 .accessTokenExpiry(5 * 60)
                 .username(users.getUsername())
                 .tokenType(TokenType.Bearer)
-                .refreshToken(refreshedToken)
+                .refreshToken(refreshTokenRepo.save(jwtTokenGenerator
+                        .createRefreshToken(users, authentication)).getRefreshToken())
                 .build();
     }
 

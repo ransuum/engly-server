@@ -36,7 +36,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
         var category = categoriesRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category not found"));
+                .orElseThrow(() -> new NotFoundException("Category not found while updating"));
 
         if (categoryRequest.name() != null) category.setName(categoryRequest.name());
         if (categoryRequest.description() != null) category.setDescription(categoryRequest.description());
@@ -55,21 +55,21 @@ public class CategoryServiceImpl implements CategoriesService {
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findById(categoryId)
-                        .orElseThrow(() -> new NotFoundException("Category not found"))
+                        .orElseThrow(() -> new NotFoundException("Category not found by id: " + categoryId))
         );
     }
 
     @Override
     public void deleteCategory(String categoryId) {
         categoriesRepo.delete(categoriesRepo.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("Category not found")));
+                .orElseThrow(() -> new NotFoundException("Category not found while deleting")));
     }
 
     @Override
     public CategoriesDto findByName(CategoryType name) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findByName(name)
-                        .orElseThrow(() -> new NotFoundException("Category not found"))
+                        .orElseThrow(() -> new NotFoundException("Category not found while finding by category type name"))
         );
     }
 }
