@@ -37,28 +37,28 @@ public class RoomController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     @Operation(summary = "Get rooms by category",
             description = """
-                    Retrieves paginated list of rooms filtered by category \n
-                    page starts from 0 \n
-                    How to use? \n
-                    You can use in 3 different ways \n
+                    Retrieves paginated list of rooms filtered by category 
+                    page starts from 0 
+                    How to use?
+                    You can use in 3 different ways 
                     {
                       "page": 2,
                       "size": 20,
                       "sort": "id"
-                    } \n
-                    /////// \n
+                    }
+                    ///////
                     {
                        "page": 1,
                        "size": 10,
                        "sort": "id,ASC"
-                     } \n
-                     //// \n
+                     }
+                     ////
                     {
                        "page": 0,
                        "size": 10,
                        "sort": "id,DESC"
-                    } \n
-                    /// \n
+                    }
+                    ///
                     id can be replaced by different fields in RoomsDto
                     \s"""
     )

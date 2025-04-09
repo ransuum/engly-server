@@ -11,10 +11,10 @@ import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.RoomService;
 import com.engly.engly_server.mapper.RoomMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,24 +24,20 @@ import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.check;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
     private final RoomRepo roomRepo;
     private final UserRepo userRepo;
     private final CategoriesRepo categoriesRepo;
-
-    public RoomServiceImpl(RoomRepo roomRepo, UserRepo userRepo, CategoriesRepo categoriesRepo) {
-        this.roomRepo = roomRepo;
-        this.userRepo = userRepo;
-        this.categoriesRepo = categoriesRepo;
-    }
+    private final SecurityService service;
 
     @Override
     @Transactional
     public RoomsDto createRoom(CategoryType name, RoomRequest roomRequest) {
-        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var username = service.getCurrentUserEmail();
         var category = categoriesRepo.findByName(name)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
-        var creator = userRepo.findByEmail(email)
+        var creator = userRepo.findByEmail(username)
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         return RoomMapper.INSTANCE.roomToDto(roomRepo.save(

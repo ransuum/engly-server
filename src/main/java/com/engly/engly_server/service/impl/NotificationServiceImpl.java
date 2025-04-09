@@ -19,11 +19,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -34,6 +31,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final UserRepo userRepo;
     private final JwtTokenGenerator generator;
     private final RefreshTokenRepo refreshTokenRepo;
+    private final SecurityService service;
 
     @Value("#{'${sysadmin.email}'.split(',\\s*')}")
     private Set<String> sysadminEmails;
@@ -41,19 +39,20 @@ public class NotificationServiceImpl implements NotificationService {
     private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
 
 
-    public NotificationServiceImpl(VerifyTokenRepo tokenRepo, EmailService emailService, EmailMessageGenerator messageGenerator, UserRepo userRepo, JwtTokenGenerator generator, RefreshTokenRepo refreshTokenRepo) {
+    public NotificationServiceImpl(VerifyTokenRepo tokenRepo, EmailService emailService, EmailMessageGenerator messageGenerator, UserRepo userRepo, JwtTokenGenerator generator, RefreshTokenRepo refreshTokenRepo, SecurityService service) {
         this.tokenRepo = tokenRepo;
         this.emailService = emailService;
         this.messageGenerator = messageGenerator;
         this.userRepo = userRepo;
         this.generator = generator;
         this.refreshTokenRepo = refreshTokenRepo;
+        this.service = service;
     }
 
 
     @Override
     public EmailSendInfo sendNotifyMessage() {
-        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var email = service.getCurrentUserEmail();
         try {
             if (!userRepo.existsByEmail(email))
                 throw new NotFoundException("User not found exception email %s".formatted(email));
@@ -76,7 +75,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public AuthResponseDto checkToken(String token) {
-        var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var email = service.getCurrentUserEmail();
         var optionalToken = tokenRepo.findByTokenAndEmail(token, email);
 
         if (optionalToken.isPresent()) {
