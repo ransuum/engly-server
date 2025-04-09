@@ -5,7 +5,7 @@ import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.request.update.ProfileUpdateRequest;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.ProfileService;
-import com.engly.engly_server.utils.mapper.UserMapper;
+import com.engly.engly_server.mapper.UserMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 

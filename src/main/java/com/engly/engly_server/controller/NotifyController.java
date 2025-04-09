@@ -28,11 +28,8 @@ public class NotifyController {
     @Operation(
             summary = "Надсилання посилання на email",
             description = """
-                         1. Введіть email
-                         2. Вкажіть URL: `http://localhost:8000/api/notify`\s
-                         4. Выберите метод `POST` и нажмите `Send`
-                        \s
-                         Вам на пошту прийде лист з посиланням для підтвердження email перейдіть по ньому і виконається запит `http://localhost:8000/api/notify/check`
+                         Вам на пошту прийде лист з посиланням для підтвердження email перейдіть по ньому і виконається запит `http://localhost:8000/api/notify/check`,
+                         але повинен бути аксес токен у Bearer(отриманий при реєстрації)
                     \s""",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Посилання було надіслано на email"),
@@ -53,8 +50,9 @@ public class NotifyController {
             summary = "Підтвердження email за допомогою посилання",
             description = """
                          1. Перейдіть по згенерованому посиланню яке надійшло на email
-                         Або
-                         1. Виконайте запит `http://localhost:8000/notify/check?token={token}&email={email}`
+                         На почту приходить повідомлення у вигляді: http://localhost:8000/api/notify/check?email=email&token=your-token.
+                         Копіюйте тільки your-token та вставляеєте його у параметр. Після чого отримуєте знову але оновлений access token та рефреш токен.
+                         Як ввели аксес токен у Bearer, тепер можете робити запити.
                         \s
                     \s""",
             responses = {

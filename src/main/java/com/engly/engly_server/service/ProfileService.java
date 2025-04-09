@@ -5,5 +5,6 @@ import com.engly.engly_server.models.request.update.ProfileUpdateRequest;
 
 public interface ProfileService {
     UsersDto getProfile();
+
     UsersDto updateProfile(ProfileUpdateRequest profileUpdateData);
 }

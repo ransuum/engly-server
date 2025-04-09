@@ -27,12 +27,11 @@ public class LogoutHandlerService implements LogoutHandler {
 
         final var refreshToken = authHeader.substring(7);
 
-        var storedRefreshToken = refreshTokenRepo.findByRefreshToken(refreshToken)
+        refreshTokenRepo.findByRefreshToken(refreshToken)
                 .map(token -> {
                     token.setRevoked(true);
                     refreshTokenRepo.save(token);
                     return token;
-                })
-                .orElse(null);
+                });
     }
 }

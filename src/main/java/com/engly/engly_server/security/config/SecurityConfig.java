@@ -15,6 +15,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,24 +52,13 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebSecurity
 @EnableMethodSecurity
 @Slf4j
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final UserManagerConfig userManagerConfig;
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
     private final LogoutHandlerService logoutHandlerService;
-
-    public SecurityConfig(UserManagerConfig userManagerConfig,
-                          RSAKeyRecord rsaKeyRecord,
-                          JwtTokenUtils jwtTokenUtils,
-                          RefreshTokenRepo refreshTokenRepo,
-                          LogoutHandlerService logoutHandlerService) {
-        this.userManagerConfig = userManagerConfig;
-        this.rsaKeyRecord = rsaKeyRecord;
-        this.jwtTokenUtils = jwtTokenUtils;
-        this.refreshTokenRepo = refreshTokenRepo;
-        this.logoutHandlerService = logoutHandlerService;
-    }
 
     @Order(1)
     @Bean
@@ -229,7 +219,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:8000");
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:3000", "https://engly-chats.vercel.app"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:3000",
+                "https://engly-chats.vercel.app",
+                "https://engly-client-blmg.vercel.app")
+        );
 
         configuration.setAllowedMethods(Arrays.asList(
                 "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"

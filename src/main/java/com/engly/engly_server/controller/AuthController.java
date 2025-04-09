@@ -63,7 +63,8 @@ public class AuthController {
             summary = "Оновлення Access-токену",
             description = """
                         Використовуйте Refresh-токен для отримання нового Access-токену.
-                        У запиті передайте `Authorization: Bearer {refresh_token}`.
+                        У запиті передайте `Authorization: Bearer {refresh_token}` та у параметрі якщо свагер,
+                        у постмані просто `Authorization: Bearer {token}`.
                     """,
             responses = {
                     @ApiResponse(responseCode = "201", description = "Новий Access-токен успішно отримано"),
@@ -79,8 +80,9 @@ public class AuthController {
     @Operation(
             summary = "Реєстрація нового користувача",
             description = """
-                        Дозволяє зареєструвати нового користувача.
-                        У тілі запиту передавайте JSON з необхідними даними.
+                        Після введення всіх полів -> отримання access token + refresh token.
+                        Так як це Email реєстрація буде видана роль NOT_VERIFIED. Це означає що ви не зможете зробити взагалі запит
+                        окрім '/api/notify'. Якщо реєстрація через гугл підтверджувати не треба.
                     """,
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Дані користувача для реєстрації",
@@ -93,8 +95,8 @@ public class AuthController {
             }
     )
     @PostMapping("/sign-up")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest,
-                                          BindingResult bindingResult, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequest signUpRequest,
+                                                        BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
         log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequest.username());
         if (bindingResult.hasErrors()) {

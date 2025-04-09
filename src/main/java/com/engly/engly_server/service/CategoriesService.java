@@ -8,9 +8,14 @@ import org.springframework.data.domain.Pageable;
 
 public interface CategoriesService {
     CategoriesDto addCategory(CategoryRequest categoryRequest);
+
     CategoriesDto updateCategory(String id, CategoryRequest categoryRequest);
+
     Page<CategoriesDto> getAllCategories(Pageable pageable);
+
     CategoriesDto getCategoryById(String categoryId);
+
     void deleteCategory(String categoryId);
+
     CategoriesDto findByName(CategoryType name);
 }

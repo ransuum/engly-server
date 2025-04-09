@@ -10,7 +10,7 @@ import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.RoomService;
-import com.engly.engly_server.utils.mapper.RoomMapper;
+import com.engly.engly_server.mapper.RoomMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

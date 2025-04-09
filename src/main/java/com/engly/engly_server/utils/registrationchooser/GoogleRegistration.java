@@ -7,7 +7,7 @@ import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.utils.passwordgenerateutil.PasswordGeneratorUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.graalvm.collections.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,7 +47,7 @@ public class GoogleRegistration implements RegistrationChooser {
                 .providerId(signUpRequest.providerId())
                 .build();
 
-        return Pair.create(userRepo.save(user), null);
+        return Pair.of(userRepo.save(user), null);
     }
 
     @Override

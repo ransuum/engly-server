@@ -22,7 +22,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
-import org.graalvm.collections.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -66,15 +66,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     });
             users.setLastLogin(Instant.now());
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-            String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
-
-            refreshTokenRepo.save(RefreshToken.builder()
-                    .user(userRepo.save(users))
-                    .refreshToken(refreshToken)
-                    .revoked(false)
-                    .createdAt(Instant.now())
-                    .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
-                    .build());
+            String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+                    .createRefreshToken(users, authentication)).getRefreshToken();
 
             jwtTokenGenerator.creatRefreshTokenCookie(response, refreshToken);
             log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
@@ -122,18 +115,11 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     public AuthResponseDto registerUser(SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
         try {
             var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
-
             var authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-            String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
-            refreshTokenRepo.save(RefreshToken.builder()
-                    .user(registration.getLeft())
-                    .refreshToken(refreshToken)
-                    .revoked(false)
-                    .createdAt(Instant.now())
-                    .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
-                    .build());
+            String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+                    .createRefreshToken(registration.getLeft(), authentication)).getRefreshToken();
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequest.username());
             return AuthResponseDto.builder()
@@ -154,7 +140,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        var oauth2User = (OAuth2User) authentication.getPrincipal();
+        final var oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
         String providerId = oauth2User.getAttribute("sub");
@@ -162,43 +148,25 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         if (email == null || name == null || providerId == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
 
-        Users user;
+        final var user = userRepo.findByEmail(email)
+                .map(existingUser -> {
+                    existingUser.setLastLogin(Instant.now());
+                    return existingUser;
+                })
+                .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
+                        .registration(new SignUpRequest(name, email, "Password123@",
+                                EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId))
+                        .getLeft());
 
-        var existingUser = userRepo.findByEmail(email);
-        if (existingUser.isPresent()) {
-            user = existingUser.get();
-            user.setLastLogin(Instant.now());
-        }
-        else {
-            Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)
-                    .registration(new SignUpRequest(name, email,
-                            "Password123@",
-                            EnglishLevels.A1,
-                            NativeLanguage.ENGLISH,
-                            Goals.DEFAULT,
-                            providerId
-                    ));
-
-            user = additionalInfoPair.getLeft();
-        }
-
-        Authentication userAuth = jwtTokenGenerator.createAuthenticationObject(user);
-        String accessToken = jwtTokenGenerator.generateAccessToken(userAuth);
-        String refreshToken = jwtTokenGenerator.generateRefreshToken(userAuth);
-
-        refreshTokenRepo.save(RefreshToken.builder()
-                .user(userRepo.save(user))
-                .refreshToken(refreshToken)
-                .revoked(false)
-                .createdAt(Instant.now())
-                .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
-                .build());
+        final var userAuth = jwtTokenGenerator.createAuthenticationObject(user);
+        final var accessToken = jwtTokenGenerator.generateAccessToken(userAuth);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getWriter(),
                 AuthResponseDto.builder()
                         .accessToken(accessToken)
-                        .refreshToken(refreshToken)
+                        .refreshToken(refreshTokenRepo.save(jwtTokenGenerator
+                                .createRefreshToken(user, authentication)).getRefreshToken())
                         .accessTokenExpiry(15 * 60)
                         .username(user.getUsername())
                         .tokenType(TokenType.Bearer)
@@ -210,22 +178,13 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
-    public Map<String, Boolean> checkUsernameAvailability(@NotBlank(message = "Username is blank")
-                                                          @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters.")
-                                                          @Pattern(
-                                                                  regexp = "^[a-zA-Z]{2,50}$",
-                                                                  message = "Username must contain only letters (a-z, A-Z) and be between 2 and 50 characters long."
-                                                          ) String username) {
+    public Map<String, Boolean> checkUsernameAvailability(String username) {
         Boolean isAvailable = !userRepo.existsByUsername(username);
         return Map.of("available", isAvailable);
     }
 
     @Override
-    public Map<String, Boolean> checkEmailAvailability(@Valid
-                                                       @Email(message = "Isn't email")
-                                                       @NotBlank(message = "Email is blank")
-                                                       @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
-                                                       String email) {
+    public Map<String, Boolean> checkEmailAvailability(String email) {
         Boolean isAvailable = !userRepo.existsByEmail(email);
         return Map.of("available", isAvailable);
     }
