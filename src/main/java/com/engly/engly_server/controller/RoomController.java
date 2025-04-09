@@ -7,9 +7,11 @@ import com.engly.engly_server.models.request.update.RoomUpdateRequest;
 import com.engly.engly_server.service.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,10 +39,10 @@ public class RoomController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     @Operation(summary = "Get rooms by category",
             description = """
-                    Retrieves paginated list of rooms filtered by category 
-                    page starts from 0 
+                    Retrieves paginated list of rooms filtered by category
+                    page starts from 0
                     How to use?
-                    You can use in 3 different ways 
+                    You can use in 3 different ways
                     {
                       "page": 2,
                       "size": 20,
@@ -62,10 +64,12 @@ public class RoomController {
                     id can be replaced by different fields in RoomsDto
                     \s"""
     )
-    public ResponseEntity<Page<RoomsDto>> getRoomsByCategory(
+    public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> getRoomsByCategory(
             @RequestParam CategoryType category,
-            @PageableDefault(size = 10, page = 0) Pageable pageable) {
-        return ResponseEntity.ok(roomService.findAllRoomsByCategoryType(category, pageable));
+            @PageableDefault Pageable pageable,
+            PagedResourcesAssembler<RoomsDto> assembler) {
+        var rooms = roomService.findAllRoomsByCategoryType(category, pageable);
+        return ResponseEntity.ok(assembler.toModel(rooms));
     }
 
     @DeleteMapping("/{id}")

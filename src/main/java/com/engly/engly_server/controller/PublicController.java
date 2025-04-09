@@ -2,18 +2,16 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.service.CategoriesService;
-import com.engly.engly_server.utils.pagging.PageConfig;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/public")
@@ -23,6 +21,7 @@ public class PublicController {
     public PublicController(CategoriesService categoriesService) {
         this.categoriesService = categoriesService;
     }
+
     @Operation(
             summary = "Автентифікація користувача",
             description = """
@@ -35,9 +34,10 @@ public class PublicController {
             }
     )
     @GetMapping("/get-all-categories")
-    public ResponseEntity<Map<String, Object>> getAll(@RequestParam(defaultValue = "0", required = false) Integer page,
-                                                      @RequestParam(defaultValue = "10", required = false) Integer size) {
-        return new ResponseEntity<>(new PageConfig<CategoriesDto>()
-                .response(categoriesService.getAllCategories(PageRequest.of(page, size)), CategoriesDto.class), HttpStatus.OK);
+    public ResponseEntity<PagedModel<EntityModel<CategoriesDto>>> getAll(
+            Pageable pageable,
+            PagedResourcesAssembler<CategoriesDto> assembler) {
+        var allCategories = categoriesService.getAllCategories(pageable);
+        return ResponseEntity.ok(assembler.toModel(allCategories));
     }
 }

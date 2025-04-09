@@ -12,6 +12,7 @@ import com.engly.engly_server.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,6 +22,7 @@ public class MessageServiceImpl implements MessageService {
     private final RoomRepo roomRepo;
     private final UserRepo userRepo;
     private final SecurityService service;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     public MessagesDto sendMessage(MessageRequest messageRequest) {
@@ -30,15 +32,17 @@ public class MessageServiceImpl implements MessageService {
         var room = roomRepo.findById(messageRequest.roomId())
                 .orElseThrow(() -> new NotFoundException("Room not found"));
 
-        var message = Message.builder()
+        var savedMessage = messageRepo.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
                 .content(messageRequest.content())
                 .user(user)
                 .room(room)
-                .build();
+                .build());
 
-        return MessageMapper.INSTANCE.toMessageDto(messageRepo.save(message));
+        var messageDto = MessageMapper.INSTANCE.toMessageDto(savedMessage);
+        messagingTemplate.convertAndSend("/topic/" + messageRequest.roomId(), messageDto);
+        return messageDto;
     }
 
     @Override
