@@ -32,9 +32,36 @@ public class RoomController {
         return new ResponseEntity<>(roomService.createRoom(name, roomRequest), HttpStatus.CREATED);
     }
 
+
     @GetMapping("/by-category")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    @Operation(summary = "Get rooms by category", description = "Retrieves paginated list of rooms filtered by category")
+    @Operation(summary = "Get rooms by category",
+            description = """
+                    Retrieves paginated list of rooms filtered by category \n
+                    page starts from 0 \n
+                    How to use? \n
+                    You can use in 3 different ways \n
+                    {
+                      "page": 2,
+                      "size": 20,
+                      "sort": "id"
+                    } \n
+                    /////// \n
+                    {
+                       "page": 1,
+                       "size": 10,
+                       "sort": "id,ASC"
+                     } \n
+                     //// \n
+                    {
+                       "page": 0,
+                       "size": 10,
+                       "sort": "id,DESC"
+                    } \n
+                    /// \n
+                    id can be replaced by different fields in RoomsDto
+                    \s"""
+    )
     public ResponseEntity<Page<RoomsDto>> getRoomsByCategory(
             @RequestParam CategoryType category,
             @PageableDefault(size = 10, page = 0) Pageable pageable) {
