@@ -3,11 +3,11 @@ package com.engly.engly_server.utils.registrationchooser;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.models.request.SignUpRequest;
+import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.utils.passwordgenerateutil.PasswordGeneratorUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.graalvm.collections.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +35,7 @@ public class GoogleRegistration implements RegistrationChooser {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this Google email already exists");
         });
 
-        Users user = Users.builder()
+        var user = Users.builder()
                 .roles(signUpRequest.email().equals(devEmail) ? "ROLE_ADMIN" : "ROLE_GOOGLE")
                 .email(signUpRequest.email())
                 .emailVerified(Boolean.TRUE)
@@ -47,7 +47,7 @@ public class GoogleRegistration implements RegistrationChooser {
                 .providerId(signUpRequest.providerId())
                 .build();
 
-        return Pair.create(userRepo.save(user), null);
+        return Pair.of(userRepo.save(user), null);
     }
 
     @Override

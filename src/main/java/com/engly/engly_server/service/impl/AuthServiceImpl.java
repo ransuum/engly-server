@@ -1,11 +1,12 @@
 package com.engly.engly_server.service.impl;
 
+import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
-import com.engly.engly_server.models.request.SignUpRequest;
+import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
@@ -14,9 +15,14 @@ import com.engly.engly_server.utils.registrationchooser.RegistrationChooser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
-import org.graalvm.collections.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -30,7 +36,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -57,19 +62,12 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
             var users = userRepo.findByEmail(authentication.getName())
                     .orElseThrow(() -> {
                         log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
-                        return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND");
+                        return new NotFoundException("USER NOT FOUND");
                     });
             users.setLastLogin(Instant.now());
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-            String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
-
-            refreshTokenRepo.save(RefreshToken.builder()
-                    .user(users)
-                    .refreshToken(refreshToken)
-                    .revoked(false)
-                    .createdAt(Instant.now())
-                    .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
-                    .build());
+            String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+                    .createRefreshToken(users, authentication)).getRefreshToken();
 
             jwtTokenGenerator.creatRefreshTokenCookie(response, refreshToken);
             log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
@@ -96,41 +94,32 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
-
-
-        Users users = refreshTokenEntity.getUser();
-        Authentication authentication = jwtTokenGenerator.createAuthenticationObject(users);
-        String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-
+        var users = refreshTokenEntity.getUser();
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepo.save(refreshTokenEntity);
 
-        String refreshedToken = jwtTokenGenerator.generateRefreshToken(authentication);
+        var authentication = jwtTokenGenerator.createAuthenticationObject(users);
+        final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+
         return AuthResponseDto.builder()
                 .accessToken(accessToken)
                 .accessTokenExpiry(5 * 60)
                 .username(users.getUsername())
                 .tokenType(TokenType.Bearer)
-                .refreshToken(refreshedToken)
+                .refreshToken(refreshTokenRepo.save(jwtTokenGenerator
+                        .createRefreshToken(users, authentication)).getRefreshToken())
                 .build();
     }
 
     @Override
     public AuthResponseDto registerUser(SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
         try {
-            Pair<Users, AdditionalInfo> registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
-
-            Authentication authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
+            var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
+            var authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-            String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
-            refreshTokenRepo.save(RefreshToken.builder()
-                    .user(registration.getLeft())
-                    .refreshToken(refreshToken)
-                    .revoked(false)
-                    .createdAt(Instant.now())
-                    .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
-                    .build());
+            String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+                    .createRefreshToken(registration.getLeft(), authentication)).getRefreshToken();
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequest.username());
             return AuthResponseDto.builder()
@@ -151,7 +140,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        final var oauth2User = (OAuth2User) authentication.getPrincipal();
         String email = oauth2User.getAttribute("email");
         String name = oauth2User.getAttribute("name");
         String providerId = oauth2User.getAttribute("sub");
@@ -159,40 +148,25 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         if (email == null || name == null || providerId == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
 
-        Users user;
+        final var user = userRepo.findByEmail(email)
+                .map(existingUser -> {
+                    existingUser.setLastLogin(Instant.now());
+                    return existingUser;
+                })
+                .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
+                        .registration(new SignUpRequest(name, email, "Password123@",
+                                EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId))
+                        .getLeft());
 
-        Optional<Users> existingUser = userRepo.findByEmail(email);
-        if (existingUser.isPresent()) user = existingUser.get();
-        else {
-            Pair<Users, AdditionalInfo> additionalInfoPair = chooserMap.get(Provider.GOOGLE)
-                    .registration(new SignUpRequest(name, email,
-                            "Password123@",
-                            EnglishLevels.A1,
-                            NativeLanguage.ENGLISH,
-                            Goals.DEFAULT,
-                            providerId
-                    ));
-
-            user = additionalInfoPair.getLeft();
-        }
-
-        Authentication userAuth = jwtTokenGenerator.createAuthenticationObject(user);
-        String accessToken = jwtTokenGenerator.generateAccessToken(userAuth);
-        String refreshToken = jwtTokenGenerator.generateRefreshToken(userAuth);
-
-        refreshTokenRepo.save(RefreshToken.builder()
-                .user(user)
-                .refreshToken(refreshToken)
-                .revoked(false)
-                .createdAt(Instant.now())
-                .expiresAt(Instant.now().plus(4, ChronoUnit.DAYS))
-                .build());
+        final var userAuth = jwtTokenGenerator.createAuthenticationObject(user);
+        final var accessToken = jwtTokenGenerator.generateAccessToken(userAuth);
 
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         new ObjectMapper().writeValue(response.getWriter(),
                 AuthResponseDto.builder()
                         .accessToken(accessToken)
-                        .refreshToken(refreshToken)
+                        .refreshToken(refreshTokenRepo.save(jwtTokenGenerator
+                                .createRefreshToken(user, authentication)).getRefreshToken())
                         .accessTokenExpiry(15 * 60)
                         .username(user.getUsername())
                         .tokenType(TokenType.Bearer)

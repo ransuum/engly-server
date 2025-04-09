@@ -25,7 +25,7 @@ public class Categories {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     @Enumerated(EnumType.STRING)
     private CategoryType name;
 

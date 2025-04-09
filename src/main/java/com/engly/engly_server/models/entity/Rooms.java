@@ -46,7 +46,7 @@ public class Rooms {
     private Users creator;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Messages> messages;
+    private List<Message> messages;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ChatParticipants> chatParticipants;

@@ -26,7 +26,6 @@ import java.io.IOException;
 
 @Slf4j
 public class JwtAccessTokenFilter extends OncePerRequestFilter {
-
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
 

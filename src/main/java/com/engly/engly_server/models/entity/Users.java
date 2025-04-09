@@ -80,5 +80,5 @@ public class Users implements Serializable {
     private List<Notifications> notifications;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Messages> messages;
+    private List<Message> messages;
 }

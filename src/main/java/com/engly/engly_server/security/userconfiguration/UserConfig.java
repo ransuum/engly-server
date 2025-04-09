@@ -15,8 +15,7 @@ public class UserConfig implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays
-                .stream(users
+        return Arrays.stream(users
                         .getRoles()
                         .split(","))
                 .map(SimpleGrantedAuthority::new)

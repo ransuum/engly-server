@@ -4,11 +4,11 @@ import com.engly.engly_server.exception.FieldValidationException;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.models.request.SignUpRequest;
+import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
-import org.graalvm.collections.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -55,9 +55,9 @@ public class EmailRegistration implements RegistrationChooser {
             users.setAdditionalInfo(addInfo);
             addInfo.setUser(users);
 
-            Users save = userRepo.save(users);
+            var save = userRepo.save(users);
 
-            return Pair.create(save, save.getAdditionalInfo());
+            return Pair.of(save, save.getAdditionalInfo());
         } catch (ValidationException e) {
             log.error("[AuthService:registerUser]User Registration Failed: {}", e.getMessage());
             throw new FieldValidationException(e.getMessage());

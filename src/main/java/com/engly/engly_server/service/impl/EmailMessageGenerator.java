@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.engly.engly_server.exception.GenerateTokenException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -10,24 +10,24 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Service
+@Slf4j
 public class EmailMessageGenerator {
-    private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
     @Value("classpath:messageTemplate.txt")
-    private Resource MESSAGE_TEMPLATE;
+    private Resource messageTemplate;
     @Value("${app.email.notification.check.url}")
-    private String URL_TEMPLATE;
+    private String urlTemplate;
 
 
     public String generate(String token, String email) {
         String message;
         try {
-            message = MESSAGE_TEMPLATE.getContentAsString(StandardCharsets.UTF_8);
+            message = messageTemplate.getContentAsString(StandardCharsets.UTF_8);
         } catch (IOException e) {
             log.error("[NotificationServiceImpl:generateMessage]Error reading message template", e);
-            throw new RuntimeException(e.getMessage());
+            throw new GenerateTokenException("Cannot generate token: ", e);
         }
         message = message.replace("[Ім'я користувача]", email);
-        message = message.replace("[Посилання для підтвердження]", URL_TEMPLATE.formatted(email, token));
+        message = message.replace("[Посилання для підтвердження]", urlTemplate.formatted(email, token));
         return message;
     }
 }

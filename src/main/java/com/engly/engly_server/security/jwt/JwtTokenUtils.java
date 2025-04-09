@@ -23,10 +23,8 @@ public class JwtTokenUtils {
     }
 
     public boolean isTokenValid(Jwt jwtToken, UserDetails userDetails){
-        final String userName = getUserName(jwtToken);
-        boolean isTokenExpired = getIfTokenIsExpired(jwtToken);
-        boolean isTokenUserSameAsDatabase = userName.equals(userDetails.getUsername());
-        return !isTokenExpired  && isTokenUserSameAsDatabase;
+        if (getIfTokenIsExpired(jwtToken)) return false;
+        return getUserName(jwtToken).equals(userDetails.getUsername());
     }
 
     private boolean getIfTokenIsExpired(Jwt jwtToken) {

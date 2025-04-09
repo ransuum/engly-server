@@ -1,6 +1,8 @@
 package com.engly.engly_server.security.jwt;
 
+import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
+import com.engly.engly_server.models.enums.Roles;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +49,7 @@ public class JwtTokenGenerator {
 
         String permissions = getPermissionsFromRoles(roles);
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        var claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
@@ -71,7 +73,7 @@ public class JwtTokenGenerator {
 
         log.info("[JwtTokenGenerator:generateRefreshToken] Token Creation Started for:{}", authentication.getName());
 
-        JwtClaimsSet claims = JwtClaimsSet.builder()
+        var claims = JwtClaimsSet.builder()
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
@@ -82,38 +84,28 @@ public class JwtTokenGenerator {
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-    private static String getRolesOfUser(Authentication authentication) {
+    private String getRolesOfUser(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
     }
 
     private String getPermissionsFromRoles(String roles) {
-        Set<String> permissions = new HashSet<>();
+        var roleList = Arrays.stream(roles.split(","))
+                .map(String::trim)
+                .toList();
 
-        if (roles.contains("ROLE_ADMIN")) {
-            permissions.addAll(List.of("READ", "WRITE", "DELETE"));
-        }
-        if (roles.contains("ROLE_MANAGER")) {
-            permissions.addAll(List.of("READ", "WRITE", "DELETE"));
-        }
-        if (roles.contains("ROLE_USER")) {
-            permissions.addAll(List.of("READ", "WRITE", "DELETE"));
-        }
-        if (roles.contains("ROLE_GOOGLE")) {
-            permissions.add("ADDITIONAL_INFO");
-        }
-        if (roles.contains("ROLE_SYSADMIN")) {
-            permissions.addAll(List.of("READ", "WRITE", "DELETE", "CREATE_CATEGORY", "UPDATE_CATEGORY", "DELETE_CATEGORY"));
-        }
-        if (roles.contains("ROLE_NOT_VERIFIED")) {
-            permissions.add("NOT_VERIFIED");
-        }
-        if (roles.contains("ROLE_ADMIN")) {
-            permissions.addAll(List.of("ADMIN", "READ", "WRITE", "DELETE", "CREATE_CATEGORY", "UPDATE_CATEGORY", "DELETE_CATEGORY"));
-        }
+        return String.join(" ", Roles.getPermissionsForRoles(roleList));
+    }
 
-        return String.join(" ", permissions);
+    public RefreshToken createRefreshToken(Users users, Authentication authentication) {
+        return RefreshToken.builder()
+                .user(users)
+                .refreshToken(generateRefreshToken(authentication))
+                .createdAt(Instant.now())
+                .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
+                .revoked(false)
+                .build();
     }
 
 }

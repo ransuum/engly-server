@@ -4,10 +4,10 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.request.CategoryRequest;
+import com.engly.engly_server.models.request.create.CategoryRequest;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.service.CategoriesService;
-import com.engly.engly_server.utils.mapper.CategoryMapper;
+import com.engly.engly_server.mapper.CategoryMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +36,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
         var category = categoriesRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category not found"));
+                .orElseThrow(() -> new NotFoundException("Category not found while updating"));
 
         if (categoryRequest.name() != null) category.setName(categoryRequest.name());
         if (categoryRequest.description() != null) category.setDescription(categoryRequest.description());
@@ -55,21 +55,21 @@ public class CategoryServiceImpl implements CategoriesService {
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findById(categoryId)
-                        .orElseThrow(() -> new NotFoundException("Category not found"))
+                        .orElseThrow(() -> new NotFoundException("Category not found by id: " + categoryId))
         );
     }
 
     @Override
     public void deleteCategory(String categoryId) {
         categoriesRepo.delete(categoriesRepo.findById(categoryId)
-                .orElseThrow(() -> new NotFoundException("Category not found")));
+                .orElseThrow(() -> new NotFoundException("Category not found while deleting")));
     }
 
     @Override
     public CategoriesDto findByName(CategoryType name) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findByName(name)
-                        .orElseThrow(() -> new NotFoundException("Category not found"))
+                        .orElseThrow(() -> new NotFoundException("Category not found while finding by category type name"))
         );
     }
 }
