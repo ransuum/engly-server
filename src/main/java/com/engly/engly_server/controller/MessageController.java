@@ -42,7 +42,7 @@ public class MessageController {
     @GetMapping("/current-room/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
-                                                                                            @PageableDefault(size = 10, page = 0) Pageable pageable,
+                                                                                            @PageableDefault Pageable pageable,
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
         var messages = messageService.findAllMessageInCurrentRoom(roomId, pageable);
         return ResponseEntity.ok(assembler.toModel(messages));
