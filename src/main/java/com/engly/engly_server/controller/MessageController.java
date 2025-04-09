@@ -5,6 +5,7 @@ import com.engly.engly_server.models.request.create.MessageRequest;
 import com.engly.engly_server.service.MessageService;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -42,7 +43,8 @@ public class MessageController {
     @GetMapping("/current-room/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
-                                                                                            @PageableDefault Pageable pageable,
+                                                                                            @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                                                                    sort = "createdDate,asc") Pageable pageable,
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
         var messages = messageService.findAllMessageInCurrentRoom(roomId, pageable);
         return ResponseEntity.ok(assembler.toModel(messages));

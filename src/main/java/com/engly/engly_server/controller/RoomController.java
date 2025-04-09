@@ -7,6 +7,7 @@ import com.engly.engly_server.models.request.update.RoomUpdateRequest;
 import com.engly.engly_server.service.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -66,7 +67,8 @@ public class RoomController {
     )
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> getRoomsByCategory(
             @RequestParam CategoryType category,
-            @PageableDefault Pageable pageable,
+            @ParameterObject  @PageableDefault(page = 0, size = 8,
+                    sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
         var rooms = roomService.findAllRoomsByCategoryType(category, pageable);
         return ResponseEntity.ok(assembler.toModel(rooms));
