@@ -62,4 +62,9 @@ public class MessageServiceImpl implements MessageService {
     public Page<MessagesDto> findAllMessageInCurrentRoom(String roomId, Pageable pageable) {
         return messageRepo.findAllByRoomId(roomId, pageable).map(MessageMapper.INSTANCE::toMessageDto);
     }
+
+    @Override
+    public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
+        return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString, pageable).map(MessageMapper.INSTANCE::toMessageDto);
+    }
 }

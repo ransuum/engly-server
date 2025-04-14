@@ -49,6 +49,17 @@ public class MessageController {
         var messages = messageService.findAllMessageInCurrentRoom(roomId, pageable);
         return ResponseEntity.ok(assembler.toModel(messages));
     }
+    @GetMapping("/current-room/{roomId}/by-keyString")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
+                                                                                            @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                                                                    sort = "createdDate,asc") Pageable pageable,
+                                                                                            @RequestParam String keyString,
+                                                                                            PagedResourcesAssembler<MessagesDto> assembler) {
+        var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);
+        return ResponseEntity.ok(assembler.toModel(messages));
+    }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
