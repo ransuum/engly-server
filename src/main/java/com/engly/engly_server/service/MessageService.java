@@ -7,7 +7,12 @@ import org.springframework.data.domain.Pageable;
 
 public interface MessageService {
     MessagesDto sendMessage(MessageRequest messageRequest);
+
     void deleteMessage(String id);
+
     MessagesDto editMessage(String id, String content);
+
     Page<MessagesDto> findAllMessageInCurrentRoom(String id, Pageable pageable);
+
+    Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable);
 }
