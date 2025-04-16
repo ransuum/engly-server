@@ -8,6 +8,7 @@ import com.engly.engly_server.models.request.create.CategoryRequest;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.service.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,12 +17,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoriesService {
     private final CategoriesRepo categoriesRepo;
-
-    public CategoryServiceImpl(CategoriesRepo categoriesRepo) {
-        this.categoriesRepo = categoriesRepo;
-    }
 
     @Override
     public CategoriesDto addCategory(CategoryRequest categoryRequest) {

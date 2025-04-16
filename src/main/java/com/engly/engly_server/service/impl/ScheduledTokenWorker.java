@@ -2,22 +2,18 @@ package com.engly.engly_server.service.impl;
 
 import com.engly.engly_server.repo.VerifyTokenRepo;
 import com.engly.engly_server.service.EmailService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
 @Component
+@RequiredArgsConstructor
 public class ScheduledTokenWorker {
     private final VerifyTokenRepo verifyTokenRepo;
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
-
-    private ScheduledTokenWorker(VerifyTokenRepo verifyTokenRepo, EmailService emailService, EmailMessageGenerator messageGenerator) {
-        this.verifyTokenRepo = verifyTokenRepo;
-        this.emailService = emailService;
-        this.messageGenerator = messageGenerator;
-    }
 
     @Scheduled(cron = "0 0 0 * * ?")
     private void deleteExpiredTokens() {

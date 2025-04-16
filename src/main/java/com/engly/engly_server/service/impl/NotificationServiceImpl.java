@@ -15,6 +15,8 @@ import com.engly.engly_server.repo.VerifyTokenRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.service.EmailService;
 import com.engly.engly_server.service.NotificationService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,8 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class NotificationServiceImpl implements NotificationService {
     private final VerifyTokenRepo tokenRepo;
     private final EmailService emailService;
@@ -35,19 +39,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Value("#{'${sysadmin.email}'.split(',\\s*')}")
     private Set<String> sysadminEmails;
-
-    private static final Logger log = LoggerFactory.getLogger(NotificationServiceImpl.class);
-
-
-    public NotificationServiceImpl(VerifyTokenRepo tokenRepo, EmailService emailService, EmailMessageGenerator messageGenerator, UserRepo userRepo, JwtTokenGenerator generator, RefreshTokenRepo refreshTokenRepo, SecurityService service) {
-        this.tokenRepo = tokenRepo;
-        this.emailService = emailService;
-        this.messageGenerator = messageGenerator;
-        this.userRepo = userRepo;
-        this.generator = generator;
-        this.refreshTokenRepo = refreshTokenRepo;
-        this.service = service;
-    }
 
 
     @Override
@@ -80,28 +71,31 @@ public class NotificationServiceImpl implements NotificationService {
 
         if (optionalToken.isPresent()) {
             VerifyToken verifyToken = optionalToken.get();
-            Users user = userRepo.findByEmail(email).get();
-            user.setEmailVerified(true);
-            user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
+            return userRepo.findByEmail(email)
+                    .map(user -> {
+                        user.setEmailVerified(true);
+                        user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
-            tokenRepo.delete(verifyToken);
+                        tokenRepo.delete(verifyToken);
 
-            var authentication = generator.createAuthenticationObject(userRepo.save(user));
-            var accessToken = generator.generateAccessToken(authentication);
-            var refreshToken = generator.generateRefreshToken(authentication);
-            log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
+                        final var authentication = generator.createAuthenticationObject(userRepo.save(user));
+                        final var accessToken = generator.generateAccessToken(authentication);
+                        final var refreshToken = generator.generateRefreshToken(authentication);
+                        log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
 
-            var savedRefreshToken = refreshTokenRepo.save(RefreshToken.builder()
-                    .user(user)
-                    .refreshToken(refreshToken)
-                    .revoked(false)
-                    .build());
+                        final var savedRefreshToken = refreshTokenRepo.save(RefreshToken.builder()
+                                .user(user)
+                                .refreshToken(refreshToken)
+                                .revoked(false)
+                                .build());
 
-            return new AuthResponseDto(accessToken,
-                    12,
-                    TokenType.Bearer,
-                    user.getUsername(),
-                    savedRefreshToken.getRefreshToken());
+                        return new AuthResponseDto(accessToken,
+                                12,
+                                TokenType.Bearer,
+                                user.getUsername(),
+                                savedRefreshToken.getRefreshToken());
+                    })
+                    .orElseThrow(() -> new NotFoundException("User not found"));
         }
         throw new TokenNotFoundException("Token not found or already verified");
     }

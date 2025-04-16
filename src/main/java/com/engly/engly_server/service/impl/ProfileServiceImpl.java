@@ -6,18 +6,16 @@ import com.engly.engly_server.models.request.update.ProfileUpdateRequest;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.check;
 
 @Service
+@RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UserRepo userRepo;
-
-    public ProfileServiceImpl(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
 
     @Override
     public UsersDto getProfile() {

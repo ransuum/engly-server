@@ -7,6 +7,7 @@ import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
 import jakarta.validation.ValidationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,17 +18,13 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class EmailRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${dev.email}")
     private String devEmail;
-
-    public EmailRegistration(UserRepo userRepo, PasswordEncoder passwordEncoder) {
-        this.userRepo = userRepo;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public Pair<Users, AdditionalInfo> registration(SignUpRequest signUpRequest) {
@@ -37,7 +34,7 @@ public class EmailRegistration implements RegistrationChooser {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exist");
             });
 
-            var users = Users.builder()
+            final var users = Users.builder()
                     .roles(signUpRequest.email().equals(devEmail) ? "ROLE_ADMIN" :"ROLE_NOT_VERIFIED")
                     .email(signUpRequest.email())
                     .emailVerified(Boolean.FALSE)
@@ -46,7 +43,7 @@ public class EmailRegistration implements RegistrationChooser {
                     .provider(Provider.LOCAL)
                     .build();
 
-            var addInfo = AdditionalInfo.builder()
+            final var addInfo = AdditionalInfo.builder()
                     .goal(signUpRequest.goals())
                     .englishLevel(signUpRequest.englishLevel())
                     .nativeLanguage(signUpRequest.nativeLanguage())
