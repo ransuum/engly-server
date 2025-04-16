@@ -2,9 +2,6 @@ package com.engly.engly_server.service.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.entity.AdditionalInfo;
-import com.engly.engly_server.models.entity.RefreshToken;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
 import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.RefreshTokenRepo;
@@ -15,14 +12,8 @@ import com.engly.engly_server.utils.registrationchooser.RegistrationChooser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
@@ -33,7 +24,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,6 +55,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                         return new NotFoundException("USER NOT FOUND");
                     });
             users.setLastLogin(Instant.now());
+            userRepo.save(users);
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
                     .createRefreshToken(users, authentication)).getRefreshToken();
@@ -171,10 +162,6 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                         .username(user.getUsername())
                         .tokenType(TokenType.Bearer)
                         .build());
-    }
-
-    public void delete(String id) {
-        userRepo.deleteById(id);
     }
 
     @Override

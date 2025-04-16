@@ -27,7 +27,7 @@ public class PublicController {
     @Operation(
             summary = "Автентифікація користувача",
             description = """
-                         Нумерування сторінок починається з 0 
+                         Нумерування сторінок починається з 0
                          page це номер сторінки
                          size це розмір сторінки
                     \s""",
@@ -37,8 +37,8 @@ public class PublicController {
     )
     @GetMapping("/get-all-categories")
     public ResponseEntity<PagedModel<EntityModel<CategoriesDto>>> getAll(
-            @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = "name,asc") Pageable pageable,
+            @ParameterObject @PageableDefault(size = 8, sort = "name,asc")
+            Pageable pageable,
             PagedResourcesAssembler<CategoriesDto> assembler) {
         var allCategories = categoriesService.getAllCategories(pageable);
         return ResponseEntity.ok(assembler.toModel(allCategories));

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -32,5 +33,10 @@ public class SwaggerConfig implements WebMvcConfigurer {
                                 .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList("basicAuth"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+    }
+
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry) {
+        registry.addRedirectViewController("/", "/swagger-ui.html");
     }
 }

@@ -22,8 +22,7 @@ public enum Roles {
     }
 
     public static Set<String> getPermissionsForRoles(Collection<String> roles) {
-        return roles.stream()
-                .map(Roles::valueOf)
+        return roles.stream().map(Roles::valueOf)
                 .flatMap(applicationRole -> applicationRole.getPermissions().stream())
                 .collect(Collectors.toSet());
     }
