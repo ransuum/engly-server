@@ -35,14 +35,14 @@ public class CategoryServiceImpl implements CategoriesService {
 
     @Override
     public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
-        var category = categoriesRepo.findById(id).orElseThrow(()
-                -> new NotFoundException("Category not found while updating"));
+        return categoriesRepo.findById(id)
+                .map(category -> {
+                    if (categoryRequest.name() != null) category.setName(categoryRequest.name());
+                    if (categoryRequest.description() != null) category.setDescription(categoryRequest.description());
 
-        if (categoryRequest.name() != null) category.setName(categoryRequest.name());
-        if (categoryRequest.description() != null) category.setDescription(categoryRequest.description());
-
-        return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepo.save(category));
-
+                    return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepo.save(category));
+                })
+                .orElseThrow(() -> new NotFoundException("Category not found while updating"));
     }
 
     @Override

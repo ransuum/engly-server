@@ -49,27 +49,28 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     @Override
     public AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication, HttpServletResponse response) {
         try {
-            var users = userRepo.findByEmail(authentication.getName())
+            return userRepo.findByEmail(authentication.getName())
+                    .map(users -> {
+                        users.setLastLogin(Instant.now());
+                        userRepo.save(users);
+                        String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+                        String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+                                .createRefreshToken(users, authentication)).getRefreshToken();
+
+                        jwtTokenGenerator.creatRefreshTokenCookie(response, refreshToken);
+                        log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
+                        return AuthResponseDto.builder()
+                                .accessToken(accessToken)
+                                .refreshToken(refreshToken)
+                                .accessTokenExpiry(15 * 60)
+                                .username(users.getUsername())
+                                .tokenType(TokenType.Bearer)
+                                .build();
+                    })
                     .orElseThrow(() -> {
                         log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
                         return new NotFoundException("USER NOT FOUND");
                     });
-            users.setLastLogin(Instant.now());
-            userRepo.save(users);
-            String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-            String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
-                    .createRefreshToken(users, authentication)).getRefreshToken();
-
-            jwtTokenGenerator.creatRefreshTokenCookie(response, refreshToken);
-            log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
-            return AuthResponseDto.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .accessTokenExpiry(15 * 60)
-                    .username(users.getUsername())
-                    .tokenType(TokenType.Bearer)
-                    .build();
-
         } catch (Exception e) {
             log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :{}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
@@ -86,8 +87,6 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
         var users = refreshTokenEntity.getUser();
-        refreshTokenEntity.setRevoked(true);
-        refreshTokenRepo.save(refreshTokenEntity);
 
         var authentication = jwtTokenGenerator.createAuthenticationObject(users);
         final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);

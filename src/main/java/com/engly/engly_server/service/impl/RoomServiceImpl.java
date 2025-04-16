@@ -37,18 +37,17 @@ public class RoomServiceImpl implements RoomService {
         var username = service.getCurrentUserEmail();
         var category = categoriesRepo.findByName(name)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
-        var creator = userRepo.findByEmail(username)
+        return userRepo.findByEmail(username)
+                .map(creator -> RoomMapper.INSTANCE.roomToDto(roomRepo.save(
+                        Rooms.builder()
+                                .creator(creator)
+                                .createdAt(Instant.now())
+                                .category(category)
+                                .description(roomRequest.description())
+                                .name(roomRequest.name())
+                                .build()
+                )))
                 .orElseThrow(() -> new NotFoundException("User not found"));
-
-        return RoomMapper.INSTANCE.roomToDto(roomRepo.save(
-                Rooms.builder()
-                        .creator(creator)
-                        .createdAt(Instant.now())
-                        .category(category)
-                        .description(roomRequest.description())
-                        .name(roomRequest.name())
-                        .build()
-        ));
     }
 
     @Override
@@ -66,15 +65,19 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
-        var room = roomRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("Room not found"));
+        return roomRepo.findById(id)
+                .map(room -> {
+                    if (check(request.newCategory())) room.setCategory(categoriesRepo.findByName(request.newCategory())
+                            .orElseThrow(() -> new NotFoundException("Category not found")));
 
-        if (check(request.newCategory())) room.setCategory(categoriesRepo.findByName(request.newCategory())
-                .orElseThrow(() -> new NotFoundException("Category not found")));
-        if (check(request.updateCreatorByEmail())) room.setCreator(userRepo.findByEmail(request.updateCreatorByEmail())
-                .orElseThrow(() -> new NotFoundException("Creator not found")));
-        if (check(request.description())) room.setDescription(request.description());
-        if (check(request.name())) room.setName(request.name());
-        return RoomMapper.INSTANCE.roomToDto(roomRepo.save(room));
+                    if (check(request.updateCreatorByEmail()))
+                        room.setCreator(userRepo.findByEmail(request.updateCreatorByEmail())
+                                .orElseThrow(() -> new NotFoundException("Creator not found")));
+
+                    if (check(request.description())) room.setDescription(request.description());
+                    if (check(request.name())) room.setName(request.name());
+                    return RoomMapper.INSTANCE.roomToDto(roomRepo.save(room));
+                })
+                .orElseThrow(() -> new NotFoundException("Room not found"));
     }
 }

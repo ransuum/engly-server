@@ -30,8 +30,8 @@ public class LogoutHandlerService implements LogoutHandler {
         refreshTokenRepo.findByRefreshToken(refreshToken)
                 .map(token -> {
                     token.setRevoked(true);
-                    refreshTokenRepo.save(token);
+                    refreshTokenRepo.delete(token);
                     return token;
-                });
+                }).orElseThrow(() -> new RuntimeException("Refresh token not found"));
     }
 }
