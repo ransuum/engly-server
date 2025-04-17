@@ -58,7 +58,7 @@ public class RoomController {
                      ////
                     {
                        "page": 0,
-                       "size": 10,
+                       "size": 10,  
                        "sort": "id,DESC"
                     }
                     ///
@@ -66,7 +66,7 @@ public class RoomController {
                     \s"""
     )
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> getRoomsByCategory(
-            @RequestParam CategoryType category,
+            @RequestParam(defaultValue = "NEWS") CategoryType category,
             @ParameterObject  @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {

@@ -8,6 +8,7 @@ import com.engly.engly_server.models.request.create.MessageRequest;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

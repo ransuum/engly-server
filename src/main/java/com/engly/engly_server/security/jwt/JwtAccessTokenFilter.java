@@ -1,7 +1,9 @@
 package com.engly.engly_server.security.jwt;
 
+import com.engly.engly_server.exception.ApiErrorResponse;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +12,7 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -48,7 +51,7 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
 
             JwtDecoder jwtDecoder =  NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
 
-            if(!authHeader.startsWith(TokenType.Bearer.name())){
+            if(authHeader == null || !authHeader.startsWith(TokenType.Bearer.name())){
                 filterChain.doFilter(request,response);
                 return;
             }
@@ -80,7 +83,17 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request,response);
         }catch (JwtValidationException jwtValidationException){
             log.error("[JwtAccessTokenFilter:doFilterInternal] Exception due to :{}",jwtValidationException.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE,jwtValidationException.getMessage());
+            response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+            final var apiError = new ApiErrorResponse(
+                    HttpStatus.NOT_ACCEPTABLE.value(),
+                    "Session Problem",
+                    jwtValidationException.getMessage()
+            );
+
+            var mapper = new ObjectMapper();
+            mapper.writeValue(response.getOutputStream(), apiError);
         }
     }
 }

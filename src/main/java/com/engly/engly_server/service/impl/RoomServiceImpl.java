@@ -9,6 +9,7 @@ import com.engly.engly_server.models.request.update.RoomUpdateRequest;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.RoomService;
 import com.engly.engly_server.mapper.RoomMapper;
 import lombok.RequiredArgsConstructor;
