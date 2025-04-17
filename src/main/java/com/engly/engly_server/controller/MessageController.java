@@ -3,6 +3,8 @@ package com.engly.engly_server.controller;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.request.create.MessageRequest;
 import com.engly.engly_server.service.MessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springdoc.core.annotations.ParameterObject;
@@ -49,6 +51,33 @@ public class MessageController {
         var messages = messageService.findAllMessageInCurrentRoom(roomId, pageable);
         return ResponseEntity.ok(assembler.toModel(messages));
     }
+
+    @Operation(
+            summary = "Retrieving a list of messages that contains a KeyString",
+            description = """
+                        roomId id of the room where to find
+                        page starts from 0 and more
+                        size is the amount of messages retrieves
+                        keyString is a string that needs to be found
+                        \n
+                        If the message doesn't contain a keyString it should not return it
+                    \s""",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Посилання було надіслано на email"),
+                    @ApiResponse(responseCode = "409", description = "Посилання не було надіслано або token не був згенерований коректно")
+            }
+    )
+    @GetMapping("/current-room/{roomId}/by-keyString")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
+                                                                                            @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                                                                    sort = "createdAt,asc") Pageable pageable,
+                                                                                            @RequestParam String keyString,
+                                                                                            PagedResourcesAssembler<MessagesDto> assembler) {
+        var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);
+        return ResponseEntity.ok(assembler.toModel(messages));
+    }
+
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")

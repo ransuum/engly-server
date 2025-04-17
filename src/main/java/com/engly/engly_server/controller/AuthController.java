@@ -37,35 +37,48 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "Автентифікація користувача",
+            summary = "User Authentication",
             description = """
-                         Використовуйте Basic Auth у Postman:
-                         1. Перейдіть до вкладки Authorization та оберіть `Basic Auth`
-                         2. Введіть email та пароль
-                         3. Вкажіть URL: `http://localhost:8000/sign-in` або `https://favourable-rodie-java-service-b82e5859.koyeb.app/sign-in`
-                         4. Оберіть метод `POST` та натисніть `Send`
-                        \s
-                         Якщо використовуєте swagger, зверху є кнопка Authorize.
-                         У відповіді прийде access-токен. Використовуйте його для наступних запитів, передаючи в заголовку `Authorization: Bearer {token}`.
-                    \s""",
+                     Use Basic Auth in Postman:
+                     1. Go to the Authorization tab and select `Basic Auth`
+                     2. Enter username and password
+                     3. Specify URL: `http://localhost:8000/sign-in`
+                     4. Select `POST` method and click `Send`
+                     5. Response: access token, refresh token and details
+                     6. Add access token to Bearer
+                    \s
+                     Use Basic Auth in Swagger:
+                     1. Go to the icon lock and use `Basic Auth`
+                     2. Enter username and password -> authorize
+                     3. Response: access token, refresh token and details
+                     4. Try it out -> execute
+                     4. Add access token to Bearer auth in swagger
+                \s""",
             responses = {
-                    @ApiResponse(responseCode = "201", description = "Успішна автентифікація. Повертає access та refresh токени."),
-                    @ApiResponse(responseCode = "401", description = "Невірні облікові дані")
+                    @ApiResponse(responseCode = "201", description = "Successful authentication. Returns access and refresh tokens."),
+                    @ApiResponse(responseCode = "401", description = "Invalid credentials")
             }
     )
-
     @PostMapping("/sign-in")
     public ResponseEntity<Object> authenticateUser(Authentication authentication, HttpServletResponse response) {
         return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(authentication, response), HttpStatus.CREATED);
     }
 
     @Operation(
-            summary = "Оновлення Access-токену",
+            summary = "User Authentication",
             description = """
-                        Використовуйте Refresh-токен для отримання нового Access-токену.
-                        У запиті передайте `Authorization: Bearer {refresh_token}` та у параметрі якщо свагер,
-                        у постмані просто `Authorization: Bearer {token}`.
-                    """,
+                     Use refresh-token in Postman:
+                     1. Go to the Authorization tab and select `Bearer`
+                     2. Specify URL: `http://localhost:8000/refresh-token` POST
+                     3. Click execute
+                     4. Response: access token, refresh token and details
+                    \s
+                     Use refresh-token in Swagger:
+                     1. Go to the icon lock and select `Bearer` -> put refresh token in there:
+                     2. Write in param refresh token too
+                     3. Click execute
+                     4. Response: access token, refresh token and details
+                \s""",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Новий Access-токен успішно отримано"),
                     @ApiResponse(responseCode = "403", description = "Refresh-токен недійсний або закінчився термін дії")

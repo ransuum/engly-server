@@ -8,6 +8,7 @@ import com.engly.engly_server.models.request.create.MessageRequest;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,20 +30,21 @@ public class MessageServiceImpl implements MessageService {
         var name = service.getCurrentUserEmail();
         var user = userRepo.findByEmail(name)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        var room = roomRepo.findById(messageRequest.roomId())
+        return roomRepo.findById(messageRequest.roomId())
+                .map(room -> {
+                    var savedMessage = messageRepo.save(Message.builder()
+                            .isEdited(Boolean.FALSE)
+                            .isDeleted(Boolean.FALSE)
+                            .content(messageRequest.content())
+                            .user(user)
+                            .room(room)
+                            .build());
+
+                    var messageDto = MessageMapper.INSTANCE.toMessageDto(savedMessage);
+                    messagingTemplate.convertAndSend("/topic/" + messageRequest.roomId(), messageDto);
+                    return messageDto;
+                })
                 .orElseThrow(() -> new NotFoundException("Room not found"));
-
-        var savedMessage = messageRepo.save(Message.builder()
-                .isEdited(Boolean.FALSE)
-                .isDeleted(Boolean.FALSE)
-                .content(messageRequest.content())
-                .user(user)
-                .room(room)
-                .build());
-
-        var messageDto = MessageMapper.INSTANCE.toMessageDto(savedMessage);
-        messagingTemplate.convertAndSend("/topic/" + messageRequest.roomId(), messageDto);
-        return messageDto;
     }
 
     @Override
@@ -52,14 +54,22 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public MessagesDto editMessage(String id, String content) {
-        var message = messageRepo.findById(id).orElseThrow(()
-                -> new NotFoundException("Cannot found this message"));
-        message.setContent(content);
-        return MessageMapper.INSTANCE.toMessageDto(messageRepo.save(message));
+        return messageRepo.findById(id)
+                .map(message -> {
+                    message.setContent(content);
+                    return MessageMapper.INSTANCE.toMessageDto(messageRepo.save(message));
+                })
+                .orElseThrow(() -> new NotFoundException("Cannot found this message"));
     }
 
     @Override
     public Page<MessagesDto> findAllMessageInCurrentRoom(String roomId, Pageable pageable) {
         return messageRepo.findAllByRoomId(roomId, pageable).map(MessageMapper.INSTANCE::toMessageDto);
+    }
+
+    @Override
+    public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
+        return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString, pageable)
+                .map(MessageMapper.INSTANCE::toMessageDto);
     }
 }

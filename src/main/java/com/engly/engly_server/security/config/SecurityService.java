@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.security.config;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -35,8 +35,7 @@ public class SecurityService {
     }
 
     public boolean hasRole(String role) {
-        return getCurrentUserRoles().stream()
-                .anyMatch(authority
-                        -> authority.getAuthority().equals(role));
+        return getCurrentUserRoles().stream().anyMatch(authority
+                -> authority.getAuthority().equals(role));
     }
 }

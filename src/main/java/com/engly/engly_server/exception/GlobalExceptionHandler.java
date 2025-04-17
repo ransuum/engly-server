@@ -3,6 +3,7 @@ package com.engly.engly_server.exception;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
         return buildResponse((HttpStatus) ex.getStatusCode(), ex.getReason(), ex);
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ApiErrorResponse> handlePropertyReferenceException(PropertyReferenceException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Invalid data", ex);
     }
 
     @ExceptionHandler(NotFoundException.class)
