@@ -59,7 +59,6 @@ public class MessageController {
                         page starts from 0 and more
                         size is the amount of messages retrieves
                         keyString is a string that needs to be found
-                        \n
                         If the message doesn't contain a keyString it should not return it
                     \s""",
             responses = {
