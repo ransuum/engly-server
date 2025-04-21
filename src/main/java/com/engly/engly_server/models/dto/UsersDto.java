@@ -8,6 +8,7 @@ import java.util.List;
 public record UsersDto(String id,
                        String username,
                        String email,
+                       String providerId,
                        Instant createdAt,
                        String roles,
                        Boolean emailVerified,

@@ -83,11 +83,15 @@ public class SecurityConfig {
         return httpSecurity
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/api/**"),
-                        new AntPathRequestMatcher("/chat/**"))
+                        new AntPathRequestMatcher("/chat/**"),
+                        new AntPathRequestMatcher("/valid/**"))
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/valid/check-email").permitAll()
+                        .requestMatchers("/valid/check-username").permitAll()
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)

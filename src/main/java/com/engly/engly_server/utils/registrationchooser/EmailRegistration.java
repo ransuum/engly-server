@@ -45,7 +45,7 @@ public class EmailRegistration implements RegistrationChooser {
                     .password(passwordEncoder.encode(signUpRequestDto.password()))
                     .provider(Provider.LOCAL)
                     .additionalInfo(AdditionalInfo.builder()
-                            .goal(Goals.fromLabel(signUpRequestDto.goals()))
+                            .goal(signUpRequestDto.goals())
                             .englishLevel(signUpRequestDto.englishLevel())
                             .nativeLanguage(signUpRequestDto.nativeLanguage())
                             .build())
