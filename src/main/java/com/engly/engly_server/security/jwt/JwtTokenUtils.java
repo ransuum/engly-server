@@ -1,7 +1,7 @@
 package com.engly.engly_server.security.jwt;
 
 import com.engly.engly_server.repo.UserRepo;
-import com.engly.engly_server.security.userconfiguration.UserConfig;
+import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -33,7 +33,7 @@ public class JwtTokenUtils {
 
     public UserDetails userDetails(String email) {
         return userRepo.findByEmail(email)
-                .map(UserConfig::new)
+                .map(UserDetailsImpl::new)
                 .orElseThrow(() -> new UsernameNotFoundException("UserEmail: " + email + " does not exist"));
     }
 }

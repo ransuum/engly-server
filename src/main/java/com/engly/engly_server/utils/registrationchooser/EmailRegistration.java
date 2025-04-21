@@ -3,6 +3,7 @@ package com.engly.engly_server.utils.registrationchooser;
 import com.engly.engly_server.exception.FieldValidationException;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
+import com.engly.engly_server.models.enums.Goals;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.request.create.SignUpRequest;
 import com.engly.engly_server.repo.UserRepo;
@@ -15,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.time.Instant;
 
 @Component
 @Slf4j
@@ -35,22 +38,19 @@ public class EmailRegistration implements RegistrationChooser {
             });
 
             final var users = Users.builder()
-                    .roles(signUpRequest.email().equals(devEmail) ? "ROLE_ADMIN" :"ROLE_NOT_VERIFIED")
+                    .roles(signUpRequest.email().equals(devEmail) ? "ROLE_ADMIN" : "ROLE_NOT_VERIFIED")
                     .email(signUpRequest.email())
                     .emailVerified(Boolean.FALSE)
                     .username(signUpRequest.username())
                     .password(passwordEncoder.encode(signUpRequest.password()))
                     .provider(Provider.LOCAL)
+                    .additionalInfo(AdditionalInfo.builder()
+                            .goal(Goals.fromLabel(signUpRequest.goals()))
+                            .englishLevel(signUpRequest.englishLevel())
+                            .nativeLanguage(signUpRequest.nativeLanguage())
+                            .build())
+                    .lastLogin(Instant.now())
                     .build();
-
-            final var addInfo = AdditionalInfo.builder()
-                    .goal(signUpRequest.goals())
-                    .englishLevel(signUpRequest.englishLevel())
-                    .nativeLanguage(signUpRequest.nativeLanguage())
-                    .build();
-
-            users.setAdditionalInfo(addInfo);
-            addInfo.setUser(users);
 
             var save = userRepo.save(users);
 

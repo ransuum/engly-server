@@ -2,12 +2,12 @@ package com.engly.engly_server.utils.fieldvalidation;
 
 import com.engly.engly_server.models.enums.CategoryType;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDate;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FieldUtil {
     public static boolean check(String val) {
         return StringUtils.isNotBlank(val);

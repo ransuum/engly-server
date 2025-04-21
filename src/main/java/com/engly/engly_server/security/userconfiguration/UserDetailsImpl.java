@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 @RequiredArgsConstructor
-public class UserConfig implements UserDetails {
+public class UserDetailsImpl implements UserDetails {
     private final Users users;
 
     @Override

@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ValidationException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -146,7 +145,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                 })
                 .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
                         .registration(new SignUpRequest(name, email, "Password123@",
-                                EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId))
+                                EnglishLevels.A1, NativeLanguage.ENGLISH, "Default", providerId))
                         .getLeft());
 
         final var userAuth = jwtTokenGenerator.createAuthenticationObject(user);

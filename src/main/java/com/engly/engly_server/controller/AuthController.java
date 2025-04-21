@@ -93,10 +93,17 @@ public class AuthController {
     @Operation(
             summary = "Реєстрація нового користувача",
             description = """
+                            For Goals:
+                            DEFAULT("Default"),
+                            IMPROVE_ENGLISH("Improve English"),
+                            LEARN_NEW_LANGUAGE("Learn new language"),
+                            MEET_NEW_PEOPLE("Meet new people");
+                           \s
+                        \s
                         Після введення всіх полів -> отримання access token + refresh token.
                         Так як це Email реєстрація буде видана роль NOT_VERIFIED. Це означає що ви не зможете зробити взагалі запит
                         окрім '/api/notify'. Якщо реєстрація через гугл підтверджувати не треба.
-                    """,
+                   \s""",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Дані користувача для реєстрації",
                     required = true,

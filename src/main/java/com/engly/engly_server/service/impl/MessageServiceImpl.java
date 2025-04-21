@@ -4,18 +4,15 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.entity.Message;
-import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.models.request.create.MessageRequest;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.MessageService;
-import com.engly.engly_server.websocket.WebSocketEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,9 +22,6 @@ public class MessageServiceImpl implements MessageService {
     private final RoomRepo roomRepo;
     private final UserRepo userRepo;
     private final SecurityService service;
-    private final SimpMessagingTemplate simpMessagingTemplate;
-
-    private static final String TOPIC_MESSAGES = "/topic/messages/";
 
     @Override
     public MessagesDto sendMessage(MessageRequest messageRequest) {
@@ -43,26 +37,18 @@ public class MessageServiceImpl implements MessageService {
                             .user(user)
                             .room(room)
                             .build());
-                    final var message = MessageMapper.INSTANCE.toMessageDto(savedMessage);
-                    simpMessagingTemplate.convertAndSend(
-                            TOPIC_MESSAGES + messageRequest.roomId(),
-                            new WebSocketEvent<>(EventType.MESSAGE_SEND, message));
-                    return message;
+                    return MessageMapper.INSTANCE.toMessageDto(savedMessage);
                 })
                 .orElseThrow(() -> new NotFoundException("Room not found"));
     }
 
     @Override
-    public void deleteMessage(String id) {
-        messageRepo.findById(id).map(message -> {
-            messageRepo.delete(message);
-            final var messageDto = MessageMapper.INSTANCE.toMessageDto(message);
-            simpMessagingTemplate.convertAndSend(
-                    TOPIC_MESSAGES + messageDto.room().id(),
-                    new WebSocketEvent<>(EventType.MESSAGE_DELETE, messageDto));
-
-            return MessageMapper.INSTANCE.toMessageDto(message);
-        }).orElseThrow(() -> new NotFoundException("Cannot found this message"));
+    public MessagesDto deleteMessage(String id) {
+        return messageRepo.findById(id).map(message -> {
+                    messageRepo.delete(message);
+                    return MessageMapper.INSTANCE.toMessageDto(message);
+                })
+                .orElseThrow(() -> new NotFoundException("Cannot found this message"));
     }
 
     @Override
@@ -70,11 +56,7 @@ public class MessageServiceImpl implements MessageService {
         return messageRepo.findById(id)
                 .map(message -> {
                     message.setContent(content);
-                    final var messageDto = MessageMapper.INSTANCE.toMessageDto(messageRepo.save(message));
-                    simpMessagingTemplate.convertAndSend(
-                            TOPIC_MESSAGES + messageDto.room().id(),
-                            new WebSocketEvent<>(EventType.MESSAGE_EDIT, messageDto));
-                    return messageDto;
+                    return MessageMapper.INSTANCE.toMessageDto(messageRepo.save(message));
                 })
                 .orElseThrow(() -> new NotFoundException("Cannot found this message"));
     }

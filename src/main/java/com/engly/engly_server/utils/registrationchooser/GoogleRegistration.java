@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
@@ -33,7 +35,8 @@ public class GoogleRegistration implements RegistrationChooser {
         });
 
         var user = Users.builder()
-                .roles(signUpRequest.email().equals(devEmail) ? "ROLE_ADMIN" : "ROLE_GOOGLE")
+                .roles(signUpRequest.email().equals(devEmail)
+                        ? "ROLE_ADMIN" : "ROLE_GOOGLE")
                 .email(signUpRequest.email())
                 .emailVerified(Boolean.TRUE)
                 .username(signUpRequest.username())
@@ -41,6 +44,7 @@ public class GoogleRegistration implements RegistrationChooser {
                         PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username()))
                 )
                 .provider(Provider.GOOGLE)
+                .lastLogin(Instant.now())
                 .providerId(signUpRequest.providerId())
                 .build();
 

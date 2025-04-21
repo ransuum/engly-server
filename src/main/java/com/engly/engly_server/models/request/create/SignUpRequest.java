@@ -36,7 +36,7 @@ public record SignUpRequest(@NotBlank(message = "Username is blank")
                             NativeLanguage nativeLanguage,
 
                             @NotNull(message = "Goals are required")
-                            Goals goals,
+                            String goals,
 
                             @JsonIgnore String providerId) {
 }

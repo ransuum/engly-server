@@ -8,7 +8,7 @@ import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
-import com.engly.engly_server.security.userconfiguration.UserConfig;
+import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import com.engly.engly_server.service.AdditionalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +48,7 @@ public class AdditionalServiceImpl implements AdditionalService {
                     final var savedUser = userRepo.save(user);
 
                     final Authentication newAuth = new UsernamePasswordAuthenticationToken(savedUser.getEmail(), null,
-                            new UserConfig(savedUser).getAuthorities());
+                            new UserDetailsImpl(savedUser).getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(newAuth);
 
                     final var accessToken = jwtTokenGenerator.generateAccessToken(newAuth);
