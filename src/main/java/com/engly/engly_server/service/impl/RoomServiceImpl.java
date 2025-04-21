@@ -4,8 +4,8 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.request.create.RoomRequest;
-import com.engly.engly_server.models.request.update.RoomUpdateRequest;
+import com.engly.engly_server.models.dto.create.RoomRequestDto;
+import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
@@ -34,7 +34,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional
-    public RoomsDto createRoom(CategoryType name, RoomRequest roomRequest) {
+    public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         var username = service.getCurrentUserEmail();
         var category = categoriesRepo.findByName(name)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
@@ -44,8 +44,8 @@ public class RoomServiceImpl implements RoomService {
                                 .creator(creator)
                                 .createdAt(Instant.now())
                                 .category(category)
-                                .description(roomRequest.description())
-                                .name(roomRequest.name())
+                                .description(roomRequestDto.description())
+                                .name(roomRequestDto.name())
                                 .build()
                 )))
                 .orElseThrow(() -> new NotFoundException("User not found"));

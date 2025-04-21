@@ -3,7 +3,7 @@ package com.engly.engly_server.service.impl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.enums.*;
-import com.engly.engly_server.models.request.create.SignUpRequest;
+import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
@@ -102,21 +102,21 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
-    public AuthResponseDto registerUser(SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
+    public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
         try {
-            var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
+            var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
             var authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
 
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
                     .createRefreshToken(registration.getLeft(), authentication)).getRefreshToken();
 
-            log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequest.username());
+            log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(5 * 60)
                     .refreshToken(refreshToken)
-                    .username(signUpRequest.username())
+                    .username(signUpRequestDto.username())
                     .tokenType(TokenType.Bearer)
                     .build();
 
@@ -144,7 +144,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     return existingUser;
                 })
                 .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
-                        .registration(new SignUpRequest(name, email, "Password123@",
+                        .registration(new SignUpRequestDto(name, email, "Password123@",
                                 EnglishLevels.A1, NativeLanguage.ENGLISH, "Default", providerId))
                         .getLeft());
 

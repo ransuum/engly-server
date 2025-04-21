@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.entity.Message;
-import com.engly.engly_server.models.request.create.MessageRequest;
+import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
@@ -24,16 +24,16 @@ public class MessageServiceImpl implements MessageService {
     private final SecurityService service;
 
     @Override
-    public MessagesDto sendMessage(MessageRequest messageRequest) {
+    public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
         final var name = service.getCurrentUserEmail();
         final var user = userRepo.findByEmail(name)
                 .orElseThrow(() -> new NotFoundException("User not found"));
-        return roomRepo.findById(messageRequest.roomId())
+        return roomRepo.findById(messageRequestDto.roomId())
                 .map(room -> {
                     final var savedMessage = messageRepo.save(Message.builder()
                             .isEdited(Boolean.FALSE)
                             .isDeleted(Boolean.FALSE)
-                            .content(messageRequest.content())
+                            .content(messageRequestDto.content())
                             .user(user)
                             .room(room)
                             .build());

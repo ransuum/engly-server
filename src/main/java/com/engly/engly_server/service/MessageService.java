@@ -1,12 +1,12 @@
 package com.engly.engly_server.service;
 
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.request.create.MessageRequest;
+import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface MessageService {
-    MessagesDto sendMessage(MessageRequest messageRequest);
+    MessagesDto sendMessage(MessageRequestDto messageRequestDto);
 
     MessagesDto deleteMessage(String id);
 

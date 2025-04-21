@@ -1,8 +1,8 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.enums.EventType;
-import com.engly.engly_server.models.request.create.MessageRequest;
-import com.engly.engly_server.models.request.update.EditMessageRequest;
+import com.engly.engly_server.models.dto.create.MessageRequestDto;
+import com.engly.engly_server.models.dto.update.EditMessageRequest;
 import com.engly.engly_server.service.MessageService;
 import com.engly.engly_server.websocket.WebSocketEvent;
 import lombok.RequiredArgsConstructor;
@@ -20,10 +20,10 @@ public class ChatController {
     private static final String TOPIC_MESSAGES = "/topic/messages/";
 
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload MessageRequest messageRequest) {
-        final var message = messageService.sendMessage(messageRequest);
+    public void sendMessage(@Payload MessageRequestDto messageRequestDto) {
+        final var message = messageService.sendMessage(messageRequestDto);
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + messageRequest.roomId(),
+                TOPIC_MESSAGES + messageRequestDto.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_SEND, message));
     }
 

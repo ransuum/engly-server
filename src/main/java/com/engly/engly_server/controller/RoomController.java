@@ -2,8 +2,8 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.request.create.RoomRequest;
-import com.engly.engly_server.models.request.update.RoomUpdateRequest;
+import com.engly.engly_server.models.dto.create.RoomRequestDto;
+import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.service.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -31,8 +31,8 @@ public class RoomController {
     @PostMapping("/create")
     @Operation(summary = "Create a new room", description = "Creates a new room with the specified category and details")
     @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
-    public ResponseEntity<RoomsDto> createRoom(@RequestParam CategoryType name, @RequestBody RoomRequest roomRequest) {
-        return new ResponseEntity<>(roomService.createRoom(name, roomRequest), HttpStatus.CREATED);
+    public ResponseEntity<RoomsDto> createRoom(@RequestParam CategoryType name, @RequestBody RoomRequestDto roomRequestDto) {
+        return new ResponseEntity<>(roomService.createRoom(name, roomRequestDto), HttpStatus.CREATED);
     }
 
 

@@ -1,6 +1,6 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.request.create.SignUpRequest;
+import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -107,7 +107,7 @@ public class AuthController {
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Дані користувача для реєстрації",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = SignUpRequest.class))
+                    content = @Content(schema = @Schema(implementation = SignUpRequestDto.class))
             ),
             responses = {
                     @ApiResponse(responseCode = "201", description = "Користувача успішно зареєстровано"),
@@ -115,10 +115,10 @@ public class AuthController {
             }
     )
     @PostMapping("/sign-up")
-    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequest signUpRequest,
+    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
                                                         BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
-        log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequest.username());
+        log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequestDto.username());
         if (bindingResult.hasErrors()) {
             List<String> errorMessage = bindingResult.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -126,7 +126,7 @@ public class AuthController {
             log.error("[AuthController:registerUser]Errors in user:{}", errorMessage);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
         }
-        return new ResponseEntity<>(authService.registerUser(signUpRequest, httpServletResponse), HttpStatus.CREATED);
+        return new ResponseEntity<>(authService.registerUser(signUpRequestDto, httpServletResponse), HttpStatus.CREATED);
     }
 
     @Operation(
