@@ -22,7 +22,7 @@ import java.time.Instant;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class EmailRegistration implements RegistrationChooser {
+public final class EmailRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 

@@ -6,7 +6,7 @@ import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import org.apache.commons.lang3.tuple.Pair;
 
-public interface RegistrationChooser {
+public sealed interface RegistrationChooser permits EmailRegistration, GoogleRegistration {
     Pair<Users, AdditionalInfo> registration(SignUpRequestDto signUpRequestDto);
     Provider getProvider();
 }

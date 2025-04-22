@@ -20,7 +20,7 @@ import java.time.Instant;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class GoogleRegistration implements RegistrationChooser {
+public final class GoogleRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
