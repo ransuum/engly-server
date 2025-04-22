@@ -3,12 +3,12 @@ package com.engly.engly_server.service.impl;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.models.request.create.AdditionalRequestForGoogleUser;
+import com.engly.engly_server.models.dto.create.AdditionalRequestForGoogleUserDto;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
-import com.engly.engly_server.security.userconfiguration.UserConfig;
+import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import com.engly.engly_server.service.AdditionalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,7 +32,7 @@ public class AdditionalServiceImpl implements AdditionalService {
     private Set<String> sysadminEmails;
 
     @Override
-    public AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUser additionalRequestForGoogleUser) {
+    public AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto) {
         final var email = securityService.getCurrentUserEmail();
         return userRepo.findByEmail(email)
                 .map(user -> {
@@ -40,15 +40,15 @@ public class AdditionalServiceImpl implements AdditionalService {
 
                     final var additionalInfo = AdditionalInfo.builder()
                             .user(user)
-                            .goal(additionalRequestForGoogleUser.goals())
-                            .nativeLanguage(additionalRequestForGoogleUser.nativeLanguage())
-                            .englishLevel(additionalRequestForGoogleUser.englishLevel())
+                            .goal(additionalRequestForGoogleUserDto.goals())
+                            .nativeLanguage(additionalRequestForGoogleUserDto.nativeLanguage())
+                            .englishLevel(additionalRequestForGoogleUserDto.englishLevel())
                             .build();
                     user.setAdditionalInfo(additionalInfo);
                     final var savedUser = userRepo.save(user);
 
                     final Authentication newAuth = new UsernamePasswordAuthenticationToken(savedUser.getEmail(), null,
-                            new UserConfig(savedUser).getAuthorities());
+                            new UserDetailsImpl(savedUser).getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(newAuth);
 
                     final var accessToken = jwtTokenGenerator.generateAccessToken(newAuth);

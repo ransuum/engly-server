@@ -2,7 +2,7 @@ package com.engly.engly_server.service.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.UsersDto;
-import com.engly.engly_server.models.request.update.ProfileUpdateRequest;
+import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;

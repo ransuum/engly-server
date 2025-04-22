@@ -3,7 +3,7 @@ package com.engly.engly_server.utils.registrationchooser;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.models.request.create.SignUpRequest;
+import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.utils.passwordgenerateutil.PasswordGeneratorUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +15,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Instant;
+
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class GoogleRegistration implements RegistrationChooser {
+public final class GoogleRegistration implements RegistrationChooser {
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
@@ -26,22 +28,24 @@ public class GoogleRegistration implements RegistrationChooser {
     private String devEmail;
 
     @Override
-    public Pair<Users, AdditionalInfo> registration(SignUpRequest signUpRequest) {
-        log.info("Registering Google user with email: {}", signUpRequest.email());
-        userRepo.findByEmail(signUpRequest.email()).ifPresent(users -> {
+    public Pair<Users, AdditionalInfo> registration(SignUpRequestDto signUpRequestDto) {
+        log.info("Registering Google user with email: {}", signUpRequestDto.email());
+        userRepo.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this Google email already exists");
         });
 
         var user = Users.builder()
-                .roles(signUpRequest.email().equals(devEmail) ? "ROLE_ADMIN" : "ROLE_GOOGLE")
-                .email(signUpRequest.email())
+                .roles(signUpRequestDto.email().equals(devEmail)
+                        ? "ROLE_ADMIN" : "ROLE_GOOGLE")
+                .email(signUpRequestDto.email())
                 .emailVerified(Boolean.TRUE)
-                .username(signUpRequest.username())
+                .username(signUpRequestDto.username())
                 .password(passwordEncoder.encode(
-                        PasswordGeneratorUtil.generatePassword(signUpRequest.email(), signUpRequest.username()))
+                        PasswordGeneratorUtil.generatePassword(signUpRequestDto.email(), signUpRequestDto.username()))
                 )
                 .provider(Provider.GOOGLE)
-                .providerId(signUpRequest.providerId())
+                .lastLogin(Instant.now())
+                .providerId(signUpRequestDto.providerId())
                 .build();
 
         return Pair.of(userRepo.save(user), null);

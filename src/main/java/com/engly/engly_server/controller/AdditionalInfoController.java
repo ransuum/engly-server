@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.request.create.AdditionalRequestForGoogleUser;
+import com.engly.engly_server.models.dto.create.AdditionalRequestForGoogleUserDto;
 import com.engly.engly_server.service.AdditionalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -36,7 +36,7 @@ public class AdditionalInfoController {
     )
     @PreAuthorize("hasAuthority('SCOPE_ADDITIONAL_INFO')")
     @PostMapping("/for-google")
-    public ResponseEntity<AuthResponseDto> addInfo(@RequestBody AdditionalRequestForGoogleUser additionalRequestForGoogleUser) {
-        return new ResponseEntity<>(additionalService.additionalRegistration(additionalRequestForGoogleUser), HttpStatus.CREATED);
+    public ResponseEntity<AuthResponseDto> addInfo(@RequestBody AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto) {
+        return new ResponseEntity<>(additionalService.additionalRegistration(additionalRequestForGoogleUserDto), HttpStatus.CREATED);
     }
 }

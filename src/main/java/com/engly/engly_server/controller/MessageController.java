@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.request.create.MessageRequest;
+import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,8 +29,8 @@ public class MessageController {
 
     @PostMapping("/send")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
-    public ResponseEntity<MessagesDto> sendMessage(@RequestBody MessageRequest messageRequest) {
-        return new ResponseEntity<>(messageService.sendMessage(messageRequest), HttpStatus.CREATED);
+    public ResponseEntity<MessagesDto> sendMessage(@RequestBody MessageRequestDto messageRequestDto) {
+        return new ResponseEntity<>(messageService.sendMessage(messageRequestDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/edit/{id}")
@@ -59,7 +59,6 @@ public class MessageController {
                         page starts from 0 and more
                         size is the amount of messages retrieves
                         keyString is a string that needs to be found
-                        \n
                         If the message doesn't contain a keyString it should not return it
                     \s""",
             responses = {

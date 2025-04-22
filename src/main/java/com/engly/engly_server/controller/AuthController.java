@@ -1,6 +1,6 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.request.create.SignUpRequest;
+import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -93,14 +93,21 @@ public class AuthController {
     @Operation(
             summary = "Реєстрація нового користувача",
             description = """
+                            For Goals:
+                            DEFAULT("Default"),
+                            IMPROVE_ENGLISH("Improve English"),
+                            LEARN_NEW_LANGUAGE("Learn new language"),
+                            MEET_NEW_PEOPLE("Meet new people");
+                           \s
+                        \s
                         Після введення всіх полів -> отримання access token + refresh token.
                         Так як це Email реєстрація буде видана роль NOT_VERIFIED. Це означає що ви не зможете зробити взагалі запит
                         окрім '/api/notify'. Якщо реєстрація через гугл підтверджувати не треба.
-                    """,
+                   \s""",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Дані користувача для реєстрації",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = SignUpRequest.class))
+                    content = @Content(schema = @Schema(implementation = SignUpRequestDto.class))
             ),
             responses = {
                     @ApiResponse(responseCode = "201", description = "Користувача успішно зареєстровано"),
@@ -108,10 +115,10 @@ public class AuthController {
             }
     )
     @PostMapping("/sign-up")
-    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequest signUpRequest,
+    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
                                                         BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
-        log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequest.username());
+        log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequestDto.username());
         if (bindingResult.hasErrors()) {
             List<String> errorMessage = bindingResult.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -119,39 +126,6 @@ public class AuthController {
             log.error("[AuthController:registerUser]Errors in user:{}", errorMessage);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
         }
-        return new ResponseEntity<>(authService.registerUser(signUpRequest, httpServletResponse), HttpStatus.CREATED);
-    }
-
-    @Operation(
-            summary = "Перевірка при реєстрації на username live",
-            description = """
-                        Дозволяє перевіряти в живую юзернейм - це для фронтенду, треба додати listener
-                    """
-    )
-    @GetMapping("/check-username")
-    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@NotBlank(message = "Username is blank")
-                                                                          @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters.")
-                                                                          @Pattern(
-                                                                                  regexp = "^[a-zA-Z]{2,50}$",
-                                                                                  message = "Username must contain only letters (a-z, A-Z) and be between 2 and 50 characters long."
-                                                                          )
-                                                                          @RequestParam
-                                                                          String username) {
-        return new ResponseEntity<>(authService.checkUsernameAvailability(username), HttpStatus.OK);
-    }
-
-    @Operation(
-            summary = "Перевірка при реєстрації на email live",
-            description = """
-                        Дозволяє перевіряти в живую email - це для фронтенду, треба додати listener
-                    """
-    )
-    @GetMapping("/check-email")
-    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@RequestParam
-                                                                       @Email(message = "Isn't email")
-                                                                       @NotBlank(message = "Email is blank")
-                                                                       @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
-                                                                       String email) {
-        return new ResponseEntity<>(authService.checkEmailAvailability(email), HttpStatus.OK);
+        return new ResponseEntity<>(authService.registerUser(signUpRequestDto, httpServletResponse), HttpStatus.CREATED);
     }
 }

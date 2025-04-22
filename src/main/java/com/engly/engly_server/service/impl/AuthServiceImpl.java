@@ -3,20 +3,17 @@ package com.engly.engly_server.service.impl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.enums.*;
-import com.engly.engly_server.models.request.create.SignUpRequest;
+import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.service.AuthService;
 import com.engly.engly_server.utils.registrationchooser.RegistrationChooser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ValidationException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -24,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +53,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .map(users -> {
                         users.setLastLogin(Instant.now());
                         userRepo.save(users);
-                        String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-                        String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+                        final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+                        final String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
                                 .createRefreshToken(users, authentication)).getRefreshToken();
 
                         jwtTokenGenerator.creatRefreshTokenCookie(response, refreshToken);
@@ -84,12 +83,12 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
         final String refreshToken = authorizationHeader.substring(7);
 
-        var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
+        final var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
-        var users = refreshTokenEntity.getUser();
+        final var users = refreshTokenEntity.getUser();
 
-        var authentication = jwtTokenGenerator.createAuthenticationObject(users);
+        final var authentication = jwtTokenGenerator.createAuthenticationObject(users);
         final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
 
         return AuthResponseDto.builder()
@@ -103,21 +102,21 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
-    public AuthResponseDto registerUser(SignUpRequest signUpRequest, HttpServletResponse httpServletResponse) {
+    public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
         try {
-            var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequest);
-            var authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
+            final var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
+            final var authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
 
-            String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-            String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+            final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+            final String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
                     .createRefreshToken(registration.getLeft(), authentication)).getRefreshToken();
 
-            log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequest.username());
+            log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
             return AuthResponseDto.builder()
                     .accessToken(accessToken)
                     .accessTokenExpiry(5 * 60)
                     .refreshToken(refreshToken)
-                    .username(signUpRequest.username())
+                    .username(signUpRequestDto.username())
                     .tokenType(TokenType.Bearer)
                     .build();
 
@@ -132,9 +131,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         final var oauth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oauth2User.getAttribute("email");
-        String name = oauth2User.getAttribute("name");
-        String providerId = oauth2User.getAttribute("sub");
+        final String email = oauth2User.getAttribute("email");
+        final String name = oauth2User.getAttribute("name");
+        final String providerId = oauth2User.getAttribute("sub");
 
         if (email == null || name == null || providerId == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
@@ -145,34 +144,22 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     return existingUser;
                 })
                 .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
-                        .registration(new SignUpRequest(name, email, "Password123@",
+                        .registration(new SignUpRequestDto(name, email, "Password123@",
                                 EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId))
                         .getLeft());
 
         final var userAuth = jwtTokenGenerator.createAuthenticationObject(user);
         final var accessToken = jwtTokenGenerator.generateAccessToken(userAuth);
+        final var refreshToken = refreshTokenRepo.save(jwtTokenGenerator
+                .createRefreshToken(user, authentication)).getRefreshToken();
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        new ObjectMapper().writeValue(response.getWriter(),
-                AuthResponseDto.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(refreshTokenRepo.save(jwtTokenGenerator
-                                .createRefreshToken(user, authentication)).getRefreshToken())
-                        .accessTokenExpiry(15 * 60)
-                        .username(user.getUsername())
-                        .tokenType(TokenType.Bearer)
-                        .build());
-    }
+        final String redirectUrl = "/auth/callback?" +
+                "access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8) +
+                "&refresh_token=" + URLEncoder.encode(refreshToken, StandardCharsets.UTF_8) +
+                "&expires_in=" + (15 * 60) +
+                "&token_type=Bearer" +
+                "&username=" + URLEncoder.encode(user.getUsername(), StandardCharsets.UTF_8);
 
-    @Override
-    public Map<String, Boolean> checkUsernameAvailability(String username) {
-        Boolean isAvailable = !userRepo.existsByUsername(username);
-        return Map.of("available", isAvailable);
-    }
-
-    @Override
-    public Map<String, Boolean> checkEmailAvailability(String email) {
-        Boolean isAvailable = !userRepo.existsByEmail(email);
-        return Map.of("available", isAvailable);
+        response.sendRedirect(redirectUrl);
     }
 }

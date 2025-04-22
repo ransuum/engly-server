@@ -1,9 +1,9 @@
 package com.engly.engly_server.service;
 
 import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.request.create.AdditionalRequestForGoogleUser;
+import com.engly.engly_server.models.dto.create.AdditionalRequestForGoogleUserDto;
 
 @FunctionalInterface
 public interface AdditionalService {
-    AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUser additionalRequestForGoogleUser);
+    AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto);
 }

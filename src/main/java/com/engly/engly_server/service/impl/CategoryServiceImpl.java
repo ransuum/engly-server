@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.request.create.CategoryRequest;
+import com.engly.engly_server.models.dto.create.CategoryRequestDto;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.service.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
@@ -22,21 +22,21 @@ public class CategoryServiceImpl implements CategoriesService {
     private final CategoriesRepo categoriesRepo;
 
     @Override
-    public CategoriesDto addCategory(CategoryRequest categoryRequest) {
+    public CategoriesDto addCategory(CategoryRequestDto categoryRequestDto) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.save(Categories.builder()
-                        .description(categoryRequest.description())
-                        .name(categoryRequest.name())
+                        .description(categoryRequestDto.description())
+                        .name(categoryRequestDto.name())
                         .build())
         );
     }
 
     @Override
-    public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
+    public CategoriesDto updateCategory(String id, CategoryRequestDto categoryRequestDto) {
         return categoriesRepo.findById(id)
                 .map(category -> {
-                    if (categoryRequest.name() != null) category.setName(categoryRequest.name());
-                    if (categoryRequest.description() != null) category.setDescription(categoryRequest.description());
+                    if (categoryRequestDto.name() != null) category.setName(categoryRequestDto.name());
+                    if (categoryRequestDto.description() != null) category.setDescription(categoryRequestDto.description());
 
                     return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepo.save(category));
                 })

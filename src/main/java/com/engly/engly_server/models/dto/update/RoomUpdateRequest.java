@@ -1,4 +1,4 @@
-package com.engly.engly_server.models.request.update;
+package com.engly.engly_server.models.dto.update;
 
 import com.engly.engly_server.models.enums.CategoryType;
 import jakarta.validation.constraints.Size;

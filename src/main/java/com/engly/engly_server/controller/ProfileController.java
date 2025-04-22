@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.UsersDto;
-import com.engly.engly_server.models.request.update.ProfileUpdateRequest;
+import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
 import com.engly.engly_server.service.ProfileService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

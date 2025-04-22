@@ -5,7 +5,7 @@ import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
 import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
-import com.engly.engly_server.security.userconfiguration.UserManagerConfig;
+import com.engly.engly_server.security.userconfiguration.UserDetailsServiceImpl;
 import com.engly.engly_server.service.impl.LogoutHandlerService;
 import com.engly.engly_server.service.impl.AuthServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -54,7 +53,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Slf4j
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final UserManagerConfig userManagerConfig;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
@@ -68,7 +67,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .userDetailsService(userManagerConfig)
+                .userDetailsService(userDetailsServiceImpl)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex ->
                         ex.authenticationEntryPoint((request, response, authException)
@@ -82,10 +81,17 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new AntPathRequestMatcher("/api/**"))
+                .securityMatcher(new OrRequestMatcher(
+                        new AntPathRequestMatcher("/api/**"),
+                        new AntPathRequestMatcher("/chat/**"),
+                        new AntPathRequestMatcher("/valid/**"))
+                )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/valid/check-email").permitAll()
+                        .requestMatchers("/valid/check-username").permitAll()
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
@@ -221,6 +227,7 @@ public class SecurityConfig {
         configuration.addAllowedOrigin("http://localhost:8000");
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
+                "http://localhost:8000",
                 "https://engly-chats.vercel.app",
                 "https://engly-client-blmg.vercel.app")
         );
