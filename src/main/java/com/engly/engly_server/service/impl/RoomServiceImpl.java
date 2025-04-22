@@ -35,8 +35,8 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
-        var username = service.getCurrentUserEmail();
-        var category = categoriesRepo.findByName(name)
+        final var username = service.getCurrentUserEmail();
+        final var category = categoriesRepo.findByName(name)
                 .orElseThrow(() -> new NotFoundException("Category not found"));
         return userRepo.findByEmail(username)
                 .map(creator -> RoomMapper.INSTANCE.roomToDto(roomRepo.save(

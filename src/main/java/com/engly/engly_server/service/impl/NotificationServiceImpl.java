@@ -41,15 +41,15 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public EmailSendInfo sendNotifyMessage() {
-        var email = service.getCurrentUserEmail();
+        final var email = service.getCurrentUserEmail();
         try {
             if (!userRepo.existsByEmail(email))
                 throw new NotFoundException("User not found exception email %s".formatted(email));
 
-            var token = RandomStringUtils.random(32, true, true);
+            final var token = RandomStringUtils.random(32, true, true);
             tokenRepo.save(new VerifyToken(token, email));
 
-            var message = messageGenerator.generate(token, email);
+            final var message = messageGenerator.generate(token, email);
 
             emailService.sendEmail(email, message);
 

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.time.LocalDate;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class FieldUtil {
+public final class FieldUtil {
     public static boolean check(String val) {
         return StringUtils.isNotBlank(val);
     }
