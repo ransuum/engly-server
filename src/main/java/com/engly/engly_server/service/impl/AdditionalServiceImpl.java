@@ -44,6 +44,7 @@ public class AdditionalServiceImpl implements AdditionalService {
                             .nativeLanguage(additionalRequestForGoogleUserDto.nativeLanguage())
                             .englishLevel(additionalRequestForGoogleUserDto.englishLevel())
                             .build();
+
                     user.setAdditionalInfo(additionalInfo);
                     final var savedUser = userRepo.save(user);
 

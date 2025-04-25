@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.check;
+import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 
 @Service
 @Slf4j
@@ -68,15 +68,15 @@ public class RoomServiceImpl implements RoomService {
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepo.findById(id)
                 .map(room -> {
-                    if (check(request.newCategory())) room.setCategory(categoriesRepo.findByName(request.newCategory())
+                    if (isValid(request.newCategory())) room.setCategory(categoriesRepo.findByName(request.newCategory())
                             .orElseThrow(() -> new NotFoundException("Category not found")));
 
-                    if (check(request.updateCreatorByEmail()))
+                    if (isValid(request.updateCreatorByEmail()))
                         room.setCreator(userRepo.findByEmail(request.updateCreatorByEmail())
                                 .orElseThrow(() -> new NotFoundException("Creator not found")));
 
-                    if (check(request.description())) room.setDescription(request.description());
-                    if (check(request.name())) room.setName(request.name());
+                    if (isValid(request.description())) room.setDescription(request.description());
+                    if (isValid(request.name())) room.setName(request.name());
                     return RoomMapper.INSTANCE.roomToDto(roomRepo.save(room));
                 })
                 .orElseThrow(() -> new NotFoundException("Room not found"));

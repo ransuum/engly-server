@@ -4,7 +4,7 @@ import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.dto.update.EditMessageRequest;
 import com.engly.engly_server.service.MessageService;
-import com.engly.engly_server.websocket.WebSocketEvent;
+import com.engly.engly_server.config.websocket.WebSocketEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
