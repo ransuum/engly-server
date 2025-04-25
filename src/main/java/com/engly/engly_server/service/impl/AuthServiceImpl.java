@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -35,6 +36,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     private final JwtTokenGenerator jwtTokenGenerator;
     private final RefreshTokenRepo refreshTokenRepo;
     private final Map<Provider, RegistrationChooser> chooserMap;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     public AuthServiceImpl(UserRepo userRepo, JwtTokenGenerator jwtTokenGenerator,
                            RefreshTokenRepo refreshTokenRepo,
@@ -153,7 +157,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         final var refreshToken = refreshTokenRepo.save(jwtTokenGenerator
                 .createRefreshToken(user, authentication)).getRefreshToken();
 
-        final String redirectUrl = "/auth/callback?" +
+        final String redirectUrl = frontendUrl + "/auth/callback?" +
                 "access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8) +
                 "&refresh_token=" + URLEncoder.encode(refreshToken, StandardCharsets.UTF_8) +
                 "&expires_in=" + (15 * 60) +

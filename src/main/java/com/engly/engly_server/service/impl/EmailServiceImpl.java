@@ -23,7 +23,7 @@ public class EmailServiceImpl implements EmailService {
     @Async
     public void sendEmail(String to, String body) {
         CompletableFuture.runAsync(() -> {
-            SimpleMailMessage message = new SimpleMailMessage();
+            final SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(to);
             message.setSubject(subject);
             message.setText(body);

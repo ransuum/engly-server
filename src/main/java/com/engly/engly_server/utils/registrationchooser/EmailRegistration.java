@@ -3,7 +3,6 @@ package com.engly.engly_server.utils.registrationchooser;
 import com.engly.engly_server.exception.FieldValidationException;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.models.enums.Goals;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.repo.UserRepo;
@@ -37,6 +36,12 @@ public final class EmailRegistration implements RegistrationChooser {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exist");
             });
 
+            final var additionalInfo = AdditionalInfo.builder()
+                    .goal(signUpRequestDto.goals())
+                    .englishLevel(signUpRequestDto.englishLevel())
+                    .nativeLanguage(signUpRequestDto.nativeLanguage())
+                    .build();
+
             final var users = Users.builder()
                     .roles(signUpRequestDto.email().equals(devEmail) ? "ROLE_ADMIN" : "ROLE_NOT_VERIFIED")
                     .email(signUpRequestDto.email())
@@ -44,17 +49,13 @@ public final class EmailRegistration implements RegistrationChooser {
                     .username(signUpRequestDto.username())
                     .password(passwordEncoder.encode(signUpRequestDto.password()))
                     .provider(Provider.LOCAL)
-                    .additionalInfo(AdditionalInfo.builder()
-                            .goal(signUpRequestDto.goals())
-                            .englishLevel(signUpRequestDto.englishLevel())
-                            .nativeLanguage(signUpRequestDto.nativeLanguage())
-                            .build())
+                    .additionalInfo(additionalInfo)
                     .lastLogin(Instant.now())
                     .build();
 
-            var save = userRepo.save(users);
+            final var savedUser = userRepo.save(users);
 
-            return Pair.of(save, save.getAdditionalInfo());
+            return Pair.of(savedUser, savedUser.getAdditionalInfo());
         } catch (ValidationException e) {
             log.error("[AuthService:registerUser]User Registration Failed: {}", e.getMessage());
             throw new FieldValidationException(e.getMessage());

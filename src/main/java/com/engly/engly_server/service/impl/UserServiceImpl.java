@@ -19,8 +19,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void delete(String id) {
-        final var user = userRepo.findById(id).orElseThrow(()
-                -> new NotFoundException("User not found"));
+        final var user = userRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
         userRepo.delete(user);
     }
 
