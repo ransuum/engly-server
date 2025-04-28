@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleNotFoundException(NotFoundException ex) {
-        return buildResponse(HttpStatus.NOT_FOUND, "Resource not found", ex);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Resource not found", ex);
     }
 
     @ExceptionHandler(GenerateTokenException.class)
