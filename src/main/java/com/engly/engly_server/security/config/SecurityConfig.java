@@ -6,7 +6,7 @@ import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.security.userconfiguration.UserDetailsServiceImpl;
-import com.engly.engly_server.service.impl.LogoutHandlerService;
+import com.engly.engly_server.service.impl.LogoutHandlerServiceImpl;
 import com.engly.engly_server.service.impl.AuthServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -57,7 +57,7 @@ public class SecurityConfig {
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
-    private final LogoutHandlerService logoutHandlerService;
+    private final LogoutHandlerServiceImpl logoutHandlerServiceImpl;
 
     @Order(1)
     @Bean
@@ -155,7 +155,7 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .addLogoutHandler(logoutHandlerService)
+                        .addLogoutHandler(logoutHandlerServiceImpl)
                         .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
                 )
                 .exceptionHandling(ex -> {
@@ -172,8 +172,6 @@ public class SecurityConfig {
         return httpSecurity
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/sign-up/**"),
-                        new AntPathRequestMatcher("/check-username"),
-                        new AntPathRequestMatcher("/check-email"),
                         new AntPathRequestMatcher("/public/**")))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

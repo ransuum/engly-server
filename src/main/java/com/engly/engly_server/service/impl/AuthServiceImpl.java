@@ -161,7 +161,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         final var refreshToken = refreshTokenRepo.save(jwtTokenGenerator
                 .createRefreshToken(user, authentication)).getRefreshToken();
 
-        final String redirectUrl = frontendUrl + "/auth/callback?" +
+        final String redirectUrl = frontendUrl + "/google-auth/callback?" +
                 "access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8) +
                 "&refresh_token=" + URLEncoder.encode(refreshToken, StandardCharsets.UTF_8) +
                 "&expires_in=" + (15 * 60) +

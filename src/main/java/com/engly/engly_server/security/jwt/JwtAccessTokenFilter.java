@@ -92,7 +92,7 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
                     jwtValidationException.getMessage()
             );
 
-            var mapper = new ObjectMapper();
+            final var mapper = new ObjectMapper();
             mapper.writeValue(response.getOutputStream(), apiError);
         }
     }
