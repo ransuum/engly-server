@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -134,7 +135,10 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        final var oauth2User = (OAuth2User) authentication.getPrincipal();
+        final var oauth2User = Optional.ofNullable(authentication.getPrincipal())
+                .map(OAuth2User.class::cast)
+                .orElseThrow(() -> new NotFoundException("Invalid OAuth2 response"));
+
         final String email = oauth2User.getAttribute("email");
         final String name = oauth2User.getAttribute("name");
         final String providerId = oauth2User.getAttribute("sub");
@@ -157,7 +161,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         final var refreshToken = refreshTokenRepo.save(jwtTokenGenerator
                 .createRefreshToken(user, authentication)).getRefreshToken();
 
-        final String redirectUrl = frontendUrl + "/auth/callback?" +
+        final String redirectUrl = frontendUrl + "/google-auth/callback?" +
                 "access_token=" + URLEncoder.encode(accessToken, StandardCharsets.UTF_8) +
                 "&refresh_token=" + URLEncoder.encode(refreshToken, StandardCharsets.UTF_8) +
                 "&expires_in=" + (15 * 60) +

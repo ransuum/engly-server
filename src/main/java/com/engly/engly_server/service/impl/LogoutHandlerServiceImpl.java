@@ -12,19 +12,21 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class LogoutHandlerService implements LogoutHandler {
+public class LogoutHandlerServiceImpl implements LogoutHandler {
     private final RefreshTokenRepo refreshTokenRepo;
 
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (!authHeader.startsWith(TokenType.Bearer.name())) return;
+        if (authHeader != null && !authHeader.startsWith(TokenType.Bearer.name())) return;
 
-        final var refreshToken = authHeader.substring(7);
+        final var refreshToken = Objects.requireNonNull(authHeader).substring(7);
 
         refreshTokenRepo.findByRefreshToken(refreshToken)
                 .map(token -> {
