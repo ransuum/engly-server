@@ -1,20 +1,26 @@
 package com.engly.engly_server.exception;
 
-import lombok.Data;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.MediaType;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 
-@Data
-public class ApiErrorResponse {
-    private int status;
-    private String message;
-    private String details;
-    private LocalDateTime timestamp;
+public record ApiErrorResponse(String message,
+                               int code,
+                               String details,
+                               LocalDateTime timestamp) {
 
-    public ApiErrorResponse(int status, String message, String details) {
-        this.status = status;
-        this.message = message;
-        this.details = details;
-        this.timestamp = LocalDateTime.now();
+    public ApiErrorResponse responseConfiguration(HttpServletResponse httpServletResponse) {
+        httpServletResponse.setStatus(code);
+        httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        return this;
+    }
+
+    public void throwException(ServletOutputStream outputStream) throws IOException {
+        final var mapper = new ObjectMapper();
+        mapper.writeValue(outputStream, this);
     }
 }

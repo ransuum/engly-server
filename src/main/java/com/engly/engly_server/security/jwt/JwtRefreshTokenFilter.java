@@ -1,5 +1,6 @@
 package com.engly.engly_server.security.jwt;
 
+import com.engly.engly_server.exception.ApiErrorResponse;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import jakarta.servlet.FilterChain;
@@ -20,9 +21,9 @@ import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Slf4j
 public class JwtRefreshTokenFilter extends OncePerRequestFilter {
@@ -77,8 +78,10 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] Completed");
         } catch (JwtValidationException jwtValidationException) {
             log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}", jwtValidationException.getMessage());
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid refresh token");
-            return;
+            new ApiErrorResponse("Session Problem", HttpStatus.NOT_ACCEPTABLE.value(),
+                    jwtValidationException.getMessage(), LocalDateTime.now())
+                    .responseConfiguration(response)
+                    .throwException(response.getOutputStream());
         }
 
         filterChain.doFilter(request, response);

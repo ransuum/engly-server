@@ -3,7 +3,6 @@ package com.engly.engly_server.security.jwt;
 import com.engly.engly_server.exception.ApiErrorResponse;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,7 +11,6 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,9 +21,9 @@ import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 @Slf4j
 public class JwtAccessTokenFilter extends OncePerRequestFilter {
@@ -42,17 +40,17 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        try{
+        try {
             log.info("[JwtAccessTokenFilter:doFilterInternal] :: Started ");
 
-            log.info("[JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:{}",request.getRequestURI());
+            log.info("[JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
 
             final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-            JwtDecoder jwtDecoder =  NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
+            JwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
 
-            if(authHeader == null || !authHeader.startsWith(TokenType.Bearer.name())){
-                filterChain.doFilter(request,response);
+            if (authHeader == null || !authHeader.startsWith(TokenType.Bearer.name())) {
+                filterChain.doFilter(request, response);
                 return;
             }
 
@@ -62,10 +60,10 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
 
             final String userName = jwtTokenUtils.getUserName(jwtToken);
 
-            if(!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null){
+            if (!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
 
                 UserDetails userDetails = jwtTokenUtils.userDetails(userName);
-                if(jwtTokenUtils.isTokenValid(jwtToken,userDetails)){
+                if (jwtTokenUtils.isTokenValid(jwtToken, userDetails)) {
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
                     UsernamePasswordAuthenticationToken createdToken = new UsernamePasswordAuthenticationToken(
@@ -80,20 +78,13 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
             }
             log.info("[JwtAccessTokenFilter:doFilterInternal] Completed");
 
-            filterChain.doFilter(request,response);
-        }catch (JwtValidationException jwtValidationException){
-            log.error("[JwtAccessTokenFilter:doFilterInternal] Exception due to :{}",jwtValidationException.getMessage());
-            response.setStatus(HttpStatus.NOT_ACCEPTABLE.value());
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-
-            final var apiError = new ApiErrorResponse(
-                    HttpStatus.NOT_ACCEPTABLE.value(),
-                    "Session Problem",
-                    jwtValidationException.getMessage()
-            );
-
-            final var mapper = new ObjectMapper();
-            mapper.writeValue(response.getOutputStream(), apiError);
+            filterChain.doFilter(request, response);
+        } catch (JwtValidationException jwtValidationException) {
+            log.error("[JwtAccessTokenFilter:doFilterInternal] Exception due to :{}", jwtValidationException.getMessage());
+            new ApiErrorResponse("Session Problem", HttpStatus.NOT_ACCEPTABLE.value(),
+                    jwtValidationException.getMessage(), LocalDateTime.now())
+                    .responseConfiguration(response)
+                    .throwException(response.getOutputStream());
         }
     }
 }
