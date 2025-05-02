@@ -9,7 +9,6 @@ import com.engly.engly_server.repo.UserRepo;
 import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +28,7 @@ public final class EmailRegistration implements RegistrationChooser {
     private String devEmail;
 
     @Override
-    public Pair<Users, AdditionalInfo> registration(SignUpRequestDto signUpRequestDto) {
+    public Users registration(SignUpRequestDto signUpRequestDto) {
         try {
             log.info("[AuthService:registerUser]User Registration Started with :::{}", signUpRequestDto);
             userRepo.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
@@ -53,9 +52,7 @@ public final class EmailRegistration implements RegistrationChooser {
                     .lastLogin(Instant.now())
                     .build();
 
-            final var savedUser = userRepo.save(users);
-
-            return Pair.of(savedUser, savedUser.getAdditionalInfo());
+            return userRepo.save(users);
         } catch (ValidationException e) {
             log.error("[AuthService:registerUser]User Registration Failed: {}", e.getMessage());
             throw new FieldValidationException(e.getMessage());

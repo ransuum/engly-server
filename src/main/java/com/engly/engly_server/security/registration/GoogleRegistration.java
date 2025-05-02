@@ -1,6 +1,5 @@
 package com.engly.engly_server.security.registration;
 
-import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
@@ -8,7 +7,6 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.utils.passwordgenerateutil.PasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +26,7 @@ public final class GoogleRegistration implements RegistrationChooser {
     private String devEmail;
 
     @Override
-    public Pair<Users, AdditionalInfo> registration(SignUpRequestDto signUpRequestDto) {
+    public Users registration(SignUpRequestDto signUpRequestDto) {
         log.info("Registering Google user with email: {}", signUpRequestDto.email());
         userRepo.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this Google email already exists");
@@ -55,7 +53,7 @@ public final class GoogleRegistration implements RegistrationChooser {
                 .providerId(signUpRequestDto.providerId())
                 .build();
 
-        return Pair.of(userRepo.save(user), null);
+        return userRepo.save(user);
     }
 
     @Override

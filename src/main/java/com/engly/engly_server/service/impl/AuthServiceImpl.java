@@ -109,12 +109,12 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     @Override
     public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
         try {
-            final var registration = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
-            final var authentication = jwtTokenGenerator.createAuthenticationObject(registration.getLeft());
+            final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
+            final var authentication = jwtTokenGenerator.createAuthenticationObject(user);
 
             final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             final String refreshToken = refreshTokenRepo.save(jwtTokenGenerator
-                    .createRefreshToken(registration.getLeft(), authentication)).getRefreshToken();
+                    .createRefreshToken(user, authentication)).getRefreshToken();
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
             return AuthResponseDto.builder()
@@ -153,8 +153,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                 })
                 .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
                         .registration(new SignUpRequestDto(name, email, "Password123@",
-                                EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId))
-                        .getLeft());
+                                EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
 
         final var userAuth = jwtTokenGenerator.createAuthenticationObject(user);
         final var accessToken = jwtTokenGenerator.generateAccessToken(userAuth);
