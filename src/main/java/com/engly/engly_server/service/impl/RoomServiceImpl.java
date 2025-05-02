@@ -52,6 +52,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
         return roomRepo.findAllByCategory_Name(category, pageable)
                 .map(RoomMapper.INSTANCE::roomToDto);

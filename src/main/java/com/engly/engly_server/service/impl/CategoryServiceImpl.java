@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
@@ -44,12 +45,14 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {
         return categoriesRepo.findAll(pageable)
                 .map(CategoryMapper.INSTANCE::toCategoriesDto);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findById(categoryId).orElseThrow(()
@@ -64,6 +67,7 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoriesDto findByName(CategoryType name) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findByName(name).orElseThrow(()

@@ -10,6 +10,7 @@ import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 
@@ -19,6 +20,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserRepo userRepo;
 
     @Override
+    @Transactional(readOnly = true)
     public UsersDto getProfile() {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
         return UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)

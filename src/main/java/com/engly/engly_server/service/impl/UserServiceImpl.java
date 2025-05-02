@@ -25,13 +25,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public UsersDto findById(String id) {
         return UserMapper.INSTANCE.toUsersDto(userRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found")));
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<UsersDto> allUsers(Pageable pageable) {
         return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
     }

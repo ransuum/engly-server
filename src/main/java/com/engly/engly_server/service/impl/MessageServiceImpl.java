@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -62,12 +63,14 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<MessagesDto> findAllMessageInCurrentRoom(String roomId, Pageable pageable) {
         return messageRepo.findAllByRoomId(roomId, pageable)
                 .map(MessageMapper.INSTANCE::toMessageDto);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
         return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString, pageable)
                 .map(MessageMapper.INSTANCE::toMessageDto);
