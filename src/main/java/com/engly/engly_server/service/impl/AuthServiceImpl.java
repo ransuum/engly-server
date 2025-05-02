@@ -8,7 +8,7 @@ import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.service.AuthService;
-import com.engly.engly_server.utils.registrationchooser.RegistrationChooser;
+import com.engly.engly_server.security.registration.RegistrationChooser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ValidationException;

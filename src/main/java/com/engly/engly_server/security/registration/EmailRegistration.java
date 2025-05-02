@@ -1,4 +1,4 @@
-package com.engly.engly_server.utils.registrationchooser;
+package com.engly.engly_server.security.registration;
 
 import com.engly.engly_server.exception.FieldValidationException;
 import com.engly.engly_server.models.entity.AdditionalInfo;
