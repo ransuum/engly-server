@@ -34,6 +34,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "You need to authorize!", ex.getMessage());
     }
 
+    @ExceptionHandler(PasswordGeneratorException.class)
+    public ResponseEntity<ApiErrorResponse> handlePasswordGeneratorException(PasswordGeneratorException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Password Generate Error", ex.getMessage());
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ApiErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
         return buildResponse((HttpStatus) ex.getStatusCode(), ex.getReason(), ex);

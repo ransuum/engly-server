@@ -5,7 +5,7 @@ import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.repo.UserRepo;
-import com.engly.engly_server.utils.passwordgenerateutil.PasswordGeneratorUtil;
+import com.engly.engly_server.utils.passwordgenerateutil.PasswordGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -41,7 +41,14 @@ public final class GoogleRegistration implements RegistrationChooser {
                 .emailVerified(Boolean.TRUE)
                 .username(signUpRequestDto.username())
                 .password(passwordEncoder.encode(
-                        PasswordGeneratorUtil.generatePassword(signUpRequestDto.email(), signUpRequestDto.username()))
+                                PasswordGenerator.builder()
+                                        .addDigits()
+                                        .addLowerLetters()
+                                        .addSymbols()
+                                        .addUpperLetters()
+                                        .startGenerate(25)
+                                        .generate()
+                        )
                 )
                 .provider(Provider.GOOGLE)
                 .lastLogin(Instant.now())
