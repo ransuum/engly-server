@@ -15,4 +15,6 @@ public interface RoomService {
     void deleteRoomById(String id);
 
     RoomsDto updateRoom(String id, RoomUpdateRequest request);
+
+    Page<RoomsDto> findAllRoomsContainingKeyString(String keyString, Pageable pageable);
 }

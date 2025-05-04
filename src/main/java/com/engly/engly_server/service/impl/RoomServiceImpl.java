@@ -81,4 +81,10 @@ public class RoomServiceImpl implements RoomService {
                 })
                 .orElseThrow(() -> new NotFoundException("Room not found"));
     }
+
+    @Override
+    public Page<RoomsDto> findAllRoomsContainingKeyString(String keyString, Pageable pageable) {
+        return roomRepo.findAllRoomsContainingKeyString(keyString, pageable)
+                .map(RoomMapper.INSTANCE::roomToDto);
+    }
 }
