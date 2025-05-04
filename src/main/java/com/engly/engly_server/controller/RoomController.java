@@ -58,7 +58,7 @@ public class RoomController {
                      ////
                     {
                        "page": 0,
-                       "size": 10,  
+                       "size": 10,
                        "sort": "id,DESC"
                     }
                     ///
@@ -77,7 +77,8 @@ public class RoomController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     @Operation(summary = "Find appropriate rooms by keyString which will find it in order category, name, description",
             description = """
-                    Retrieves paginated list of rooms filtered by category, topics and description
+                    Retrieves paginated list of rooms filtered by category, name and description
+                    Searching is done ignore case of keyString and fields
                     page starts from 0
                     keyString is a string that needs to be found
                     id can be replaced by different fields in RoomsDto

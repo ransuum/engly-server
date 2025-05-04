@@ -11,7 +11,8 @@ public interface RoomRepo extends JpaRepository<Rooms, String> {
     Page<Rooms> findAllByCategory_Name(CategoryType name, Pageable pageable);
 
     @Query(value = """
-            SELECT r FROM Rooms r WHERE LOWER(r.category) LIKE LOWER('%' || :keyString || '%') OR
+            SELECT r FROM Rooms r WHERE
+            LOWER(r.category.name) LIKE LOWER('%' || :keyString || '%') OR
             LOWER(r.name) LIKE LOWER('%' || :keyString || '%') OR
             LOWER(r.description) LIKE LOWER('%' || :keyString || '%')
             """
