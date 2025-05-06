@@ -58,7 +58,7 @@ public class RoomController {
                      ////
                     {
                        "page": 0,
-                       "size": 10,  
+                       "size": 10,
                        "sort": "id,DESC"
                     }
                     ///
@@ -71,6 +71,25 @@ public class RoomController {
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
         var rooms = roomService.findAllRoomsByCategoryType(category, pageable);
+        return ResponseEntity.ok(assembler.toModel(rooms));
+    }
+    @GetMapping("/find")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    @Operation(summary = "Find appropriate rooms by keyString which will find it in order category, name, description",
+            description = """
+                    Retrieves paginated list of rooms filtered by category, name and description
+                    Searching is done ignore case of keyString and fields
+                    page starts from 0
+                    keyString is a string that needs to be found
+                    id can be replaced by different fields in RoomsDto
+                    \s"""
+    )
+    public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByKeyString(
+            @RequestParam String keyString,
+            @ParameterObject  @PageableDefault(page = 0, size = 8,
+                    sort = "name,asc") Pageable pageable,
+            PagedResourcesAssembler<RoomsDto> assembler) {
+        var rooms = roomService.findAllRoomsContainingKeyString(keyString, pageable);
         return ResponseEntity.ok(assembler.toModel(rooms));
     }
 
