@@ -83,10 +83,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
-    public Object getAccessTokenUsingRefreshToken(String authorizationHeader) {
-        if (authorizationHeader == null || !authorizationHeader.startsWith(TokenType.Bearer.name()))
+    public AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken) {
+        if (refreshToken == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
-        final String refreshToken = authorizationHeader.substring(7);
 
         final var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
