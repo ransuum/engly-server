@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.notification.impl;
 
 
 import com.engly.engly_server.exception.NotFoundException;
@@ -14,19 +14,22 @@ import com.engly.engly_server.repo.VerifyTokenRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.service.EmailService;
-import com.engly.engly_server.service.NotificationService;
+import com.engly.engly_server.service.impl.EmailMessageGenerator;
+import com.engly.engly_server.service.notification.EmailVerificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class NotificationServiceImpl implements NotificationService {
+public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final VerifyTokenRepo tokenRepo;
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
@@ -35,12 +38,16 @@ public class NotificationServiceImpl implements NotificationService {
     private final RefreshTokenRepo refreshTokenRepo;
     private final SecurityService service;
 
+    @Value("classpath:emailTemplates/verificationTemplate.txt")
+    private Resource messageTemplate;
+    @Value("${app.email.notification.check.url}")
+    private String urlTemplate;
     @Value("#{'${sysadmin.email}'.split(',\\s*')}")
     private Set<String> sysadminEmails;
 
 
     @Override
-    public EmailSendInfo sendNotifyMessage() {
+    public EmailSendInfo sendMessage() {
         final var email = service.getCurrentUserEmail();
         try {
             if (!userRepo.existsByEmail(email))
@@ -49,7 +56,7 @@ public class NotificationServiceImpl implements NotificationService {
             final var token = RandomStringUtils.random(32, true, true);
             tokenRepo.save(new VerifyToken(token, email));
 
-            final var message = messageGenerator.generate(token, email);
+            final var message = messageGenerator.generate(Map.of("[email]", email, "[link]", urlTemplate.formatted(token)), messageTemplate);
 
             emailService.sendEmail(email, message);
 
