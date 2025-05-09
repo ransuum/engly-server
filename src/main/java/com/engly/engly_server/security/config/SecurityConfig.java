@@ -6,8 +6,8 @@ import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.security.userconfiguration.UserDetailsServiceImpl;
-import com.engly.engly_server.service.impl.LogoutHandlerServiceImpl;
 import com.engly.engly_server.service.impl.AuthServiceImpl;
+import com.engly.engly_server.service.impl.LogoutHandlerServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -256,5 +256,22 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
+    }
+
+//TO DO security
+    @Order(8)
+    @Bean
+    public SecurityFilterChain passwordReset(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                .securityMatcher(
+                        new AntPathRequestMatcher("/api/password-reset/**")
+                )
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests(auth ->
+                        auth.anyRequest().permitAll())
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
     }
 }
