@@ -2,15 +2,12 @@ package com.engly.engly_server.service.impl;
 
 import com.engly.engly_server.exception.GenerateTokenException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ContextResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-import java.util.function.BiConsumer;
 
 @Service
 @Slf4j

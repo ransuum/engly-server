@@ -38,7 +38,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final UserRepo userRepo;
     private final JwtTokenGenerator generator;
     private final RefreshTokenRepo refreshTokenRepo;
-    private final SecurityService service;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -61,7 +60,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
             final var message = messageGenerator.generate(Map.of("[email]", email, "[link]", urlTemplate.formatted(token)), messageTemplate);
 
-            emailService.sendEmail(email, messageGenerator.generate(Map.of("[email]", email, "[link]", urlTemplate.formatted(token)), messageTemplate));
+            emailService.sendEmail(email, message);
 
             log.info("[PasswordResetServiceImpl:sendMessage]Message was sent for email:{} with token:{}", email, token);
             return new EmailSendInfo(email, "Email sent");
