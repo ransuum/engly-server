@@ -7,9 +7,10 @@ import com.engly.engly_server.models.dto.create.AdditionalRequestForGoogleUserDt
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
-import com.engly.engly_server.security.jwt.JwtTokenGenerator;
+import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import com.engly.engly_server.service.AdditionalService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,14 +26,15 @@ import java.util.Set;
 public class AdditionalServiceImpl implements AdditionalService {
     private final RefreshTokenRepo refreshTokenRepo;
     private final UserRepo userRepo;
-    private final JwtTokenGenerator jwtTokenGenerator;
     private final SecurityService securityService;
+    private final JwtAuthenticationService jwtAuthenticationService;
 
     @Value("#{'${sysadmin.email}'.split(',\\s*')}")
     private Set<String> sysadminEmails;
 
     @Override
-    public AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto) {
+    public AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto,
+                                                  HttpServletResponse httpServletResponse) {
         final var email = securityService.getCurrentUserEmail();
         return userRepo.findByEmail(email)
                 .map(user -> {
@@ -52,12 +54,16 @@ public class AdditionalServiceImpl implements AdditionalService {
                             new UserDetailsImpl(savedUser).getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(newAuth);
 
-                    final var accessToken = jwtTokenGenerator.generateAccessToken(newAuth);
-                    final var refreshToken = refreshTokenRepo.save(jwtTokenGenerator
-                            .createRefreshToken(savedUser, newAuth)).getRefreshToken();
+                    final var jwtHolder = jwtAuthenticationService.authenticateData(newAuth, httpServletResponse);
+                    refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(savedUser, jwtHolder.refreshToken()));
 
-                    return new AuthResponseDto(accessToken, 300, TokenType.Bearer, savedUser.getUsername(), refreshToken);
+                    return new AuthResponseDto(
+                            jwtHolder.accessToken(),
+                            300,
+                            TokenType.Bearer,
+                            savedUser.getUsername(),
+                            jwtHolder.refreshToken());
                 })
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid User"));
     }
 }

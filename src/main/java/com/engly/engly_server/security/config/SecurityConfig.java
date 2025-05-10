@@ -91,6 +91,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/valid/check-email").permitAll()
                         .requestMatchers("/valid/check-username").permitAll()
+                        .requestMatchers("/api/password-reset/send").permitAll()
+                        .requestMatchers("/api/password-reset").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -256,22 +258,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
-    }
-
-//TO DO security
-    @Order(8)
-    @Bean
-    public SecurityFilterChain passwordReset(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
-                .securityMatcher(
-                        new AntPathRequestMatcher("/api/password-reset/**")
-                )
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth ->
-                        auth.anyRequest().permitAll())
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .build();
     }
 }

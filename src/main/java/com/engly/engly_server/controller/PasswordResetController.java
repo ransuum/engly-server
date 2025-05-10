@@ -8,6 +8,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,9 +40,13 @@ public class PasswordResetController {
                     @ApiResponse(responseCode = "409", description = "Посилання не було надіслано")
             }
     )
-//    @PreAuthorize("hasAuthority('SCOPE_PASSWORD_RESET')")
     @PostMapping("/send")
-    public ResponseEntity<EmailSendInfo> notifyUserPasswordReset(@RequestParam String email) {
+    public ResponseEntity<EmailSendInfo> notifyUserPasswordReset(@Valid
+                                                                 @Email(message = "Isn't email")
+                                                                 @NotBlank(message = "Email is blank")
+                                                                 @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
+                                                                 @RequestParam
+                                                                 String email) {
         try {
             return new ResponseEntity<>(passwordResetService.sendMessage(email), HttpStatus.OK);
         } catch (Exception e) {
@@ -62,7 +69,6 @@ public class PasswordResetController {
             }
     )
     @PostMapping
-//    @PreAuthorize("hasAuthority('SCOPE_PASSWORD_RESET')")
     public ResponseEntity<AuthResponseDto> passwordReset(@Valid @RequestBody PasswordResetRequest data) {
         return new ResponseEntity<>(passwordResetService.passwordReset(data), HttpStatus.OK);
     }
