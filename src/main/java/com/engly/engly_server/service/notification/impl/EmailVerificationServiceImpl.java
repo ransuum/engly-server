@@ -38,7 +38,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final RefreshTokenRepo refreshTokenRepo;
     private final SecurityService service;
 
-    @Value("classpath:emailTemplates/verificationTemplate.txt")
+    @Value("classpath:/emailTemplates/verificationTemplate.txt")
     private Resource messageTemplate;
     @Value("${app.email.notification.check.url}")
     private String urlTemplate;

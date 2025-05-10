@@ -40,7 +40,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final PasswordEncoder passwordEncoder;
 
 
-    @Value("classpath:emailTemplates/passwordResetTemplate.txt")
+    @Value("classpath:/emailTemplates/password-resetTemplate.txt")
     private Resource messageTemplate;
     @Value("${app.email.notification.password-reset.url}")
     private String urlTemplate;
@@ -72,17 +72,16 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     public AuthResponseDto passwordReset(PasswordResetRequest data) {
-        var email = data.email();
-        var optionalToken = tokenRepo.findByTokenAndEmail(data.token(), email);
+        var optionalToken = tokenRepo.findById(data.token());
 
         if (optionalToken.isPresent()) {
             VerifyToken verifyToken = optionalToken.get();
-            return userRepo.findByEmail(email)
+            return userRepo.findByEmail(verifyToken.getEmail())
                     .map(user -> {
                         user.setPassword(passwordEncoder.encode(data.newPassword()));
                         if (!user.getEmailVerified()) {
                             user.setEmailVerified(true);
-                            user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
+                            user.setRoles(sysadminEmails.contains(verifyToken.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
                         }
 
                         tokenRepo.delete(verifyToken);
@@ -90,7 +89,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                         final var authentication = generator.createAuthenticationObject(userRepo.save(user));
                         final var accessToken = generator.generateAccessToken(authentication);
                         final var refreshToken = generator.generateRefreshToken(authentication);
-                        log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", data.token(), email);
+                        log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", verifyToken.getToken(), verifyToken.getEmail());
 
                         final var savedRefreshToken = refreshTokenRepo.save(RefreshToken.builder()
                                 .user(user)

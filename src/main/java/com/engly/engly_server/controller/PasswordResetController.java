@@ -7,10 +7,10 @@ import com.engly.engly_server.service.notification.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,7 +37,7 @@ public class PasswordResetController {
                     @ApiResponse(responseCode = "409", description = "Посилання не було надіслано")
             }
     )
-    @PreAuthorize("hasAuthority('SCOPE_PASSWORD_RESET')")
+//    @PreAuthorize("hasAuthority('SCOPE_PASSWORD_RESET')")
     @PostMapping("/send")
     public ResponseEntity<EmailSendInfo> notifyUserPasswordReset(@RequestParam String email) {
         try {
@@ -57,13 +57,13 @@ public class PasswordResetController {
                         \s
                     \s""",
             responses = {
-                    @ApiResponse(responseCode = "205", description = "Успішне зміна паролю"),
+                    @ApiResponse(responseCode = "200", description = "Успішне зміна паролю"),
                     @ApiResponse(responseCode = "404", description = "Пароль не був відновлений")
             }
     )
     @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_PASSWORD_RESET')")
-    public ResponseEntity<AuthResponseDto> passwordReset(@RequestBody PasswordResetRequest data) {
-        return new ResponseEntity<>(passwordResetService.passwordReset(data), HttpStatus.RESET_CONTENT);
+//    @PreAuthorize("hasAuthority('SCOPE_PASSWORD_RESET')")
+    public ResponseEntity<AuthResponseDto> passwordReset(@Valid @RequestBody PasswordResetRequest data) {
+        return new ResponseEntity<>(passwordResetService.passwordReset(data), HttpStatus.OK);
     }
 }
