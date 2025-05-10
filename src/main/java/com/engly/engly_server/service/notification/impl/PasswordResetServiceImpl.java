@@ -67,7 +67,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                 userRepo.findByEmail(verifyToken.getEmail())
                         .map(user -> {
                             user.setPassword(passwordEncoder.encode(data.newPassword()));
-                            if (!user.getEmailVerified()) {
+                            if (Boolean.FALSE.equals(user.getEmailVerified())) {
                                 user.setEmailVerified(true);
                                 user.setRoles(sysadminEmails.contains(verifyToken.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
                             }
