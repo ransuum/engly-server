@@ -1,5 +1,6 @@
 package com.engly.engly_server.security.config;
 
+import com.engly.engly_server.models.enums.Authority;
 import com.engly.engly_server.models.enums.Roles;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -9,10 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,10 +43,12 @@ public class SecurityService {
         final var roleList = Arrays.stream(roles.split(","))
                 .map(String::trim)
                 .toList();
-
         log.info("[SecurityService:getPermissionsFromRoles] Roles: {}", roleList);
 
-        return String.join(" ", Roles.getPermissionsForRoles(roleList));
+        final Set<Authority> authorities = Roles.getPermissionsForRoles(roleList);
+        return authorities.stream()
+                .map(Enum::name)
+                .collect(Collectors.joining(" "));
     }
 
     private Collection<SimpleGrantedAuthority> getCurrentUserRoles() {
