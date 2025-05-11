@@ -10,8 +10,8 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.repo.VerifyTokenRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
-import com.engly.engly_server.service.EmailService;
-import com.engly.engly_server.service.impl.EmailMessageGenerator;
+import com.engly.engly_server.service.common.EmailService;
+import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import com.engly.engly_server.service.notification.EmailVerificationService;
 import com.engly.engly_server.utils.emailsenderconfig.EmailSenderUtil;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +52,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                     emailService,
                     messageTemplate,
                     urlTemplate,
-                    "EmailVerificationServiceImpl:sendMessage").sendTokenEmail(userRepo::existsByEmail);
+                    "EmailVerificationServiceImpl:sendMessage").sendTokenEmail(userRepo::existsByEmail, TokenType.EMAIL_VERIFICATION);
         } catch (Exception e) {
             log.error("[NotificationServiceImpl:sendNotifyMessage]Errors in user:{}", e.getMessage());
             throw new TokenNotFoundException("token not saved exception email %s".formatted(email));
@@ -63,26 +63,26 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     @Override
     public AuthResponseDto checkToken(String token) {
         final var email = service.getCurrentUserEmail();
-        return tokenRepo.findByTokenAndEmail(token, email).map(verifyToken ->
-                userRepo.findByEmail(email)
-                        .map(user -> {
-                            user.setEmailVerified(true);
-                            user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
+        return tokenRepo.findByTokenAndEmail(token, email).map(verifyToken -> {
+            if (!verifyToken.getTokenType().equals(TokenType.EMAIL_VERIFICATION))
+                throw new TokenNotFoundException("Invalid token for email verification");
 
-                            tokenRepo.delete(verifyToken);
+            return userRepo.findByEmail(email).map(user -> {
+                user.setEmailVerified(true);
+                user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
-                            final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
-                            refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
-                            log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
+                tokenRepo.delete(verifyToken);
 
+                final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
+                refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
+                log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
 
-                            return new AuthResponseDto(jwtHolder.accessToken(),
-                                    12,
-                                    TokenType.Bearer,
-                                    user.getUsername(),
-                                    jwtHolder.refreshToken());
-                        })
-                        .orElseThrow(() -> new NotFoundException("Invalid User"))
-        ).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
+                return new AuthResponseDto(jwtHolder.accessToken(),
+                        12,
+                        TokenType.Bearer,
+                        user.getUsername(),
+                        jwtHolder.refreshToken());
+            }).orElseThrow(() -> new NotFoundException("Invalid User"));
+        }).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
     }
 }

@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.MessageMapper;
@@ -9,7 +9,7 @@ import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
-import com.engly.engly_server.service.MessageService;
+import com.engly.engly_server.service.common.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

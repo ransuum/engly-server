@@ -2,7 +2,7 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.dto.create.CategoryRequestDto;
-import com.engly.engly_server.service.CategoriesService;
+import com.engly.engly_server.service.common.CategoriesService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -1,4 +1,4 @@
-package com.engly.engly_server.service;
+package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.models.dto.UsersDto;
 import org.springframework.data.domain.Page;

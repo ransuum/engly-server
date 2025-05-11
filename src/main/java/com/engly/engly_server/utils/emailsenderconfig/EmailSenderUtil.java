@@ -3,9 +3,10 @@ package com.engly.engly_server.utils.emailsenderconfig;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.EmailSendInfo;
 import com.engly.engly_server.models.entity.VerifyToken;
+import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repo.VerifyTokenRepo;
-import com.engly.engly_server.service.EmailService;
-import com.engly.engly_server.service.impl.EmailMessageGenerator;
+import com.engly.engly_server.service.common.EmailService;
+import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.core.io.Resource;
@@ -24,7 +25,7 @@ public record EmailSenderUtil(
         String urlTemplate,
         String logTag) {
 
-    public EmailSendInfo sendTokenEmail(Predicate<String> existsChecker) {
+    public EmailSendInfo sendTokenEmail(Predicate<String> existsChecker, TokenType tokenType) {
         if (!existsChecker.test(email))
             throw new NotFoundException("User not found exception email %s".formatted(email));
 
@@ -34,7 +35,7 @@ public record EmailSenderUtil(
                 true, true,
                 null,
                 new SecureRandom());
-        tokenRepo.save(new VerifyToken(token, email));
+        tokenRepo.save(new VerifyToken(token, email, tokenType));
 
         final var message = messageGenerator.generate(
                 Map.of("[email]", email, "[link]", urlTemplate.formatted(token)), messageTemplate);

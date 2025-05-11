@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
@@ -9,7 +9,7 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
-import com.engly.engly_server.service.AdditionalService;
+import com.engly.engly_server.service.common.AdditionalService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

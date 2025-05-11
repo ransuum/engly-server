@@ -10,8 +10,8 @@ import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.repo.VerifyTokenRepo;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
-import com.engly.engly_server.service.EmailService;
-import com.engly.engly_server.service.impl.EmailMessageGenerator;
+import com.engly.engly_server.service.common.EmailService;
+import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import com.engly.engly_server.service.notification.PasswordResetService;
 import com.engly.engly_server.utils.emailsenderconfig.EmailSenderUtil;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +53,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                     emailService,
                     messageTemplate,
                     urlTemplate,
-                    "PasswordResetServiceImpl:sendMessage").sendTokenEmail(userRepo::existsByEmail);
+                    "PasswordResetServiceImpl:sendMessage").sendTokenEmail(userRepo::existsByEmail, TokenType.PASSWORD_RESET);
         } catch (Exception e) {
             log.error("[PasswordResetServiceImpl:sendMessage]Errors in user:{}", e.getMessage());
             throw new TokenNotFoundException("token not saved exception email %s".formatted(email));
@@ -63,30 +63,31 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
     @Override
     public AuthResponseDto passwordReset(PasswordResetRequest data) {
-        return tokenRepo.findById(data.token()).map(verifyToken ->
-                userRepo.findByEmail(verifyToken.getEmail())
-                        .map(user -> {
-                            user.setPassword(passwordEncoder.encode(data.newPassword()));
-                            if (Boolean.FALSE.equals(user.getEmailVerified())) {
-                                user.setEmailVerified(true);
-                                user.setRoles(sysadminEmails.contains(verifyToken.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
-                            }
+        return tokenRepo.findById(data.token()).map(verifyToken -> {
+            if (!verifyToken.getTokenType().equals(TokenType.PASSWORD_RESET))
+                throw new TokenNotFoundException("Invalid token for password reset");
 
-                            tokenRepo.delete(verifyToken);
+            return userRepo.findByEmail(verifyToken.getEmail()).map(user -> {
+                user.setPassword(passwordEncoder.encode(data.newPassword()));
+                if (Boolean.FALSE.equals(user.getEmailVerified())) {
+                    user.setEmailVerified(true);
+                    user.setRoles(sysadminEmails.contains(verifyToken.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
+                }
 
-                            final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
-                            refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
-                            log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted",
-                                    verifyToken.getToken(), verifyToken.getEmail());
+                tokenRepo.delete(verifyToken);
 
-                            return new AuthResponseDto(jwtHolder.accessToken(),
-                                    12,
-                                    TokenType.Bearer,
-                                    user.getUsername(),
-                                    jwtHolder.refreshToken());
-                        })
-                        .orElseThrow(() -> new NotFoundException("User not found"))
-        ).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
+                final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
+                refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
+                log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted",
+                        verifyToken.getToken(), verifyToken.getEmail());
+
+                return new AuthResponseDto(jwtHolder.accessToken(),
+                        12,
+                        TokenType.Bearer,
+                        user.getUsername(),
+                        jwtHolder.refreshToken());
+            }).orElseThrow(() -> new NotFoundException("User not found"));
+        }).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
     }
 }
 

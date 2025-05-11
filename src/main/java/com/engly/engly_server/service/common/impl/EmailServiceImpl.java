@@ -1,6 +1,6 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.service.EmailService;
+import com.engly.engly_server.service.common.EmailService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

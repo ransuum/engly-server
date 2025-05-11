@@ -1,10 +1,10 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.models.dto.AvailabilityResponseDto;
 import com.engly.engly_server.models.dto.GoogleAvailabilityDto;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
-import com.engly.engly_server.service.UserValidationService;
+import com.engly.engly_server.service.common.UserValidationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +16,7 @@ public class UserValidationServiceImpl implements UserValidationService {
 
     @Override
     public GoogleAvailabilityDto firstLogin() {
-        return new GoogleAvailabilityDto(!securityService.hasRole("ROLE_GOOGLE"));
+        return new GoogleAvailabilityDto(!securityService.hasRole("SCOPE_ADDITIONAL_INFO"));
     }
 
     @Override

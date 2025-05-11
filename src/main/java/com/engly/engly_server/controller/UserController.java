@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.UsersDto;
-import com.engly.engly_server.service.UserService;
+import com.engly.engly_server.service.common.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;

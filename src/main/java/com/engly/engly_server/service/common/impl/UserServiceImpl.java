@@ -1,10 +1,10 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.repo.UserRepo;
-import com.engly.engly_server.service.UserService;
+import com.engly.engly_server.service.common.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,6 +36,4 @@ public class UserServiceImpl implements UserService {
     public Page<UsersDto> allUsers(Pageable pageable) {
         return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
     }
-
-
 }

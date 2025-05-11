@@ -1,13 +1,13 @@
 package com.engly.engly_server.security.config;
 
 import com.engly.engly_server.models.enums.Roles;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,39 +16,37 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class SecurityService {
 
-    @Transactional(readOnly = true)
     public String getCurrentUserEmail() {
         return getAuthenticationOrThrow().getName();
     }
 
-    @Transactional(readOnly = true)
     public boolean hasAnyRole(List<String> roles) {
         return getCurrentUserRoles().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(roles::contains);
     }
 
-    @Transactional(readOnly = true)
     public boolean hasRole(String role) {
         return getCurrentUserRoles().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role::equals);
     }
 
-    @Transactional(readOnly = true)
     public String getRolesOfUser(Authentication authentication) {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(" "));
     }
 
-    @Transactional(readOnly = true)
     public String getPermissionsFromRoles(String roles) {
-        var roleList = Arrays.stream(roles.split(","))
+        final var roleList = Arrays.stream(roles.split(","))
                 .map(String::trim)
                 .toList();
+
+        log.info("[SecurityService:getPermissionsFromRoles] Roles: {}", roleList);
 
         return String.join(" ", Roles.getPermissionsForRoles(roleList));
     }
@@ -71,6 +69,5 @@ public class SecurityService {
 
         return authentication;
     }
-
 
 }

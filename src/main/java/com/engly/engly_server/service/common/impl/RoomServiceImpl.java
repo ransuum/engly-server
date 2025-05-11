@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.RoomsDto;
@@ -10,7 +10,7 @@ import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
-import com.engly.engly_server.service.RoomService;
+import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.mapper.RoomMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +84,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<RoomsDto> findAllRoomsContainingKeyString(String keyString, Pageable pageable) {
         return roomRepo.findAllRoomsContainingKeyString(keyString, pageable)
                 .map(RoomMapper.INSTANCE::roomToDto);

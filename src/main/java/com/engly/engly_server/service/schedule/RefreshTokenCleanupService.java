@@ -1,7 +1,6 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.schedule;
 
 import com.engly.engly_server.repo.RefreshTokenRepo;
-import com.engly.engly_server.service.RefreshTokenCleanupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -13,10 +12,9 @@ import java.time.Instant;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class RefreshTokenCleanupServiceImpl implements RefreshTokenCleanupService {
+public class RefreshTokenCleanupService {
     private final RefreshTokenRepo refreshTokenRepo;
 
-    @Override
     @Scheduled(cron = "0 0 */6 * * *")
     @Transactional
     public void cleanupExpiredAndRevokedTokens() {

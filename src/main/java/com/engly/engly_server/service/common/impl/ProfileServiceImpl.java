@@ -1,10 +1,10 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
 import com.engly.engly_server.repo.UserRepo;
-import com.engly.engly_server.service.ProfileService;
+import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;

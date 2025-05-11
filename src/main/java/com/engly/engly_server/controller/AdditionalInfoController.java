@@ -2,7 +2,7 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.create.AdditionalRequestForGoogleUserDto;
-import com.engly.engly_server.service.AdditionalService;
+import com.engly.engly_server.service.common.AdditionalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;

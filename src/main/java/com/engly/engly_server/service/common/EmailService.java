@@ -1,4 +1,4 @@
-package com.engly.engly_server.service;
+package com.engly.engly_server.service.common;
 
 @FunctionalInterface
 public interface EmailService {

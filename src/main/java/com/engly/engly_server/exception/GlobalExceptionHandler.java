@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,6 +28,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TypeMismatchException.class)
     public ResponseEntity<ApiErrorResponse> handleTypeMismatch(TypeMismatchException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getPropertyName(), ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Access denied", ex.getMessage());
     }
 
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)

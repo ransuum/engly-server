@@ -4,7 +4,7 @@ import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
-import com.engly.engly_server.service.RoomService;
+import com.engly.engly_server.service.common.RoomService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;

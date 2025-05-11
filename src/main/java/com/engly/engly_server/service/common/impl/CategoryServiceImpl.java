@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.CategoriesDto;
@@ -6,7 +6,7 @@ import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.CategoryRequestDto;
 import com.engly.engly_server.repo.CategoriesRepo;
-import com.engly.engly_server.service.CategoriesService;
+import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,7 +1,8 @@
-package com.engly.engly_server.service.impl;
+package com.engly.engly_server.service.schedule;
 
 import com.engly.engly_server.repo.VerifyTokenRepo;
-import com.engly.engly_server.service.EmailService;
+import com.engly.engly_server.service.common.EmailService;
+import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
