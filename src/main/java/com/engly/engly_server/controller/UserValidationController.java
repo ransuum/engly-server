@@ -2,7 +2,7 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.AvailabilityResponseDto;
 import com.engly.engly_server.models.dto.GoogleAvailabilityDto;
-import com.engly.engly_server.service.UserValidationService;
+import com.engly.engly_server.service.common.UserValidationService;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -6,8 +6,8 @@ import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.security.userconfiguration.UserDetailsServiceImpl;
-import com.engly.engly_server.service.impl.LogoutHandlerServiceImpl;
-import com.engly.engly_server.service.impl.AuthServiceImpl;
+import com.engly.engly_server.service.common.impl.AuthServiceImpl;
+import com.engly.engly_server.service.common.impl.LogoutHandlerServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -91,6 +91,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/valid/check-email").permitAll()
                         .requestMatchers("/valid/check-username").permitAll()
+                        .requestMatchers("/api/password-reset/send").permitAll()
+                        .requestMatchers("/api/password-reset").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
-import com.engly.engly_server.service.AuthService;
+import com.engly.engly_server.service.common.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,10 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
@@ -22,9 +18,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @Slf4j
@@ -39,21 +35,21 @@ public class AuthController {
     @Operation(
             summary = "User Authentication",
             description = """
-                     Use Basic Auth in Postman:
-                     1. Go to the Authorization tab and select `Basic Auth`
-                     2. Enter username and password
-                     3. Specify URL: `http://localhost:8000/sign-in`
-                     4. Select `POST` method and click `Send`
-                     5. Response: access token, refresh token and details
-                     6. Add access token to Bearer
-                    \s
-                     Use Basic Auth in Swagger:
-                     1. Go to the icon lock and use `Basic Auth`
-                     2. Enter username and password -> authorize
-                     3. Response: access token, refresh token and details
-                     4. Try it out -> execute
-                     4. Add access token to Bearer auth in swagger
-                \s""",
+                         Use Basic Auth in Postman:
+                         1. Go to the Authorization tab and select `Basic Auth`
+                         2. Enter username and password
+                         3. Specify URL: `http://localhost:8000/sign-in`
+                         4. Select `POST` method and click `Send`
+                         5. Response: access token, refresh token and details
+                         6. Add access token to Bearer
+                        \s
+                         Use Basic Auth in Swagger:
+                         1. Go to the icon lock and use `Basic Auth`
+                         2. Enter username and password -> authorize
+                         3. Response: access token, refresh token and details
+                         4. Try it out -> execute
+                         4. Add access token to Bearer auth in swagger
+                    \s""",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Successful authentication. Returns access and refresh tokens."),
                     @ApiResponse(responseCode = "401", description = "Invalid credentials")
@@ -67,18 +63,18 @@ public class AuthController {
     @Operation(
             summary = "User Authentication",
             description = """
-                     Use refresh-token in Postman:
-                     1. Go to the Authorization tab and select `Bearer`
-                     2. Specify URL: `http://localhost:8000/refresh-token` POST
-                     3. Click execute
-                     4. Response: access token, refresh token and details
-                    \s
-                     Use refresh-token in Swagger:
-                     1. Go to the icon lock and select `Bearer` -> put refresh token in there:
-                     2. Write in param refresh token too
-                     3. Click execute
-                     4. Response: access token, refresh token and details
-                \s""",
+                         Use refresh-token in Postman:
+                         1. Go to the Authorization tab and select `Bearer`
+                         2. Specify URL: `http://localhost:8000/refresh-token` POST
+                         3. Click execute
+                         4. Response: access token, refresh token and details
+                        \s
+                         Use refresh-token in Swagger:
+                         1. Go to the icon lock and select `Bearer` -> put refresh token in there:
+                         2. Write in param refresh token too
+                         3. Click execute
+                         4. Response: access token, refresh token and details
+                    \s""",
             responses = {
                     @ApiResponse(responseCode = "201", description = "Новий Access-токен успішно отримано"),
                     @ApiResponse(responseCode = "403", description = "Refresh-токен недійсний або закінчився термін дії")
@@ -86,24 +82,34 @@ public class AuthController {
     )
     @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
     @PostMapping("/refresh-token")
-    public ResponseEntity<Object> getAccessToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
-        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(authorizationHeader));
+    public ResponseEntity<Object> getAccessToken(
+            @CookieValue(value = "refreshToken", required = false) String refreshTokenFromCookie,
+            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader) {
+        String refreshToken = null;
+        if (refreshTokenFromCookie != null) refreshToken = refreshTokenFromCookie;
+        else if (authorizationHeader != null && authorizationHeader.startsWith("Bearer "))
+            refreshToken = authorizationHeader.substring(7);
+
+        if (refreshToken == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No refresh token found");
+
+        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(refreshToken));
     }
 
     @Operation(
             summary = "Реєстрація нового користувача",
             description = """
-                            For Goals:
-                            DEFAULT("Default"),
-                            IMPROVE_ENGLISH("Improve English"),
-                            LEARN_NEW_LANGUAGE("Learn new language"),
-                            MEET_NEW_PEOPLE("Meet new people");
-                           \s
-                        \s
-                        Після введення всіх полів -> отримання access token + refresh token.
-                        Так як це Email реєстрація буде видана роль NOT_VERIFIED. Це означає що ви не зможете зробити взагалі запит
-                        окрім '/api/notify'. Якщо реєстрація через гугл підтверджувати не треба.
-                   \s""",
+                             For Goals:
+                             DEFAULT("Default"),
+                             IMPROVE_ENGLISH("Improve English"),
+                             LEARN_NEW_LANGUAGE("Learn new language"),
+                             MEET_NEW_PEOPLE("Meet new people");
+                            \s
+                         \s
+                         Після введення всіх полів -> отримання access token + refresh token.
+                         Так як це Email реєстрація буде видана роль NOT_VERIFIED. Це означає що ви не зможете зробити взагалі запит
+                         окрім '/api/notify'. Якщо реєстрація через гугл підтверджувати не треба.
+                    \s""",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Дані користувача для реєстрації",
                     required = true,
@@ -116,7 +122,7 @@ public class AuthController {
     )
     @PostMapping("/sign-up")
     public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
-                                                        BindingResult bindingResult, HttpServletResponse httpServletResponse) {
+                                               BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
         log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequestDto.username());
         if (bindingResult.hasErrors()) {

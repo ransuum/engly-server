@@ -2,7 +2,7 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
-import com.engly.engly_server.service.MessageService;
+import com.engly.engly_server.service.common.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.constraints.NotBlank;

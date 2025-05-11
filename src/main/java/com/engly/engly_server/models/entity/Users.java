@@ -10,7 +10,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.util.List;
 
@@ -20,7 +19,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "users")
-public class Users implements Serializable {
+public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
@@ -73,7 +72,7 @@ public class Users implements Serializable {
     @OneToMany(mappedBy = "moder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Moderation> moderations;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserSettings userSettings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

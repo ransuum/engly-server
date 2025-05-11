@@ -1,7 +1,7 @@
 package com.engly.engly_server.security.config;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import com.engly.engly_server.models.enums.Roles;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -9,30 +9,18 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Slf4j
 public class SecurityService {
+
     public String getCurrentUserEmail() {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated())
-            throw new AuthenticationCredentialsNotFoundException("No authenticated user found");
-
-        return authentication.getName();
-    }
-
-    public Collection<SimpleGrantedAuthority> getCurrentUserRoles() {
-        final Optional<Authentication> authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
-        return authentication.map(authentication1 ->
-                        authentication1.getAuthorities()
-                                .stream()
-                                .filter(SimpleGrantedAuthority.class::isInstance)
-                                .map(SimpleGrantedAuthority.class::cast)
-                                .toList())
-                .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("No authenticated user found"));
+        return getAuthenticationOrThrow().getName();
     }
 
     public boolean hasAnyRole(List<String> roles) {
@@ -46,4 +34,40 @@ public class SecurityService {
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(role::equals);
     }
+
+    public String getRolesOfUser(Authentication authentication) {
+        return authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(" "));
+    }
+
+    public String getPermissionsFromRoles(String roles) {
+        final var roleList = Arrays.stream(roles.split(","))
+                .map(String::trim)
+                .toList();
+
+        log.info("[SecurityService:getPermissionsFromRoles] Roles: {}", roleList);
+
+        return String.join(" ", Roles.getPermissionsForRoles(roleList));
+    }
+
+    private Collection<SimpleGrantedAuthority> getCurrentUserRoles() {
+        final Optional<Authentication> authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+        return authentication.map(authentication1 ->
+                        authentication1.getAuthorities()
+                                .stream()
+                                .filter(SimpleGrantedAuthority.class::isInstance)
+                                .map(SimpleGrantedAuthority.class::cast)
+                                .toList())
+                .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("No authenticated user found"));
+    }
+
+    private Authentication getAuthenticationOrThrow() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated())
+            throw new AuthenticationCredentialsNotFoundException("No authenticated user found in SecurityContext");
+
+        return authentication;
+    }
+
 }

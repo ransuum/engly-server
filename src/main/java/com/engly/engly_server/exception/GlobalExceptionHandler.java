@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestControllerAdvice
@@ -28,9 +30,19 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getPropertyName(), ex.getMessage());
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        return buildResponse(HttpStatus.FORBIDDEN, "Access denied", ex.getMessage());
+    }
+
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AuthenticationCredentialsNotFoundException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "You need to authorize!", ex.getMessage());
+    }
+
+    @ExceptionHandler(PasswordGeneratorException.class)
+    public ResponseEntity<ApiErrorResponse> handlePasswordGeneratorException(PasswordGeneratorException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, "Password Generate Error", ex.getMessage());
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -54,7 +66,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException() {
         return buildResponse(HttpStatus.CONFLICT, "Duplicate entry", "A record with the same unique identifier already exists");
     }
 
@@ -101,17 +113,17 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, Exception ex) {
         return ResponseEntity.status(status)
-                .body(new ApiErrorResponse(status.value(), message, ex.getMessage()));
+                .body(new ApiErrorResponse(message, status.value(), ex.getMessage(), LocalDateTime.now()));
     }
 
     private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, String ex) {
         return ResponseEntity.status(status)
-                .body(new ApiErrorResponse(status.value(), message, ex));
+                .body(new ApiErrorResponse(message, status.value(), ex, LocalDateTime.now()));
     }
 
     private ResponseEntity<ApiErrorResponse> buildResponse(String message, List<String> errors) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), message, String.join(", ", errors)));
+                .body(new ApiErrorResponse(message, HttpStatus.BAD_REQUEST.value(), String.join(", ", errors), LocalDateTime.now()));
     }
 }
 

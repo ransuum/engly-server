@@ -15,9 +15,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(users
-                        .getRoles()
-                        .split(","))
+        return Arrays.stream(users.getRoles().split(","))
                 .map(SimpleGrantedAuthority::new)
                 .toList();
     }
