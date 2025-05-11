@@ -1,7 +1,6 @@
 package com.engly.engly_server.service.schedule;
 
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,8 +17,8 @@ public class IncompleteGoogleUserService {
 
     @Scheduled(fixedRate = 10 * 60 * 1000)
     public void deleteUsers() {
-        Instant expireBefore = Instant.now().minus(Duration.ofMinutes(15));
-        List<Users> incomplete = userRepo.findAllByRolesAndCreatedAtBefore("ROLE_GOOGLE", expireBefore);
+        final Instant expireBefore = Instant.now().minus(Duration.ofMinutes(15));
+        final List<Users> incomplete = userRepo.findAllByRolesAndCreatedAtBefore("ROLE_GOOGLE", expireBefore);
         userRepo.deleteAll(incomplete);
     }
 }
