@@ -31,7 +31,7 @@ public class RoomController {
     @PostMapping("/create")
     @Operation(summary = "Create a new room", description = "Creates a new room with the specified category and details")
     @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
-    public ResponseEntity<RoomsDto> createRoom(@RequestParam CategoryType name, @RequestBody RoomRequestDto roomRequestDto) {
+    public ResponseEntity<RoomsDto> createRoom(@RequestParam CategoryType name, @Valid @RequestBody RoomRequestDto roomRequestDto) {
         return new ResponseEntity<>(roomService.createRoom(name, roomRequestDto), HttpStatus.CREATED);
     }
 
