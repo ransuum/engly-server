@@ -7,7 +7,6 @@ import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -73,16 +72,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleTokenNotFoundException(TokenNotFoundException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid token", ex);
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ApiErrorResponse> handleAuthenticationException(AuthenticationException ex) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Something went wrong", ex);
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiErrorResponse> handleBadCredentialsException(BadCredentialsException ex) {
-        return buildResponse(HttpStatus.UNAUTHORIZED, "Authentication failed", ex);
     }
 
     @ExceptionHandler(FieldValidationException.class)

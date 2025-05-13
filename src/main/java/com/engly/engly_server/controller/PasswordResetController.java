@@ -7,6 +7,7 @@ import com.engly.engly_server.service.notification.PasswordResetService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -69,7 +70,7 @@ public class PasswordResetController {
             }
     )
     @PostMapping
-    public ResponseEntity<AuthResponseDto> passwordReset(@Valid @RequestBody PasswordResetRequest data) {
-        return new ResponseEntity<>(passwordResetService.passwordReset(data), HttpStatus.OK);
+    public ResponseEntity<AuthResponseDto> passwordReset(@Valid @RequestBody PasswordResetRequest data, HttpServletResponse response) {
+        return new ResponseEntity<>(passwordResetService.passwordReset(data, response), HttpStatus.OK);
     }
 }

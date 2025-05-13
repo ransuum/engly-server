@@ -4,7 +4,7 @@ import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
 
 public interface ProfileService {
-    UsersDto getProfile();
+    Object getProfile();
 
     UsersDto updateProfile(ProfileUpdateRequest profileUpdateData);
 }

@@ -2,7 +2,9 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.UsersDto;
+import com.engly.engly_server.models.dto.VerifiedDto;
 import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
+import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
@@ -21,10 +23,12 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional(readOnly = true)
-    public UsersDto getProfile() {
+    public Object getProfile() {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User Not Found")));
+        final var user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User Not Found"));
+        if (user.getRoles().equals("ROLE_NOT_VERIFIED")) return new VerifiedDto(false);
+        else return UserMapper.INSTANCE.toUsersDto(user);
     }
 
     @Override

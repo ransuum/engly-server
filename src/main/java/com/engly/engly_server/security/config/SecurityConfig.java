@@ -1,5 +1,6 @@
 package com.engly.engly_server.security.config;
 
+import com.engly.engly_server.exception.ApiErrorResponse;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
 import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -70,8 +72,12 @@ public class SecurityConfig {
                 .userDetailsService(userDetailsServiceImpl)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint((request, response, authException)
-                                -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage())))
+                    ex.authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"INVALID_CREDENTIALS\", \"message\":\"" + authException.getMessage() + "\"}");
+                        })
+                )
                 .httpBasic(withDefaults())
                 .build();
     }
@@ -224,12 +230,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:8000");
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:8000",
                 "https://engly-chats.vercel.app",
-                "https://engly-client-blmg.vercel.app")
+                "https://engly-client-blmg.vercel.app",
+                "https://equal-aardvark-java-service-74283cac.koyeb.app")
         );
 
         configuration.setAllowedMethods(Arrays.asList(

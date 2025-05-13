@@ -6,7 +6,6 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.EmailSendInfo;
 import com.engly.engly_server.models.dto.update.PasswordResetRequest;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.repo.VerifyTokenRepo;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
@@ -14,6 +13,7 @@ import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import com.engly.engly_server.service.notification.PasswordResetService;
 import com.engly.engly_server.utils.emailsenderconfig.EmailSenderUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +31,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
     private final UserRepo userRepo;
-    private final RefreshTokenRepo refreshTokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationService jwtAuthenticationService;
 
@@ -62,7 +61,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
 
     @Override
-    public AuthResponseDto passwordReset(PasswordResetRequest data) {
+    public AuthResponseDto passwordReset(PasswordResetRequest data, HttpServletResponse response) {
         return tokenRepo.findById(data.token()).map(verifyToken -> {
             if (!verifyToken.getTokenType().equals(TokenType.PASSWORD_RESET))
                 throw new TokenNotFoundException("Invalid token for password reset");
@@ -76,16 +75,14 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
                 tokenRepo.delete(verifyToken);
 
-                final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
-                refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
+                final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
                 log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted",
                         verifyToken.getToken(), verifyToken.getEmail());
 
                 return new AuthResponseDto(jwtHolder.accessToken(),
                         12,
                         TokenType.Bearer,
-                        user.getUsername(),
-                        jwtHolder.refreshToken());
+                        user.getUsername());
             }).orElseThrow(() -> new NotFoundException("User not found"));
         }).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
     }

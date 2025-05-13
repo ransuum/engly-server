@@ -57,12 +57,18 @@ public class JwtTokenGenerator {
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
     }
 
-    public void creatRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        final var refreshTokenCookie = new Cookie("refresh_token", refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(true);
-        refreshTokenCookie.setMaxAge(15 * 24 * 60 * 60);
-        response.addCookie(refreshTokenCookie);
+    public void createRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
+        final var cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setHttpOnly(true);
+        response.addCookie(cookie);
+
+        final var cookieValue = String.format(
+                "refreshToken=%s; Path=/; Secure; HttpOnly; SameSite=None",
+                refreshToken
+        );
+        response.addHeader("Set-Cookie", cookieValue);
     }
 
 

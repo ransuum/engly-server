@@ -58,11 +58,9 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                         users.setLastLogin(Instant.now());
                         userRepo.save(users);
                         final var jwtHolder = jwtAuthenticationService.authenticateData(authentication, response);
-                        refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(users, jwtHolder.refreshToken()));
                         log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
                         return AuthResponseDto.builder()
                                 .accessToken(jwtHolder.accessToken())
-                                .refreshToken(jwtHolder.refreshToken())
                                 .accessTokenExpiry(15 * 60)
                                 .username(users.getUsername())
                                 .tokenType(TokenType.Bearer)
@@ -78,25 +76,25 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         }
     }
 
+
     @Override
-    public AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken) {
+    public AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
 
         final var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
-        final var users = refreshTokenEntity.getUser();
+        refreshTokenEntity.setRevoked(true);
+        final var users = refreshTokenRepo.save(refreshTokenEntity).getUser();
 
-        final var jwtHolder = jwtAuthenticationService.createAuthObject(users);
-        refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(users, jwtHolder.refreshToken()));
+        final var jwtHolder = jwtAuthenticationService.createAuthObject(users, response);
 
         return AuthResponseDto.builder()
                 .accessToken(jwtHolder.accessToken())
                 .accessTokenExpiry(5 * 60)
                 .username(users.getUsername())
                 .tokenType(TokenType.Bearer)
-                .refreshToken(jwtHolder.refreshToken())
                 .build();
     }
 
@@ -104,14 +102,12 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
         try {
             final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
-            final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
-            refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
+            final var jwtHolder = jwtAuthenticationService.createAuthObject(user, httpServletResponse);
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
             return AuthResponseDto.builder()
                     .accessToken(jwtHolder.accessToken())
                     .accessTokenExpiry(5 * 60)
-                    .refreshToken(jwtHolder.refreshToken())
                     .username(signUpRequestDto.username())
                     .tokenType(TokenType.Bearer)
                     .build();
@@ -146,8 +142,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                         .registration(new SignUpRequestDto(name, email, "Password123@",
                                 EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
 
-        final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
-        refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
+        final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
 
         final String redirectUrl = frontendUrl + "/google-auth/callback?" +
                 "access_token=" + URLEncoder.encode(jwtHolder.accessToken(), StandardCharsets.UTF_8) +

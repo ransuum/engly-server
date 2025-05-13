@@ -8,7 +8,7 @@ import org.springframework.security.core.Authentication;
 public interface AuthService {
     AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication, HttpServletResponse response);
 
-    AuthResponseDto getAccessTokenUsingRefreshToken(String authorizationHeader);
+    AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken, HttpServletResponse response);
 
     AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse);
 }

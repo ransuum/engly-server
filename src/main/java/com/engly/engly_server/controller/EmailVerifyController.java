@@ -6,6 +6,7 @@ import com.engly.engly_server.service.notification.EmailVerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +62,7 @@ public class EmailVerifyController {
     )
     @GetMapping("/check")
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
-    public ResponseEntity<AuthResponseDto> checkToken(@RequestParam("token") String token) {
-        return new ResponseEntity<>(emailVerificationService.checkToken(token), HttpStatus.OK);
+    public ResponseEntity<AuthResponseDto> checkToken(@RequestParam("token") String token, HttpServletResponse response) {
+        return new ResponseEntity<>(emailVerificationService.checkToken(token, response), HttpStatus.OK);
     }
 }
