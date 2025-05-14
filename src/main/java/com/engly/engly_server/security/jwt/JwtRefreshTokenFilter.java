@@ -61,11 +61,10 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             final String userName = jwtTokenUtils.getUserName(jwtRefreshToken);
 
             if (!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-                final var isRefreshTokenValidInDatabase = refreshTokenRepo.findByRefreshToken(jwtRefreshToken.getTokenValue())
-                        .map(refreshTokenEntity -> !refreshTokenEntity.isRevoked())
-                        .orElse(false);
+                final var isRefreshTokenValidInDatabase = refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(jwtRefreshToken.getTokenValue())
+                        .orElse(null);
                 UserDetails userDetails = jwtTokenUtils.userDetails(userName);
-                if (jwtTokenUtils.isTokenValid(jwtRefreshToken, userDetails) && isRefreshTokenValidInDatabase) {
+                if (jwtTokenUtils.isTokenValid(jwtRefreshToken, userDetails) && isRefreshTokenValidInDatabase != null) {
                     final List<GrantedAuthority> authorities = new LinkedList<>(userDetails.getAuthorities());
 
                     final var scope = jwtRefreshToken.getClaimAsString("scope");
