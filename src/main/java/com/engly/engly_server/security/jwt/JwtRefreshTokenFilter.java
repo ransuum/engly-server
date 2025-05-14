@@ -73,7 +73,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
                         authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope.toUpperCase()));
 
 
-                    UsernamePasswordAuthenticationToken createdToken = new UsernamePasswordAuthenticationToken(
+                    final UsernamePasswordAuthenticationToken createdToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             authorities

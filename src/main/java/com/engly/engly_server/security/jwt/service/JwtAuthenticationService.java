@@ -8,5 +8,5 @@ import org.springframework.security.core.Authentication;
 public interface JwtAuthenticationService {
     JwtHolder createAuthObject(Users users, HttpServletResponse response);
 
-    JwtHolder authenticateData(Authentication authentication, HttpServletResponse response);
+    JwtHolder authenticateData(Users users, Authentication authentication, HttpServletResponse response);
 }

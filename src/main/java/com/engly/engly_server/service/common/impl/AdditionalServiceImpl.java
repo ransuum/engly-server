@@ -52,7 +52,7 @@ public class AdditionalServiceImpl implements AdditionalService {
                             new UserDetailsImpl(savedUser).getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(newAuth);
 
-                    final var jwtHolder = jwtAuthenticationService.authenticateData(newAuth, httpServletResponse);
+                    final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, newAuth, httpServletResponse);
 
                     return new AuthResponseDto(
                             jwtHolder.accessToken(),

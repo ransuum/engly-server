@@ -56,8 +56,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
             return userRepo.findByEmail(authentication.getName())
                     .map(users -> {
                         users.setLastLogin(Instant.now());
-                        userRepo.save(users);
-                        final var jwtHolder = jwtAuthenticationService.authenticateData(authentication, response);
+                        final var savedUser = userRepo.save(users);
+                        final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
                         log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
                         return AuthResponseDto.builder()
                                 .accessToken(jwtHolder.accessToken())

@@ -30,10 +30,10 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     @Override
-    public JwtHolder authenticateData(Authentication authentication, HttpServletResponse response) {
+    public JwtHolder authenticateData(Users user, Authentication authentication, HttpServletResponse response) {
         final var refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
         final var accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-        jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
+        createRefreshToken(user, refreshToken, response);
         return new JwtHolder(refreshToken, accessToken);
     }
 
