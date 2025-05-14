@@ -6,5 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public interface EmailVerificationService {
     EmailSendInfo sendMessage();
+
     AuthResponseDto checkToken(String token, HttpServletResponse httpServletResponse);
 }

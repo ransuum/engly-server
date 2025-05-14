@@ -1,6 +1,5 @@
 package com.engly.engly_server.security.config;
 
-import com.engly.engly_server.exception.ApiErrorResponse;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
 import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;

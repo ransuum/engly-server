@@ -25,10 +25,10 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional(readOnly = true)
     public Object getProfile() {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        final var user = userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User Not Found"));
-        if (user.getRoles().equals("ROLE_NOT_VERIFIED")) return new VerifiedDto(false);
-        else return UserMapper.INSTANCE.toUsersDto(user);
+        final var user = UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User Not Found")));
+        return user.roles().equals("ROLE_NOT_VERIFIED") ?
+                new VerifiedDto(user, false) : new VerifiedDto(user, true);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class ProfileServiceImpl implements ProfileService {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email)
                 .map(user -> {
-                    if (FieldUtil.isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
+                    if (isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
                     if (isValid(profileUpdateData.goal())) user.getAdditionalInfo().setGoal(profileUpdateData.goal());
                     if (isValid(profileUpdateData.englishLevel()))
                         user.getAdditionalInfo().setEnglishLevel(profileUpdateData.englishLevel());

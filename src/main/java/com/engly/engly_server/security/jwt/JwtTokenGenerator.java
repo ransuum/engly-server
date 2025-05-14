@@ -1,12 +1,12 @@
 package com.engly.engly_server.security.jwt;
 
-import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.security.config.SecurityService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 public class JwtTokenGenerator {
     private final JwtEncoder jwtEncoder;
     private final SecurityService securityService;
+
+    @Value("${app.backend.url}")
+    private String url;
 
     public Authentication createAuthenticationObject(Users users) {
         final var username = users.getEmail();
@@ -62,13 +65,18 @@ public class JwtTokenGenerator {
         cookie.setPath("/");
         cookie.setSecure(true);
         cookie.setHttpOnly(true);
+        cookie.setDomain(url);
+
         response.addCookie(cookie);
 
-        final var cookieValue = String.format(
-                "refreshToken=%s; Path=/; Secure; HttpOnly; SameSite=None",
-                refreshToken
+
+        response.setHeader(
+                "Set-Cookie",
+                String.format(
+                        "refreshToken=%s; Path=/; Secure; HttpOnly; SameSite=None; Domain=%s",
+                        refreshToken, url
+                )
         );
-        response.addHeader("Set-Cookie", cookieValue);
     }
 
 

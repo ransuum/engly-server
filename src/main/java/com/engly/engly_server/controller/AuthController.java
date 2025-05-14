@@ -86,17 +86,8 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<Object> getAccessToken(
             @CookieValue(value = "refreshToken", required = false) String refreshTokenFromCookie,
-            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader,
             HttpServletResponse httpServletResponse) {
-        String refreshToken = null;
-        if (refreshTokenFromCookie != null) refreshToken = refreshTokenFromCookie;
-        else if (authorizationHeader != null && authorizationHeader.startsWith("Bearer "))
-            refreshToken = authorizationHeader.substring(7);
-
-        if (refreshToken == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No refresh token found");
-
-        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(refreshToken, httpServletResponse));
+        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(refreshTokenFromCookie, httpServletResponse));
     }
 
     @Operation(
