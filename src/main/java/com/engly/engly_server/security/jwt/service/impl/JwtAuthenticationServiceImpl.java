@@ -1,5 +1,6 @@
 package com.engly.engly_server.security.jwt.service.impl;
 
+import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repo.RefreshTokenRepo;
@@ -8,6 +9,8 @@ import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     private final JwtTokenGenerator jwtTokenGenerator;
     private final RefreshTokenRepo refreshTokenRepo;
+    private final AuthenticationManager authenticationManager;
 
     @Override
     public JwtHolder createAuthObject(Users users, HttpServletResponse response) {
@@ -35,6 +39,11 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         final var accessToken = jwtTokenGenerator.generateAccessToken(authentication);
         createRefreshToken(user, refreshToken, response);
         return new JwtHolder(refreshToken, accessToken);
+    }
+
+    @Override
+    public Authentication authenticate(SignInDto sign) {
+        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(sign.email(), sign.password()));
     }
 
     private void createRefreshToken(Users users, String refreshToken, HttpServletResponse httpServletResponse) {

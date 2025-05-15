@@ -5,7 +5,6 @@ import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
 import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
-import com.engly.engly_server.security.userconfiguration.UserDetailsServiceImpl;
 import com.engly.engly_server.service.common.impl.AuthServiceImpl;
 import com.engly.engly_server.service.common.impl.LogoutHandlerServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
@@ -14,19 +13,20 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -54,7 +54,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Slf4j
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final UserDetailsService userDetailsService;
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
@@ -67,17 +67,9 @@ public class SecurityConfig {
                 .securityMatcher(new AntPathRequestMatcher("/sign-in/**"))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .userDetailsService(userDetailsServiceImpl)
+                .authorizeHttpRequests(auth -> auth.anyRequest().anonymous())
+                .userDetailsService(userDetailsService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(ex ->
-                    ex.authenticationEntryPoint((request, response, authException) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"error\": \"INVALID_CREDENTIALS\", \"message\":\"" + authException.getMessage() + "\"}");
-                        })
-                )
-                .httpBasic(withDefaults())
                 .build();
     }
 
@@ -212,6 +204,11 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean

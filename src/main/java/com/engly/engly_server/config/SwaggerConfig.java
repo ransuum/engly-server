@@ -28,14 +28,10 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .servers(List.of(new Server().url(url)))
                 .info(new Info().title("EnglyChat API").version("1.0.0"))
                 .components(new Components()
-                        .addSecuritySchemes("basicAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("basic"))
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")))
-                .addSecurityItem(new SecurityRequirement().addList("basicAuth"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 

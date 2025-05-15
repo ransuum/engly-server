@@ -1,7 +1,9 @@
 package com.engly.engly_server.exception;
 
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
@@ -37,6 +39,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AuthenticationCredentialsNotFoundException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "You need to authorize!", ex.getMessage());
+    }
+
+    @ExceptionHandler(SignInException.class)
+    public ResponseEntity<ApiErrorResponse> handleSignInException(SignInException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Password or email is not correct", ex.getMessage());
     }
 
     @ExceptionHandler(PasswordGeneratorException.class)
@@ -76,7 +83,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(FieldValidationException.class)
     public ResponseEntity<ApiErrorResponse> handleFieldValidationException(FieldValidationException ex) {
-        return buildResponse(HttpStatus.BAD_REQUEST, "Validation error", ex);
+        return buildResponse(HttpStatus.BAD_REQUEST, "Validation error", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -84,7 +91,7 @@ public class GlobalExceptionHandler {
         var errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .toList();
 
         return buildResponse("Validation failed", errors);
@@ -94,7 +101,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         var errors = ex.getConstraintViolations()
                 .stream()
-                .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                .map(ConstraintViolation::getMessage)
                 .toList();
 
         return buildResponse("Constraint violation", errors);
