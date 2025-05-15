@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.Arrays;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class CookieUtils {
+public final class CookieUtils {
 
     public static String getRefreshTokenCookie(HttpServletRequest request) {
         final Cookie[] cookies = request.getCookies();
