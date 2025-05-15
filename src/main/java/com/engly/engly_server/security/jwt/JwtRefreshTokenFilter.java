@@ -2,11 +2,11 @@ package com.engly.engly_server.security.jwt;
 
 import com.engly.engly_server.exception.ApiErrorResponse;
 import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.security.cookiemanagement.CookieUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -49,7 +49,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
         try {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started ");
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
-            String token = getString(request);
+            String token = CookieUtils.getRefreshTokenCookie(request);
 
             if (token == null) {
                 filterChain.doFilter(request, response);
@@ -94,15 +94,5 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
-    }
-
-    private static String getString(HttpServletRequest request) {
-        final Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
-        return Arrays.stream(cookies)
-                .filter(cookie -> "refreshToken".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
     }
 }
