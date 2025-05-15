@@ -2,13 +2,10 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.UsersDto;
-import com.engly.engly_server.models.dto.VerifiedDto;
 import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
-import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -23,12 +20,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional(readOnly = true)
-    public Object getProfile() {
+    public UsersDto getProfile() {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
-        final var user = UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
+        return UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User Not Found")));
-        return user.roles().equals("ROLE_NOT_VERIFIED") ?
-                new VerifiedDto(user, false) : new VerifiedDto(user, true);
     }
 
     @Override

@@ -28,7 +28,7 @@ public class JwtTokenGenerator {
     private final JwtEncoder jwtEncoder;
     private final SecurityService securityService;
 
-    @Value("${app.backend.url}")
+    @Value("${app.backend-cookie.url}")
     private String url;
 
     public Authentication createAuthenticationObject(Users users) {
