@@ -11,7 +11,7 @@ import java.util.Collection;
 
 @RequiredArgsConstructor
 public class UserDetailsImpl implements UserDetails {
-    private final Users user;
+    private final transient Users user;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
