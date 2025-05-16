@@ -4,7 +4,6 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.models.dto.create.AdditionalRequestForGoogleUserDto;
-import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
@@ -24,7 +23,6 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AdditionalServiceImpl implements AdditionalService {
-    private final RefreshTokenRepo refreshTokenRepo;
     private final UserRepo userRepo;
     private final SecurityService securityService;
     private final JwtAuthenticationService jwtAuthenticationService;
@@ -54,15 +52,13 @@ public class AdditionalServiceImpl implements AdditionalService {
                             new UserDetailsImpl(savedUser).getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(newAuth);
 
-                    final var jwtHolder = jwtAuthenticationService.authenticateData(newAuth, httpServletResponse);
-                    refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(savedUser, jwtHolder.refreshToken()));
+                    final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, newAuth, httpServletResponse);
 
                     return new AuthResponseDto(
                             jwtHolder.accessToken(),
                             300,
                             TokenType.Bearer,
-                            savedUser.getUsername(),
-                            jwtHolder.refreshToken());
+                            savedUser.getUsername());
                 })
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid User"));
     }

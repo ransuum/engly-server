@@ -1,5 +1,7 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.service.common.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +17,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -56,8 +59,8 @@ public class AuthController {
             }
     )
     @PostMapping("/sign-in")
-    public ResponseEntity<Object> authenticateUser(Authentication authentication, HttpServletResponse response) {
-        return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(authentication, response), HttpStatus.CREATED);
+    public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody SignInDto signInDto, HttpServletResponse response) {
+        return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(signInDto, response), HttpStatus.OK);
     }
 
     @Operation(
@@ -84,16 +87,8 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<Object> getAccessToken(
             @CookieValue(value = "refreshToken", required = false) String refreshTokenFromCookie,
-            @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorizationHeader) {
-        String refreshToken = null;
-        if (refreshTokenFromCookie != null) refreshToken = refreshTokenFromCookie;
-        else if (authorizationHeader != null && authorizationHeader.startsWith("Bearer "))
-            refreshToken = authorizationHeader.substring(7);
-
-        if (refreshToken == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No refresh token found");
-
-        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(refreshToken));
+            HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(refreshTokenFromCookie, httpServletResponse));
     }
 
     @Operation(

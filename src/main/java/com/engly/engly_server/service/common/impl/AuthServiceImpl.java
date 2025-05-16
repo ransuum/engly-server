@@ -1,7 +1,9 @@
 package com.engly.engly_server.service.common.impl;
 
+import com.engly.engly_server.exception.SignInException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.enums.*;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.repo.RefreshTokenRepo;
@@ -15,7 +17,9 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
@@ -51,52 +55,50 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     }
 
     @Override
-    public AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication, HttpServletResponse response) {
+    public AuthResponseDto getJwtTokensAfterAuthentication(SignInDto signInDto, HttpServletResponse response) {
         try {
-            return userRepo.findByEmail(authentication.getName())
+            final var authentication = jwtAuthenticationService.authenticate(signInDto);
+            return userRepo.findByEmail(signInDto.email())
                     .map(users -> {
                         users.setLastLogin(Instant.now());
-                        userRepo.save(users);
-                        final var jwtHolder = jwtAuthenticationService.authenticateData(authentication, response);
-                        refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(users, jwtHolder.refreshToken()));
+                        final var savedUser = userRepo.save(users);
+                        final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
                         log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
                         return AuthResponseDto.builder()
                                 .accessToken(jwtHolder.accessToken())
-                                .refreshToken(jwtHolder.refreshToken())
                                 .accessTokenExpiry(15 * 60)
                                 .username(users.getUsername())
                                 .tokenType(TokenType.Bearer)
                                 .build();
                     })
                     .orElseThrow(() -> {
-                        log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
+                        log.error("[AuthService:userSignInAuth] User :{} not found", signInDto.email());
                         return new NotFoundException("USER NOT FOUND");
                     });
-        } catch (Exception e) {
+        } catch (BadCredentialsException e) {
             log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :{}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
+            throw new SignInException(e.getMessage());
         }
     }
 
+
     @Override
-    public AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken) {
+    public AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken, HttpServletResponse response) {
         if (refreshToken == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
 
-        final var refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
-                .filter(tokens -> !tokens.isRevoked())
+        final var refreshTokenEntity = refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(refreshToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
-        final var users = refreshTokenEntity.getUser();
+        refreshTokenEntity.setRevoked(true);
+        final var users = refreshTokenRepo.save(refreshTokenEntity).getUser();
 
-        final var jwtHolder = jwtAuthenticationService.createAuthObject(users);
-        refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(users, jwtHolder.refreshToken()));
+        final var jwtHolder = jwtAuthenticationService.createAuthObject(users, response);
 
         return AuthResponseDto.builder()
                 .accessToken(jwtHolder.accessToken())
                 .accessTokenExpiry(5 * 60)
                 .username(users.getUsername())
                 .tokenType(TokenType.Bearer)
-                .refreshToken(jwtHolder.refreshToken())
                 .build();
     }
 
@@ -104,14 +106,12 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
     public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
         try {
             final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
-            final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
-            refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
+            final var jwtHolder = jwtAuthenticationService.createAuthObject(user, httpServletResponse);
 
             log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
             return AuthResponseDto.builder()
                     .accessToken(jwtHolder.accessToken())
                     .accessTokenExpiry(5 * 60)
-                    .refreshToken(jwtHolder.refreshToken())
                     .username(signUpRequestDto.username())
                     .tokenType(TokenType.Bearer)
                     .build();
@@ -146,8 +146,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                         .registration(new SignUpRequestDto(name, email, "Password123@",
                                 EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
 
-        final var jwtHolder = jwtAuthenticationService.createAuthObject(user);
-        refreshTokenRepo.save(jwtAuthenticationService.createRefreshToken(user, jwtHolder.refreshToken()));
+        final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
 
         final String redirectUrl = frontendUrl + "/google-auth/callback?" +
                 "access_token=" + URLEncoder.encode(jwtHolder.accessToken(), StandardCharsets.UTF_8) +

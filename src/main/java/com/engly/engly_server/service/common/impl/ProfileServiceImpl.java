@@ -6,7 +6,6 @@ import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
-import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,7 +31,7 @@ public class ProfileServiceImpl implements ProfileService {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email)
                 .map(user -> {
-                    if (FieldUtil.isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
+                    if (isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
                     if (isValid(profileUpdateData.goal())) user.getAdditionalInfo().setGoal(profileUpdateData.goal());
                     if (isValid(profileUpdateData.englishLevel()))
                         user.getAdditionalInfo().setEnglishLevel(profileUpdateData.englishLevel());

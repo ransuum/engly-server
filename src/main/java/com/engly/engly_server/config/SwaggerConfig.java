@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -18,20 +19,19 @@ import java.util.List;
 @OpenAPIDefinition
 public class SwaggerConfig implements WebMvcConfigurer {
 
+    @Value("${app.backend.url}")
+    private String url;
+
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .servers(List.of(new Server().url("http://localhost:8000")))
+                .servers(List.of(new Server().url(url)))
                 .info(new Info().title("EnglyChat API").version("1.0.0"))
                 .components(new Components()
-                        .addSecuritySchemes("basicAuth", new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("basic"))
                         .addSecuritySchemes("bearerAuth", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")))
-                .addSecurityItem(new SecurityRequirement().addList("basicAuth"))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 

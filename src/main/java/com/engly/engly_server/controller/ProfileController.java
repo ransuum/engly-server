@@ -17,8 +17,8 @@ public class ProfileController {
     }
 
     @GetMapping("/check")
-    @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<UsersDto> getProfile() {
+    @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
+    public ResponseEntity<Object> getProfile() {
         return ResponseEntity.ok(profileService.getProfile());
     }
 

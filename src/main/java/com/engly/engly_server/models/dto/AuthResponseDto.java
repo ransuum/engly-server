@@ -8,6 +8,5 @@ import lombok.Builder;
 public record AuthResponseDto(@JsonProperty("access_token") String accessToken,
                               @JsonProperty("access_token_expiry") int accessTokenExpiry,
                               @JsonProperty("token_type") TokenType tokenType,
-                              @JsonProperty("user_name") String username,
-                              @JsonProperty("refresh_token") String refreshToken) {
+                              @JsonProperty("user_name") String username) {
 }
