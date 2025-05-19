@@ -10,4 +10,6 @@ public interface UserService {
     UsersDto findById(String id);
 
     List<UsersDto> allUsers();
+
+    List<UsersDto> deleteSomeUsers(List<String> ids);
 }

@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -41,5 +43,16 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         userService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/some")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<PagedModel<EntityModel<UsersDto>>> deleteSomeUsers(
+            @ParameterObject @PageableDefault(sort = "username,asc", size = 25, page = 5) Pageable pageable,
+            PagedResourcesAssembler<UsersDto> assembler,
+            @RequestParam List<String> ids
+    ) {
+        final var users = userService.deleteSomeUsers(ids);
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(users, pageable, users.size())));
     }
 }

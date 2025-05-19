@@ -15,5 +15,5 @@ resilience4j:
         timeout-duration: 1m
       EmailController:
         limit-for-period: 3
-        limit-refresh-period: 0
+        limit-refresh-period: 30s
         timeout-duration: 3m

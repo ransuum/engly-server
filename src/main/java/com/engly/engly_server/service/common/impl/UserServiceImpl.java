@@ -38,4 +38,16 @@ public class UserServiceImpl implements UserService {
                 .map(UserMapper.INSTANCE::toUsersDto)
                 .toList();
     }
+
+    @Override
+    public List<UsersDto> deleteSomeUsers(List<String> ids) {
+        return ids.stream()
+                .map(id -> userRepo.findById(id)
+                        .map(user -> {
+                            userRepo.delete(user);
+                            return UserMapper.INSTANCE.toUsersDto(user);
+                        })
+                        .orElse(null))
+                .toList();
+    }
 }
