@@ -10,10 +10,14 @@ import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -23,6 +27,15 @@ public class CategoryServiceImpl implements CategoriesService {
     private final CategoriesRepo categoriesRepo;
 
     @Override
+    @Caching(
+            put = {
+                    @CachePut(value = "categoryById", key = "#result.id"),
+                    @CachePut(value = "categoryByName", key = "#result.name.toString()")
+            },
+            evict = {
+                    @CacheEvict(value = "allCategories", allEntries = true)
+            }
+    )
     public CategoriesDto addCategory(CategoryRequestDto categoryRequestDto) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.save(Categories.builder()
@@ -33,6 +46,15 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
+    @Caching(
+            put = {
+                    @CachePut(value = "categoryById", key = "#id"),
+                    @CachePut(value = "categoryByName", key = "#result.name.toString()")
+            },
+            evict = {
+                    @CacheEvict(value = "allCategories", allEntries = true)
+            }
+    )
     public CategoriesDto updateCategory(String id, CategoryRequestDto categoryRequestDto) {
         return categoriesRepo.findById(id)
                 .map(category -> {
@@ -45,13 +67,17 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
+    @Cacheable(value = "allCategories", unless = "#result.isEmpty()")
     @Transactional(readOnly = true)
-    public Page<CategoriesDto> getAllCategories(Pageable pageable) {
-        return categoriesRepo.findAll(pageable)
-                .map(CategoryMapper.INSTANCE::toCategoriesDto);
+    public List<CategoriesDto> getAllCategories() {
+        return categoriesRepo.findAll()
+                .stream()
+                .map(CategoryMapper.INSTANCE::toCategoriesDto)
+                .toList();
     }
 
     @Override
+    @Cacheable(value = "categoryById", key = "#categoryId")
     @Transactional(readOnly = true)
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
@@ -61,12 +87,18 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "categoryById", key = "#categoryId"),
+            @CacheEvict(value = "allCategories", allEntries = true),
+            @CacheEvict(value = "categoryByName", allEntries = true)
+    })
     public void deleteCategory(String categoryId) {
         categoriesRepo.delete(categoriesRepo.findById(categoryId).orElseThrow(()
                 -> new NotFoundException("Category not found while deleting")));
     }
 
     @Override
+    @Cacheable(value = "categoryByName", key = "#name.toString()")
     @Transactional(readOnly = true)
     public CategoriesDto findByName(CategoryType name) {
         return CategoryMapper.INSTANCE.toCategoriesDto(

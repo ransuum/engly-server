@@ -11,10 +11,10 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.MessageService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -64,15 +64,19 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MessagesDto> findAllMessageInCurrentRoom(String roomId, Pageable pageable) {
-        return messageRepo.findAllByRoomId(roomId, pageable)
-                .map(MessageMapper.INSTANCE::toMessageDto);
+    public List<MessagesDto> findAllMessageInCurrentRoom(String roomId) {
+        return messageRepo.findAllByRoomId(roomId)
+                .stream()
+                .map(MessageMapper.INSTANCE::toMessageDto)
+                .toList();
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
-        return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString, pageable)
-                .map(MessageMapper.INSTANCE::toMessageDto);
+    public List<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString) {
+        return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString)
+                .stream()
+                .map(MessageMapper.INSTANCE::toMessageDto)
+                .toList();
     }
 }

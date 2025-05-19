@@ -11,6 +11,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -33,7 +35,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UsersDto> allUsers(Pageable pageable) {
-        return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
+    public List<UsersDto> allUsers() {
+        return userRepo.findAll().stream()
+                .map(UserMapper.INSTANCE::toUsersDto)
+                .toList();
     }
 }

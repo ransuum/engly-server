@@ -14,12 +14,17 @@ import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.mapper.RoomMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 
@@ -33,6 +38,8 @@ public class RoomServiceImpl implements RoomService {
     private final SecurityService service;
 
     @Override
+    @CacheEvict(value = "roomsByCategory", key = "#name")
+    @CachePut(value = "roomById", key = "#result.id")
     @Transactional
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
@@ -52,13 +59,21 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Cacheable(value = "roomsByCategory", key = "#category")
     @Transactional(readOnly = true)
-    public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
-        return roomRepo.findAllByCategory_Name(category, pageable)
-                .map(RoomMapper.INSTANCE::roomToDto);
+    public List<RoomsDto> findAllRoomsByCategoryType(CategoryType category) {
+        return roomRepo.findAllByCategory_Name(category)
+                .stream()
+                .map(RoomMapper.INSTANCE::roomToDto)
+                .toList();
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "roomById", key = "#id"),
+            @CacheEvict(value = "roomsByCategory", allEntries = true),
+            @CacheEvict(value = "roomSearchResults", allEntries = true)
+    })
     public void deleteRoomById(String id) {
         var room = roomRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("You can't delete this room"));
@@ -66,6 +81,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @CachePut(value = "roomById", key = "#id")
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepo.findById(id)
                 .map(room -> {
@@ -85,8 +101,10 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<RoomsDto> findAllRoomsContainingKeyString(String keyString, Pageable pageable) {
-        return roomRepo.findAllRoomsContainingKeyString(keyString, pageable)
-                .map(RoomMapper.INSTANCE::roomToDto);
+    public List<RoomsDto> findAllRoomsContainingKeyString(String keyString) {
+        return roomRepo.findAllRoomsContainingKeyString(keyString)
+                .stream()
+                .map(RoomMapper.INSTANCE::roomToDto)
+                .toList();
     }
 }
