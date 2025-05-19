@@ -26,7 +26,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
         try {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started ");
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
-            String token = CookieUtils.getRefreshTokenCookie(request);
+            String token = new CookieUtils(request.getCookies()).getRefreshTokenCookie();
 
             if (token == null) {
                 filterChain.doFilter(request, response);

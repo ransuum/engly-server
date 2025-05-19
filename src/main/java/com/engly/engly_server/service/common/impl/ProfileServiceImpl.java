@@ -7,6 +7,8 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ public class ProfileServiceImpl implements ProfileService {
     private final UserRepo userRepo;
 
     @Override
+    @Cacheable(value = "userProfiles", key = "#root.target.getCurrentUserEmail()", unless = "#result == null")
     @Transactional(readOnly = true)
     public UsersDto getProfile() {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -27,6 +30,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
+    @CachePut(value = "userProfiles", key = "#root.target.getCurrentUserEmail()")
     public UsersDto updateProfile(ProfileUpdateRequest profileUpdateData) {
         final var email = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepo.findByEmail(email)
