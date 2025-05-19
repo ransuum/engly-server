@@ -4,8 +4,6 @@ import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 

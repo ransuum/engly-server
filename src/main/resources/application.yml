@@ -3,21 +3,17 @@ resilience4j:
     instances:
       AuthController:
         limit-for-period: 3
-        limit-refresh-period: 60s
-        timeout-duration: 0
+        limit-refresh-period: 10s
+        timeout-duration: 3m
       CategoryController:
         limit-for-period: 3
         limit-refresh-period: 30s
-        timeout-duration: 0
+        timeout-duration: 1m
       RoomController:
-        limit-for-period: 8
+        limit-for-period: 4
         limit-refresh-period: 30s
-        timeout-duration: 0
+        timeout-duration: 1m
       EmailController:
         limit-for-period: 3
-        limit-refresh-period: 5m
-        timeout-duration: 0
-      PublicController:
-        limit-for-period: 1
-        limit-refresh-period: 5s
-        timeout-duration: 0
+        limit-refresh-period: 0
+        timeout-duration: 3m
