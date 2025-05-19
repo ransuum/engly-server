@@ -4,10 +4,11 @@ import com.engly.engly_server.models.enums.EnglishLevels;
 import com.engly.engly_server.models.enums.Goals;
 import com.engly.engly_server.models.enums.NativeLanguage;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public record SignUpRequestDto(@NotBlank(message = "Username is blank")
                                @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters.")
                                @Pattern(

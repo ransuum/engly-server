@@ -4,7 +4,6 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.core.Authentication;
 
 public interface AuthService {
     AuthResponseDto getJwtTokensAfterAuthentication(SignInDto sign, HttpServletResponse response);

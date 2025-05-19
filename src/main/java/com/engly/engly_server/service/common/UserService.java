@@ -1,8 +1,6 @@
 package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.models.dto.UsersDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -12,4 +10,6 @@ public interface UserService {
     UsersDto findById(String id);
 
     List<UsersDto> allUsers();
+
+    List<UsersDto> deleteSomeUsers(List<String> ids);
 }
