@@ -4,12 +4,12 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
 import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,20 +19,21 @@ import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UserRepo userRepo;
+    private final SecurityService securityService;
 
     @Override
-    @Cacheable(value = "userProfiles", key = "#root.target.getCurrentUserEmail()", unless = "#result == null")
+    @Cacheable(value = "userProfiles", key = "T(java.util.Objects).requireNonNull(#root.target.getCurrentUserEmail())", unless = "#result == null")
     @Transactional(readOnly = true)
     public UsersDto getProfile() {
-        final var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        final var email = securityService.getCurrentUserEmail();
         return UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User Not Found")));
     }
 
     @Override
-    @CachePut(value = "userProfiles", key = "#root.target.getCurrentUserEmail()")
+    @CachePut(value = "userProfiles", key = "T(java.util.Objects).requireNonNull(#root.target.getCurrentUserEmail())")
     public UsersDto updateProfile(ProfileUpdateRequest profileUpdateData) {
-        final var email = SecurityContextHolder.getContext().getAuthentication().getName();
+        final var email = securityService.getCurrentUserEmail();
         return userRepo.findByEmail(email)
                 .map(user -> {
                     if (isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
@@ -45,5 +46,10 @@ public class ProfileServiceImpl implements ProfileService {
                     return UserMapper.INSTANCE.toUsersDto(userRepo.save(user));
                 })
                 .orElseThrow(() -> new NotFoundException("User Not Found"));
+    }
+
+    @SuppressWarnings("unused")
+    public String getCurrentUserEmail() {
+        return securityService.getCurrentUserEmail();
     }
 }
