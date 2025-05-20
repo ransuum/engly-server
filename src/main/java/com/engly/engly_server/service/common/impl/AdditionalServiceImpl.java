@@ -54,11 +54,7 @@ public class AdditionalServiceImpl implements AdditionalService {
 
                     final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, newAuth, httpServletResponse);
 
-                    return new AuthResponseDto(
-                            jwtHolder.accessToken(),
-                            300,
-                            TokenType.Bearer,
-                            savedUser.getUsername());
+                    return new AuthResponseDto(jwtHolder.accessToken(), 300, TokenType.Bearer, savedUser.getUsername());
                 })
                 .orElseThrow(() -> new UsernameNotFoundException("Invalid User"));
     }

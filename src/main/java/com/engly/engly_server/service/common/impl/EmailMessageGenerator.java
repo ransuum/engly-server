@@ -2,6 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.GenerateTokenException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +14,7 @@ import java.util.Map;
 @Slf4j
 public class EmailMessageGenerator {
 
-
+    @Cacheable(value = "emailTemplates", key = "#resource.filename")
     public String generate(Map<String, Object> parameters, Resource resource) {
         String message;
         try {
