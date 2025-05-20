@@ -67,18 +67,19 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                 throw new TokenNotFoundException("Invalid token for email verification");
 
             return userRepo.findByEmail(email).map(user -> {
-                user.setEmailVerified(true);
+                user.setEmailVerified(Boolean.TRUE);
                 user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
                 tokenRepo.delete(verifyToken);
 
-                final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
+                final var userSaved = userRepo.save(user);
+                final var jwtHolder = jwtAuthenticationService.createAuthObject(userSaved, response);
                 log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
 
                 return new AuthResponseDto(jwtHolder.accessToken(),
                         12,
                         TokenType.Bearer,
-                        user.getUsername());
+                        userSaved.getUsername());
             }).orElseThrow(() -> new NotFoundException("Invalid User"));
         }).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
     }
