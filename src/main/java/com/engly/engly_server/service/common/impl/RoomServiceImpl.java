@@ -98,6 +98,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Cacheable(value = "rooms", key = "#keyString")
     @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsContainingKeyString(String keyString) {
         return roomRepo.findAllRoomsContainingKeyString(keyString)
