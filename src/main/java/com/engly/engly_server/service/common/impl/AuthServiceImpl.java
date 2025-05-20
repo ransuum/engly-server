@@ -114,8 +114,6 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                     .username(signUpRequestDto.username())
                     .tokenType(TokenType.Bearer)
                     .build();
-
-
         } catch (ValidationException e) {
             log.error("[AuthService:registerUser]Exception while registering the user due to :{}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getMessage());
@@ -153,7 +151,6 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                 "&expires_in=" + (15 * 60) +
                 "&token_type=Bearer" +
                 "&username=" + URLEncoder.encode(user.getUsername(), StandardCharsets.UTF_8);
-
         response.sendRedirect(redirectUrl);
     }
 }

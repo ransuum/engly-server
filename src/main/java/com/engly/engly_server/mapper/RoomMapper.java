@@ -10,8 +10,6 @@ import org.mapstruct.factory.Mappers;
 public interface RoomMapper {
     RoomMapper INSTANCE = Mappers.getMapper(RoomMapper.class);
 
-
-    @Mapping(target = "category", source = "category")
     @Mapping(target = "creator", source = "creator")
     @Mapping(target = "messages", ignore = true)
     @Mapping(target = "chatParticipants", source = "chatParticipants")

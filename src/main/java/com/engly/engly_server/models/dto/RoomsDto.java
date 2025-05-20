@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.util.List;
 
 public record RoomsDto(String id,
-                       CategoriesDto category,
                        String name,
                        String description,
                        Instant createdAt,
