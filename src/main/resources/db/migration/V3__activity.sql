@@ -1,4 +1,4 @@
-create table activity_logs
+create table if not exists activity_logs
 (
     id         varchar(255)                not null
         primary key,
@@ -12,10 +12,7 @@ create table activity_logs
             references users
 );
 
-alter table activity_logs
-    owner to postgres;
-
-create table notifications
+create table if not exists notifications
 (
     id         varchar(255)                not null
         primary key,
@@ -27,10 +24,7 @@ create table notifications
             references users
 );
 
-alter table notifications
-    owner to postgres;
-
-create table moderation
+create table if not exists moderation
 (
     id         varchar(255)                not null
         primary key,
@@ -53,10 +47,7 @@ create table moderation
             references users
 );
 
-alter table moderation
-    owner to postgres;
-
-create table message
+create table if not exists message
 (
     id         varchar(255)                not null
         primary key,
@@ -73,10 +64,7 @@ create table message
             references users
 );
 
-alter table message
-    owner to postgres;
-
-create table chat_participants
+create table if not exists chat_participants
 (
     id        varchar(255)                not null
         primary key,
@@ -93,7 +81,4 @@ create table chat_participants
         constraint fkbhdyxo0ndtbs1t49l28y21rkw
             references users
 );
-
-alter table chat_participants
-    owner to postgres;
 
