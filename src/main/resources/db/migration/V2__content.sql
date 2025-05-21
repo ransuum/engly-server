@@ -1,4 +1,4 @@
-create table categories
+create table if not exists categories
 (
     id          varchar(255)                not null
         primary key,
@@ -13,7 +13,6 @@ create table categories
     updated_at  timestamp(6) with time zone
 );
 
-create table rooms
 (
     id          varchar(255)                not null
         primary key,
@@ -29,7 +28,6 @@ create table rooms
             references users
 );
 
-create table statistics
 (
     id                varchar(255) not null
         primary key,

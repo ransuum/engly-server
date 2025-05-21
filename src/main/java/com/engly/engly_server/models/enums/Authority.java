@@ -14,5 +14,6 @@ public enum Authority {
     AUTHORIZE,
     PASSWORD_RESET,
     ADDITIONAL_INFO,
-    NOT_VERIFIED
+    NOT_VERIFIED,
+    LIMITED_ACCESS
 }

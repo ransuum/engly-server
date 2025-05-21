@@ -1,4 +1,4 @@
-create table activity_logs
+create table if not exists activity_logs
 (
     id         varchar(255)                not null
         primary key,
@@ -12,7 +12,6 @@ create table activity_logs
             references users
 );
 
-create table notifications
 (
     id         varchar(255)                not null
         primary key,
@@ -24,7 +23,6 @@ create table notifications
             references users
 );
 
-create table moderation
 (
     id         varchar(255)                not null
         primary key,
@@ -47,7 +45,6 @@ create table moderation
             references users
 );
 
-create table message
 (
     id         varchar(255)                not null
         primary key,
@@ -64,7 +61,6 @@ create table message
             references users
 );
 
-create table chat_participants
 (
     id        varchar(255)                not null
         primary key,
