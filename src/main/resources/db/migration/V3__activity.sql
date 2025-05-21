@@ -12,9 +12,6 @@ create table activity_logs
             references users
 );
 
-alter table activity_logs
-    owner to postgres;
-
 create table notifications
 (
     id         varchar(255)                not null
@@ -26,9 +23,6 @@ create table notifications
         constraint fk9y21adhxn0ayjhfocscqox7bh
             references users
 );
-
-alter table notifications
-    owner to postgres;
 
 create table moderation
 (
@@ -53,9 +47,6 @@ create table moderation
             references users
 );
 
-alter table moderation
-    owner to postgres;
-
 create table message
 (
     id         varchar(255)                not null
@@ -72,9 +63,6 @@ create table message
         constraint fkpdrb79dg3bgym7pydlf9k3p1n
             references users
 );
-
-alter table message
-    owner to postgres;
 
 create table chat_participants
 (
@@ -93,7 +81,4 @@ create table chat_participants
         constraint fkbhdyxo0ndtbs1t49l28y21rkw
             references users
 );
-
-alter table chat_participants
-    owner to postgres;
 

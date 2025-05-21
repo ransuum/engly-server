@@ -13,9 +13,6 @@ create table categories
     updated_at  timestamp(6) with time zone
 );
 
-alter table categories
-    owner to postgres;
-
 create table rooms
 (
     id          varchar(255)                not null
@@ -32,9 +29,6 @@ create table rooms
             references users
 );
 
-alter table rooms
-    owner to postgres;
-
 create table statistics
 (
     id                varchar(255) not null
@@ -45,6 +39,3 @@ create table statistics
         constraint fkcg4xleo3ygoniq2rker691nje
             references rooms
 );
-
-alter table statistics
-    owner to postgres;
