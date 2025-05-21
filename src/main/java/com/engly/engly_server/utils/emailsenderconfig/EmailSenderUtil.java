@@ -27,7 +27,7 @@ public record EmailSenderUtil(
 
     public EmailSendInfo sendTokenEmail(Predicate<String> existsChecker, TokenType tokenType) {
         if (!existsChecker.test(email))
-            throw new NotFoundException("User not found exception email %s".formatted(email));
+            throw new NotFoundException("User not found exception email " + email);
 
         final var token = RandomStringUtils.random(
                 32,

@@ -1,5 +1,3 @@
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 INSERT INTO categories (id, created_at, description, name, updated_at)
 VALUES
     (gen_random_uuid(), now(), 'Open discussions about anything', 'GENERAL_CHAT', now()),

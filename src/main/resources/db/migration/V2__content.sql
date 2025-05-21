@@ -13,7 +13,6 @@ create table if not exists categories
     updated_at  timestamp(6) with time zone
 );
 
-create table if not exists rooms
 (
     id          varchar(255)                not null
         primary key,
@@ -29,7 +28,6 @@ create table if not exists rooms
             references users
 );
 
-create table if not exists statistics
 (
     id                varchar(255) not null
         primary key,

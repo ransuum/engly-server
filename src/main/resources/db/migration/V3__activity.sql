@@ -12,7 +12,6 @@ create table if not exists activity_logs
             references users
 );
 
-create table if not exists notifications
 (
     id         varchar(255)                not null
         primary key,
@@ -24,7 +23,6 @@ create table if not exists notifications
             references users
 );
 
-create table if not exists moderation
 (
     id         varchar(255)                not null
         primary key,
@@ -47,7 +45,6 @@ create table if not exists moderation
             references users
 );
 
-create table if not exists message
 (
     id         varchar(255)                not null
         primary key,
@@ -64,7 +61,6 @@ create table if not exists message
             references users
 );
 
-create table if not exists chat_participants
 (
     id        varchar(255)                not null
         primary key,

@@ -53,8 +53,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                     urlTemplate,
                     "EmailVerificationServiceImpl:sendMessage").sendTokenEmail(userRepo::existsByEmail, TokenType.EMAIL_VERIFICATION);
         } catch (Exception e) {
-            log.error("[NotificationServiceImpl:sendNotifyMessage]Errors in user:{}", e.getMessage());
-            throw new TokenNotFoundException("token not saved exception email %s".formatted(email));
+            log.error("[EmailVerificationServiceImpl:sendNotifyMessage]Errors: {}", e.getMessage());
+            throw new TokenNotFoundException("token not saved exception email " + email);
         }
     }
 
