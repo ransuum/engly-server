@@ -1,9 +1,9 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.RoomsDto;
-import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
+import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.service.common.RoomService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -70,10 +70,32 @@ public class RoomController {
     )
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> getRoomsByCategory(
             @RequestParam(defaultValue = "NEWS") CategoryType category,
-            @ParameterObject  @PageableDefault(page = 0, size = 8,
+            @ParameterObject @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
         final var rooms = roomService.findAllRoomsByCategoryType(category);
+        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(rooms, pageable, rooms.size())));
+    }
+
+    @GetMapping("/find/in/{category}/by-keyString/")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    @Operation(summary = "Find appropriate rooms by keyString and category",
+            description = """
+                    Retrieves paginated list of rooms filtered by category, name
+                    Searching is done ignore case of keyString and fields
+                    page starts from 0
+                    keyString is a string that needs to be found in name
+                    id can be replaced by different fields in RoomsDto
+                    \s"""
+    )
+    @RateLimiter(name = "RoomController")
+    public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByCategoryAndKeyString(
+            @PathVariable(value = "category") CategoryType category,
+            @RequestParam(value = "keyString") String keyString,
+            @ParameterObject @PageableDefault(page = 0, size = 8,
+                    sort = "name,asc") Pageable pageable,
+            PagedResourcesAssembler<RoomsDto> assembler) {
+        final var rooms = roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString);
         return ResponseEntity.ok(assembler.toModel(new PageImpl<>(rooms, pageable, rooms.size())));
     }
 
@@ -91,7 +113,7 @@ public class RoomController {
     @RateLimiter(name = "RoomController")
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByKeyString(
             @RequestParam String keyString,
-            @ParameterObject  @PageableDefault(page = 0, size = 8,
+            @ParameterObject @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
         final var rooms = roomService.findAllRoomsContainingKeyString(keyString);

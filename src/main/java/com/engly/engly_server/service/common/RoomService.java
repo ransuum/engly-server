@@ -17,4 +17,6 @@ public interface RoomService {
     RoomsDto updateRoom(String id, RoomUpdateRequest request);
 
     List<RoomsDto> findAllRoomsContainingKeyString(String keyString);
+
+    List<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString);
 }

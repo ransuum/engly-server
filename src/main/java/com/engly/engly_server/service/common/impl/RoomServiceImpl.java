@@ -1,17 +1,17 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.RoomsDto;
-import com.engly.engly_server.models.entity.Rooms;
-import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
+import com.engly.engly_server.models.entity.Rooms;
+import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.RoomService;
-import com.engly.engly_server.mapper.RoomMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -83,8 +83,9 @@ public class RoomServiceImpl implements RoomService {
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepo.findById(id)
                 .map(room -> {
-                    if (isValid(request.newCategory())) room.setCategory(categoriesRepo.findByName(request.newCategory())
-                            .orElseThrow(() -> new NotFoundException("Category not found")));
+                    if (isValid(request.newCategory()))
+                        room.setCategory(categoriesRepo.findByName(request.newCategory())
+                                .orElseThrow(() -> new NotFoundException("Category not found")));
 
                     if (isValid(request.updateCreatorByEmail()))
                         room.setCreator(userRepo.findByEmail(request.updateCreatorByEmail())
@@ -102,6 +103,14 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsContainingKeyString(String keyString) {
         return roomRepo.findAllRoomsContainingKeyString(keyString)
+                .stream()
+                .map(RoomMapper.INSTANCE::roomToDto)
+                .toList();
+    }
+
+    @Override
+    public List<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString) {
+        return roomRepo.findAllByNameContainingIgnoreCaseAndCategoryName(keyString, categoryType)
                 .stream()
                 .map(RoomMapper.INSTANCE::roomToDto)
                 .toList();
