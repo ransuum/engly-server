@@ -1,5 +1,6 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
@@ -124,9 +125,8 @@ public class RoomController {
     @Operation(summary = "Delete a room", description = "Deletes a room by its ID")
     @PreAuthorize("hasAuthority('SCOPE_DELETE_GLOBAL')")
     @RateLimiter(name = "RoomController")
-    public ResponseEntity<Void> deleteRoom(@PathVariable String id) {
-        roomService.deleteRoomById(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse> deleteRoom(@PathVariable String id) {
+        return ResponseEntity.ok(roomService.deleteRoomById(id));
     }
 
     @PutMapping("/{id}")

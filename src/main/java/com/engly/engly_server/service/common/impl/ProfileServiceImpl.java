@@ -27,7 +27,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Cacheable(
             value = "userProfiles",
-            key = "#root.target.securityService.getCurrentUserEmail()",
+            key = "#root.target.getCurrentUserEmail()",
             sync = true
     )
     @Transactional(readOnly = true)
@@ -40,7 +40,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = "userProfiles", key = "#root.target.securityService.getCurrentUserEmail()")
+                    @CachePut(value = "userProfiles", key = "#root.target.getCurrentUserEmail()")
             },
             evict = {
                     @CacheEvict(value = "users", allEntries = true),
@@ -63,5 +63,10 @@ public class ProfileServiceImpl implements ProfileService {
                     return UserMapper.INSTANCE.toUsersDto(userRepo.save(user));
                 })
                 .orElseThrow(() -> new NotFoundException("User Not Found"));
+    }
+
+    @SuppressWarnings("unused")
+    public String getCurrentUserEmail() {
+        return securityService.getCurrentUserEmail();
     }
 }

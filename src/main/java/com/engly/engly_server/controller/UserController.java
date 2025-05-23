@@ -1,5 +1,6 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.service.common.UserService;
 import lombok.RequiredArgsConstructor;
@@ -40,9 +41,8 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-        userService.delete(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ApiResponse> deleteUser(@PathVariable String id) {
+        return ResponseEntity.ok(userService.delete(id));
     }
 
     @DeleteMapping("/some")
