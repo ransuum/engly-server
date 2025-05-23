@@ -28,7 +28,7 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
 
         final var refreshToken = Objects.requireNonNull(authHeader).substring(7);
 
-        refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(refreshToken)
+        refreshTokenRepo.findByTokenAndRevokedIsFalse(refreshToken)
                 .map(token -> {
                     token.setRevoked(true);
                     return refreshTokenRepo.save(token);

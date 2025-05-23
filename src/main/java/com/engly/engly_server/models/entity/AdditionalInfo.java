@@ -8,14 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.relational.core.mapping.Table;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
 @Entity
-@Table(name = "additional_info_user")
+@Table(name = "additional_info")
 public class AdditionalInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

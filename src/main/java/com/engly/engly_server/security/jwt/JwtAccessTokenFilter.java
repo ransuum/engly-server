@@ -4,7 +4,6 @@ import com.engly.engly_server.exception.ApiErrorResponse;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -17,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -36,9 +34,9 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull FilterChain filterChain) throws IOException {
 
         try {
             log.info("[JwtAccessTokenFilter:doFilterInternal] :: Started ");
@@ -79,10 +77,10 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
             log.info("[JwtAccessTokenFilter:doFilterInternal] Completed");
 
             filterChain.doFilter(request, response);
-        } catch (JwtValidationException jwtValidationException) {
-            log.error("[JwtAccessTokenFilter:doFilterInternal] Exception due to :{}", jwtValidationException.getMessage());
+        } catch (Exception e) {
+            log.error("[JwtAccessTokenFilter:doFilterInternal] Exception due to :{}", e.getMessage());
             new ApiErrorResponse("Session Problem", HttpStatus.NOT_ACCEPTABLE.value(),
-                    jwtValidationException.getMessage(), LocalDateTime.now())
+                    e.getMessage(), LocalDateTime.now())
                     .responseConfiguration(response)
                     .throwException(response.getOutputStream());
         }

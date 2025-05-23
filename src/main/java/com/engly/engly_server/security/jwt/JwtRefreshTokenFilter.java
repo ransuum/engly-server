@@ -6,7 +6,6 @@ import com.engly.engly_server.security.cookiemanagement.CookieUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -19,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtValidationException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -42,9 +40,9 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
+    protected void doFilterInternal(@NonNull HttpServletRequest request,
                                     @NonNull HttpServletResponse response,
-                                    @NonNull FilterChain filterChain) throws ServletException, IOException {
+                                    @NonNull FilterChain filterChain) throws IOException {
         try {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started ");
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
@@ -60,7 +58,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
             final String userName = jwtTokenUtils.getUserName(jwtRefreshToken);
 
             if (!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-                final var isRefreshTokenValidInDatabase = refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(jwtRefreshToken.getTokenValue())
+                final var isRefreshTokenValidInDatabase = refreshTokenRepo.findByTokenAndRevokedIsFalse(jwtRefreshToken.getTokenValue())
                         .orElse(null);
                 UserDetails userDetails = jwtTokenUtils.userDetails(userName);
                 if (jwtTokenUtils.isTokenValid(jwtRefreshToken, userDetails) && isRefreshTokenValidInDatabase != null) {
@@ -83,15 +81,14 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
                     SecurityContextHolder.setContext(securityContext);
                 }
             }
+            filterChain.doFilter(request, response);
             log.info("[JwtRefreshTokenFilter:doFilterInternal] Completed");
-        } catch (JwtValidationException jwtValidationException) {
-            log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}", jwtValidationException.getMessage());
+        } catch (Exception e) {
+            log.error("[JwtRefreshTokenFilter:doFilterInternal] Exception due to :{}", e.getMessage());
             new ApiErrorResponse("Session Problem", HttpStatus.NOT_ACCEPTABLE.value(),
-                    jwtValidationException.getMessage(), LocalDateTime.now())
+                    e.getMessage(), LocalDateTime.now())
                     .responseConfiguration(response)
                     .throwException(response.getOutputStream());
         }
-
-        filterChain.doFilter(request, response);
     }
 }

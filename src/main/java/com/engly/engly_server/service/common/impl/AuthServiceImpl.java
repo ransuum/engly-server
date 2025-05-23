@@ -86,7 +86,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         if (refreshToken == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
 
-        final var refreshTokenEntity = refreshTokenRepo.findByRefreshTokenAndRevokedIsFalse(refreshToken)
+        final var refreshTokenEntity = refreshTokenRepo.findByTokenAndRevokedIsFalse(refreshToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
         refreshTokenEntity.setRevoked(true);
         final var users = refreshTokenRepo.save(refreshTokenEntity).getUser();

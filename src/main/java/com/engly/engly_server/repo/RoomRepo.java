@@ -18,4 +18,6 @@ public interface RoomRepo extends JpaRepository<Rooms, String> {
             """
     )
     List<Rooms> findAllRoomsContainingKeyString(String keyString);
+
+    List<Rooms> findAllByNameContainingIgnoreCaseAndCategoryName(String keyString, CategoryType categoryName);
 }
