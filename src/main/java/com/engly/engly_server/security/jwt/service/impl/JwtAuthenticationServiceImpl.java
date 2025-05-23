@@ -50,7 +50,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         jwtTokenGenerator.createRefreshTokenCookie(httpServletResponse, refreshToken);
         refreshTokenRepo.save(RefreshToken.builder()
                 .user(users)
-                .refreshToken(refreshToken)
+                .token(refreshToken)
                 .createdAt(Instant.now())
                 .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
                 .revoked(false)

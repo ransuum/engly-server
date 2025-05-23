@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.common;
 
+import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
@@ -12,7 +13,7 @@ public interface RoomService {
 
     List<RoomsDto> findAllRoomsByCategoryType(CategoryType category);
 
-    void deleteRoomById(String id);
+    ApiResponse deleteRoomById(String id);
 
     RoomsDto updateRoom(String id, RoomUpdateRequest request);
 

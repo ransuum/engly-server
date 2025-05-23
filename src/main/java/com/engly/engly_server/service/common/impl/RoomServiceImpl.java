@@ -2,6 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
+import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
@@ -36,8 +37,16 @@ public class RoomServiceImpl implements RoomService {
     private final SecurityService service;
 
     @Override
-    @CacheEvict(value = "roomsByCategory", key = "#name")
-    @CachePut(value = "roomById", key = "#result.id")
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "roomsByCategory", key = "#name"),
+                    @CacheEvict(value = "rooms", allEntries = true),
+                    @CacheEvict(value = "roomSearchResults", allEntries = true)
+            },
+            put = {
+                    @CachePut(value = "roomById", key = "#result.id")
+            }
+    )
     @Transactional
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
@@ -57,7 +66,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Cacheable(value = "roomsByCategory", key = "#category")
+    @Cacheable(value = "roomsByCategory", key = "#category", sync = true)
     @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsByCategoryType(CategoryType category) {
         return roomRepo.findAllByCategory_Name(category)
@@ -70,16 +79,29 @@ public class RoomServiceImpl implements RoomService {
     @Caching(evict = {
             @CacheEvict(value = "roomById", key = "#id"),
             @CacheEvict(value = "roomsByCategory", allEntries = true),
-            @CacheEvict(value = "roomSearchResults", allEntries = true)
+            @CacheEvict(value = "roomSearchResults", allEntries = true),
+            @CacheEvict(value = "rooms", allEntries = true)
     })
-    public void deleteRoomById(String id) {
-        var room = roomRepo.findById(id)
+    public ApiResponse deleteRoomById(String id) {
+        return roomRepo.findById(id)
+                .map(rooms -> {
+                    roomRepo.delete(rooms);
+                    return new ApiResponse("Room deleted successfully", true, Instant.now());
+                })
                 .orElseThrow(() -> new NotFoundException("You can't delete this room"));
-        roomRepo.delete(room);
     }
 
     @Override
-    @CachePut(value = "roomById", key = "#id")
+    @Caching(
+            put = {
+                    @CachePut(value = "roomById", key = "#id")
+            },
+            evict = {
+                    @CacheEvict(value = "roomsByCategory", allEntries = true),
+                    @CacheEvict(value = "roomSearchResults", allEntries = true),
+                    @CacheEvict(value = "rooms", allEntries = true)
+            }
+    )
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepo.findById(id)
                 .map(room -> {
@@ -99,7 +121,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Cacheable(value = "rooms", key = "#keyString")
+    @Cacheable(value = "rooms", key = "'keyString_' + #keyString", sync = true)
     @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsContainingKeyString(String keyString) {
         return roomRepo.findAllRoomsContainingKeyString(keyString)
@@ -109,6 +131,8 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Cacheable(value = "roomSearchResults", key = "'category_' + #categoryType + '_key_' + #keyString", sync = true)
+    @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString) {
         return roomRepo.findAllByNameContainingIgnoreCaseAndCategoryName(keyString, categoryType)
                 .stream()

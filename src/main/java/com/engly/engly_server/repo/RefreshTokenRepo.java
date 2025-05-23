@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface RefreshTokenRepo extends JpaRepository<RefreshToken, Long> {
-    Optional<RefreshToken> findByRefreshTokenAndRevokedIsFalse(String refreshToken);
+    Optional<RefreshToken> findByTokenAndRevokedIsFalse(String refreshToken);
 
     boolean existsByUserAndRevoked(Users user, boolean revoked);
 

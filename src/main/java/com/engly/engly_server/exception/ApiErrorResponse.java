@@ -1,6 +1,7 @@
 package com.engly.engly_server.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +24,7 @@ public record ApiErrorResponse(String message,
     public void throwException(ServletOutputStream outputStream) throws IOException {
         final var mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         mapper.writeValue(outputStream, this);
     }
 }

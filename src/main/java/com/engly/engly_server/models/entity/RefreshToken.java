@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.Instant;
 
@@ -14,16 +13,16 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "REFRESH_TOKENS")
+@Table(name = "refresh_tokens")
 public class RefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "REFRESH_TOKEN", nullable = false, length = 10000)
-    private String refreshToken;
+    @Column(name = "token", nullable = false, length = 10000)
+    private String token;
 
-    @Column(name = "REVOKED")
+    @Column(name = "revoked")
     private boolean revoked;
 
     @ManyToOne

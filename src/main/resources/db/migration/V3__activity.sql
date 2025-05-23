@@ -47,7 +47,7 @@ create table if not exists moderation
             references users
 );
 
-create table if not exists message
+create table if not exists messages
 (
     id         varchar(255)                not null
         primary key,

@@ -7,9 +7,12 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
+import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +25,11 @@ public class ProfileServiceImpl implements ProfileService {
     private final SecurityService securityService;
 
     @Override
-    @Cacheable(value = "userProfiles", key = "T(java.util.Objects).requireNonNull(#root.target.getCurrentUserEmail())", unless = "#result == null")
+    @Cacheable(
+            value = "userProfiles",
+            key = "#root.target.securityService.getCurrentUserEmail()",
+            sync = true
+    )
     @Transactional(readOnly = true)
     public UsersDto getProfile() {
         final var email = securityService.getCurrentUserEmail();
@@ -31,7 +38,17 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    @CachePut(value = "userProfiles", key = "T(java.util.Objects).requireNonNull(#root.target.getCurrentUserEmail())")
+    @Caching(
+            put = {
+                    @CachePut(value = "userProfiles", key = "#root.target.securityService.getCurrentUserEmail()")
+            },
+            evict = {
+                    @CacheEvict(value = "users", allEntries = true),
+                    @CacheEvict(value = "allUsers", allEntries = true),
+                    @CacheEvict(value = CacheName.USER_ID, key = "#result.id")
+            }
+    )
+    @Transactional
     public UsersDto updateProfile(ProfileUpdateRequest profileUpdateData) {
         final var email = securityService.getCurrentUserEmail();
         return userRepo.findByEmail(email)
@@ -46,10 +63,5 @@ public class ProfileServiceImpl implements ProfileService {
                     return UserMapper.INSTANCE.toUsersDto(userRepo.save(user));
                 })
                 .orElseThrow(() -> new NotFoundException("User Not Found"));
-    }
-
-    @SuppressWarnings("unused")
-    public String getCurrentUserEmail() {
-        return securityService.getCurrentUserEmail();
     }
 }

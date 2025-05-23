@@ -34,6 +34,6 @@ public class JwtTokenUtils {
     public UserDetails userDetails(String email) {
         return userRepo.findByEmail(email)
                 .map(UserDetailsImpl::new)
-                .orElseThrow(() -> new UsernameNotFoundException("UserEmail: " + email + " does not exist"));
+                .orElseThrow(() -> new UsernameNotFoundException("Your account can be banned or deleted from the chat"));
     }
 }

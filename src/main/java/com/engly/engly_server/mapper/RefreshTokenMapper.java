@@ -11,7 +11,7 @@ import org.mapstruct.factory.Mappers;
 public interface RefreshTokenMapper {
     RefreshTokenMapper INSTANCE = Mappers.getMapper(RefreshTokenMapper.class);
 
-    @Mapping(target = "refreshToken", qualifiedByName = "normalizeToken")
+    @Mapping(target = "token", qualifiedByName = "normalizeToken")
     RefreshTokenDto toDisplayDto(RefreshToken source);
 
     @Named("normalizeToken")
