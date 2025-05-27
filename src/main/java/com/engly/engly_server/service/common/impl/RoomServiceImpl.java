@@ -13,6 +13,7 @@ import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.RoomService;
+import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -39,12 +40,12 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Caching(
             evict = {
-                    @CacheEvict(value = "roomsByCategory", key = "#name"),
-                    @CacheEvict(value = "rooms", allEntries = true),
-                    @CacheEvict(value = "roomSearchResults", allEntries = true)
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, key = "#name"),
+                    @CacheEvict(value = CacheName.ROOMS, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOM_SEARCH_RESULTS, allEntries = true)
             },
             put = {
-                    @CachePut(value = "roomById", key = "#result.id")
+                    @CachePut(value = CacheName.ROOM_ID, key = "#result.id")
             }
     )
     @Transactional
@@ -66,7 +67,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Cacheable(value = "roomsByCategory", key = "#category", sync = true)
+    @Cacheable(value = CacheName.ROOMS_BY_CATEGORY, key = "#category", sync = true)
     @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsByCategoryType(CategoryType category) {
         return roomRepo.findAllByCategory_Name(category)
@@ -77,10 +78,10 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "roomById", key = "#id"),
-            @CacheEvict(value = "roomsByCategory", allEntries = true),
-            @CacheEvict(value = "roomSearchResults", allEntries = true),
-            @CacheEvict(value = "rooms", allEntries = true)
+            @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+            @CacheEvict(value = CacheName.ROOM_SEARCH_RESULTS, allEntries = true),
+            @CacheEvict(value = CacheName.ROOMS, allEntries = true)
     })
     public ApiResponse deleteRoomById(String id) {
         return roomRepo.findById(id)
@@ -94,12 +95,12 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = "roomById", key = "#id")
+                    @CachePut(value = CacheName.ROOM_ID, key = "#id")
             },
             evict = {
-                    @CacheEvict(value = "roomsByCategory", allEntries = true),
-                    @CacheEvict(value = "roomSearchResults", allEntries = true),
-                    @CacheEvict(value = "rooms", allEntries = true)
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOM_SEARCH_RESULTS, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOMS, allEntries = true)
             }
     )
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
@@ -121,7 +122,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Cacheable(value = "rooms", key = "'keyString_' + #keyString", sync = true)
+    @Cacheable(value = CacheName.ROOMS, key = "'keyString_' + #keyString", sync = true)
     @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsContainingKeyString(String keyString) {
         return roomRepo.findAllRoomsContainingKeyString(keyString)
@@ -131,7 +132,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Cacheable(value = "roomSearchResults", key = "'category_' + #categoryType + '_key_' + #keyString", sync = true)
+    @Cacheable(value = CacheName.ROOM_SEARCH_RESULTS, key = "'category_' + #categoryType + '_key_' + #keyString", sync = true)
     @Transactional(readOnly = true)
     public List<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString) {
         return roomRepo.findAllByNameContainingIgnoreCaseAndCategoryName(keyString, categoryType)

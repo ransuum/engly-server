@@ -15,7 +15,7 @@ import java.util.List;
 public class IncompleteGoogleUserService {
     private final UserRepo userRepo;
 
-    @Scheduled(fixedRate = 10 * 60 * 1000)
+    @Scheduled(cron = "0 */25 0 * * *")
     public void deleteUsers() {
         final Instant expireBefore = Instant.now().minus(Duration.ofMinutes(15));
         final List<Users> incomplete = userRepo.findAllByRolesAndCreatedAtBefore("ROLE_GOOGLE", expireBefore);

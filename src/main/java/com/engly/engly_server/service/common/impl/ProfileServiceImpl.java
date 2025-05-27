@@ -26,7 +26,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Cacheable(
-            value = "userProfiles",
+            value = CacheName.USER_PROFILES,
             key = "#root.target.getCurrentUserEmail()",
             sync = true
     )
@@ -40,11 +40,11 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = "userProfiles", key = "#root.target.getCurrentUserEmail()")
+                    @CachePut(value = CacheName.USER_PROFILES, key = "#root.target.getCurrentUserEmail()")
             },
             evict = {
-                    @CacheEvict(value = "users", allEntries = true),
-                    @CacheEvict(value = "allUsers", allEntries = true),
+                    @CacheEvict(value = CacheName.USER_ID, allEntries = true),
+                    @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
                     @CacheEvict(value = CacheName.USER_ID, key = "#result.id")
             }
     )

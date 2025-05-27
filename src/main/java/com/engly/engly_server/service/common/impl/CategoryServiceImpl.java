@@ -8,6 +8,8 @@ import com.engly.engly_server.models.dto.create.CategoryRequestDto;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
+import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -28,11 +30,11 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = "categoryById", key = "#result.id"),
-                    @CachePut(value = "categoryByName", key = "#result.name.toString()")
+                    @CachePut(value = CacheName.CATEGORY_ID, key = "#result.id"),
+                    @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()")
             },
             evict = {
-                    @CacheEvict(value = "allCategories", allEntries = true)
+                    @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
             }
     )
     public CategoriesDto addCategory(CategoryRequestDto categoryRequestDto) {
@@ -47,18 +49,18 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = "categoryById", key = "#id"),
-                    @CachePut(value = "categoryByName", key = "#result.name.toString()")
+                    @CachePut(value = CacheName.CATEGORY_ID, key = "#id"),
+                    @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()")
             },
             evict = {
-                    @CacheEvict(value = "allCategories", allEntries = true)
+                    @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
             }
     )
     public CategoriesDto updateCategory(String id, CategoryRequestDto categoryRequestDto) {
         return categoriesRepo.findById(id)
                 .map(category -> {
-                    if (categoryRequestDto.name() != null) category.setName(categoryRequestDto.name());
-                    if (categoryRequestDto.description() != null) category.setDescription(categoryRequestDto.description());
+                    if (FieldUtil.isValid(categoryRequestDto.name())) category.setName(categoryRequestDto.name());
+                    if (FieldUtil.isValid(categoryRequestDto.description())) category.setDescription(categoryRequestDto.description());
 
                     return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepo.save(category));
                 })
@@ -66,7 +68,7 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
-    @Cacheable(value = "allCategories", unless = "#result.isEmpty()")
+    @Cacheable(value = CacheName.ALL_CATEGORIES, unless = "#result.isEmpty()")
     @Transactional(readOnly = true)
     public List<CategoriesDto> getAllCategories() {
         return categoriesRepo.findAll()
@@ -76,7 +78,7 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
-    @Cacheable(value = "categoryById", key = "#categoryId")
+    @Cacheable(value = CacheName.CATEGORY_ID, key = "#categoryId")
     @Transactional(readOnly = true)
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
@@ -87,9 +89,9 @@ public class CategoryServiceImpl implements CategoriesService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "categoryById", key = "#categoryId"),
-            @CacheEvict(value = "allCategories", allEntries = true),
-            @CacheEvict(value = "categoryByName", allEntries = true)
+            @CacheEvict(value = CacheName.CATEGORY_ID, key = "#categoryId"),
+            @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true),
+            @CacheEvict(value = CacheName.CATEGORY_NAME, allEntries = true)
     })
     public void deleteCategory(String categoryId) {
         categoriesRepo.delete(categoriesRepo.findById(categoryId).orElseThrow(()
@@ -97,7 +99,7 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
-    @Cacheable(value = "categoryByName", key = "#name.toString()")
+    @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()")
     @Transactional(readOnly = true)
     public CategoriesDto findByName(CategoryType name) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
