@@ -61,21 +61,12 @@ public class JwtTokenGenerator {
     }
 
     public void createRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
-        final var cookie = new Cookie("refreshToken", refreshToken);
-        cookie.setPath("/");
-        cookie.setSecure(true);
-        cookie.setHttpOnly(true);
-        cookie.setDomain(url);
+        final int REFRESH_TOKEN_EXPIRE_SECONDS = 25 * 24 * 60 * 60;
 
-        response.addCookie(cookie);
-
-
-        response.setHeader(
-                "Set-Cookie",
+        response.setHeader("Set-Cookie",
                 String.format(
-                        "refreshToken=%s; Path=/; Secure; HttpOnly; SameSite=None; Domain=%s",
-                        refreshToken, url
-                )
+                        "refreshToken=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None; Domain=%s",
+                        refreshToken, REFRESH_TOKEN_EXPIRE_SECONDS, url)
         );
     }
 
