@@ -7,6 +7,7 @@ import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.security.jwt.JwtHolder;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
+import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,7 +60,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     @Override
     public JwtHolder createAuthObjectForVerification(Users user, HttpServletResponse response) {
         SecurityContextHolder.clearContext();
-        var authentication = jwtTokenGenerator.createAuthenticationObject(user);
+        final Authentication authentication = new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword(), new UserDetailsImpl(user).getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return generateAndStoreTokens(user, authentication, response);
     }

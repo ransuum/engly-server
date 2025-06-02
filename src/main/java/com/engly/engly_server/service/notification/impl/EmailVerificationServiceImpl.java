@@ -67,7 +67,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                 throw new TokenNotFoundException("Invalid token for email verification");
 
             return userRepo.findByEmail(email).map(user -> {
-                user.setEmailVerified(Boolean.TRUE);
+                user.setEmailVerified(true);
                 user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
                 tokenRepo.delete(verifyToken);

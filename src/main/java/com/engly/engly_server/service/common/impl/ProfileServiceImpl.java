@@ -11,7 +11,6 @@ import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,11 +24,6 @@ public class ProfileServiceImpl implements ProfileService {
     private final SecurityService securityService;
 
     @Override
-    @Cacheable(
-            value = CacheName.USER_PROFILES,
-            key = "#root.target.getCurrentUserEmail()",
-            sync = true
-    )
     @Transactional(readOnly = true)
     public UsersDto getProfile() {
         final var email = securityService.getCurrentUserEmail();
@@ -40,7 +34,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = CacheName.USER_PROFILES, key = "#root.target.getCurrentUserEmail()")
+                    @CachePut(value = CacheName.USER_PROFILES, key = "#profileUpdateData.username()")
             },
             evict = {
                     @CacheEvict(value = CacheName.USER_ID, allEntries = true),
@@ -63,10 +57,5 @@ public class ProfileServiceImpl implements ProfileService {
                     return UserMapper.INSTANCE.toUsersDto(userRepo.save(user));
                 })
                 .orElseThrow(() -> new NotFoundException("User Not Found"));
-    }
-
-    @SuppressWarnings("unused")
-    public String getCurrentUserEmail() {
-        return securityService.getCurrentUserEmail();
     }
 }
