@@ -73,7 +73,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                 tokenRepo.delete(verifyToken);
 
                 final var userSaved = userRepo.save(user);
-                final var jwtHolder = jwtAuthenticationService.createAuthObject(userSaved, response);
+                final var jwtHolder = jwtAuthenticationService.createAuthObjectForVerification(userSaved, response);
                 log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
 
                 return new AuthResponseDto(jwtHolder.accessToken(),

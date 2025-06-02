@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -20,40 +21,66 @@ import java.time.temporal.ChronoUnit;
 @Service
 @RequiredArgsConstructor
 public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
+    private static final int REFRESH_TOKEN_VALIDITY_DAYS = 25;
+
     private final JwtTokenGenerator jwtTokenGenerator;
     private final RefreshTokenRepo refreshTokenRepo;
     private final AuthenticationManager authenticationManager;
 
+    /**
+     * Creates access and refresh tokens and sends refresh token in cookie.
+     */
     @Override
-    public JwtHolder createAuthObject(Users users, HttpServletResponse response) {
-        final var authentication = jwtTokenGenerator.createAuthenticationObject(users);
-        final var accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-        final var refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
-        createRefreshToken(users, refreshToken, response);
-        return new JwtHolder(refreshToken, accessToken);
+    public JwtHolder createAuthObject(Users user, HttpServletResponse response) {
+        var authentication = jwtTokenGenerator.createAuthenticationObject(user);
+        return generateAndStoreTokens(user, authentication, response);
     }
 
+    /**
+     * Creates and stores tokens given a valid authentication.
+     */
     @Override
     public JwtHolder authenticateData(Users user, Authentication authentication, HttpServletResponse response) {
-        final var refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
-        final var accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-        createRefreshToken(user, refreshToken, response);
+        return generateAndStoreTokens(user, authentication, response);
+    }
+
+    /**
+     * Authenticates the user with email/password credentials.
+     */
+    @Override
+    public Authentication authenticate(SignInDto sign) {
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(sign.email(), sign.password()));
+    }
+
+    /**
+     * Used post-verification to create new tokens and set SecurityContext.
+     */
+    @Override
+    public JwtHolder createAuthObjectForVerification(Users user, HttpServletResponse response) {
+        SecurityContextHolder.clearContext();
+        var authentication = jwtTokenGenerator.createAuthenticationObject(user);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return generateAndStoreTokens(user, authentication, response);
+    }
+
+    private JwtHolder generateAndStoreTokens(Users user, Authentication authentication, HttpServletResponse response) {
+        String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+        String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
+        persistRefreshTokenAndSetCookie(user, refreshToken, response);
         return new JwtHolder(refreshToken, accessToken);
     }
 
-    @Override
-    public Authentication authenticate(SignInDto sign) {
-        return authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(sign.email(), sign.password()));
-    }
-
-    private void createRefreshToken(Users users, String refreshToken, HttpServletResponse httpServletResponse) {
-        jwtTokenGenerator.createRefreshTokenCookie(httpServletResponse, refreshToken);
-        refreshTokenRepo.save(RefreshToken.builder()
-                .user(users)
-                .token(refreshToken)
-                .createdAt(Instant.now())
-                .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
-                .revoked(false)
-                .build());
+    private void persistRefreshTokenAndSetCookie(Users user, String refreshToken, HttpServletResponse response) {
+        jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
+        refreshTokenRepo.save(
+                RefreshToken.builder()
+                        .user(user)
+                        .token(refreshToken)
+                        .createdAt(Instant.now())
+                        .expiresAt(Instant.now().plus(REFRESH_TOKEN_VALIDITY_DAYS, ChronoUnit.DAYS))
+                        .revoked(false)
+                        .build()
+        );
     }
 }
