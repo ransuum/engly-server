@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -19,7 +20,8 @@ public class ChatController {
 
     private static final String TOPIC_MESSAGES = "/topic/messages/";
 
-    @MessageMapping("/chat.sendMessage")
+    @MessageMapping("/chat/message.send")
+    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     public void sendMessage(@Payload MessageRequestDto messageRequestDto) {
         final var message = messageService.sendMessage(messageRequestDto);
         messagingTemplate.convertAndSend(
@@ -27,15 +29,17 @@ public class ChatController {
                 new WebSocketEvent<>(EventType.MESSAGE_SEND, message));
     }
 
-    @MessageMapping("/chat.editMessage")
+    @MessageMapping("/chat/message.edit")
+    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     public void editMessage(@Payload EditMessageRequest request) {
         final var message = messageService.editMessage(request.id(), request.content());
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + message.id(),
+                TOPIC_MESSAGES + message.room().id(),
                 new WebSocketEvent<>(EventType.MESSAGE_EDIT, message));
     }
 
-    @MessageMapping("/chat.deleteMessage")
+    @MessageMapping("/chat/message.delete")
+    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     public void deleteMessage(@Payload String id) {
         final var message = messageService.deleteMessage(id);
         messagingTemplate.convertAndSend(

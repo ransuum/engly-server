@@ -45,11 +45,13 @@ public class JwtTokenGenerator {
     }
 
     public String generateAccessToken(Authentication authentication) {
+        final var jti = UUID.randomUUID().toString();
         log.info("[JwtTokenGenerator:generateAccessToken] Token Creation Started for:{}", authentication.getName());
         final var roles = securityService.getRolesOfUser(authentication);
         final var permissions = securityService.getPermissionsFromRoles(roles);
 
         final var claims = JwtClaimsSet.builder()
+                .id(jti)
                 .issuer("chat-engly")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
@@ -72,6 +74,7 @@ public class JwtTokenGenerator {
 
 
     public String generateRefreshToken(Authentication authentication) {
+        final var jti = UUID.randomUUID().toString();
         log.info("[JwtTokenGenerator:generateRefreshToken] Token Creation Started for:{}", authentication.getName());
 
         final var claims = JwtClaimsSet.builder()
@@ -80,6 +83,7 @@ public class JwtTokenGenerator {
                 .expiresAt(Instant.now().plus(25, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", "REFRESH_TOKEN")
+                .id(jti)
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();

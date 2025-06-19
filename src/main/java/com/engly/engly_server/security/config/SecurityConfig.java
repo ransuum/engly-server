@@ -81,7 +81,6 @@ public class SecurityConfig {
         return httpSecurity
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/api/**"),
-                        new AntPathRequestMatcher("/chat/**"),
                         new AntPathRequestMatcher("/valid/**"))
                 )
                 .csrf(AbstractHttpConfigurer::disable)
@@ -255,7 +254,7 @@ public class SecurityConfig {
                 "http://localhost:8000",
                 "https://engly-chats.vercel.app",
                 "https://engly-client-blmg.vercel.app",
-                "https://equal-aardvark-java-service-74283cac.koyeb.app")
+                "https://engly-server-practika-5d017e7c.koyeb.app")
         );
 
         configuration.setAllowedMethods(Arrays.asList(

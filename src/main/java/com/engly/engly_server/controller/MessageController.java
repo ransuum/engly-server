@@ -1,12 +1,9 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.service.common.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +11,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,21 +22,6 @@ public class MessageController {
 
     public MessageController(MessageService messageService) {
         this.messageService = messageService;
-    }
-
-    @PostMapping("/send")
-    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
-    public ResponseEntity<MessagesDto> sendMessage(@RequestBody MessageRequestDto messageRequestDto) {
-        return new ResponseEntity<>(messageService.sendMessage(messageRequestDto), HttpStatus.CREATED);
-    }
-
-    @PutMapping("/edit/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
-    public ResponseEntity<MessagesDto> editMessage(@PathVariable String id,
-                                                   @NotBlank(message = "Pls input some new message")
-                                                   @Size(max = 200)
-                                                   @RequestParam String content) {
-        return new ResponseEntity<>(messageService.editMessage(id, content), HttpStatus.OK);
     }
 
     @GetMapping("/current-room/{roomId}")
@@ -76,13 +57,5 @@ public class MessageController {
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
         final var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString);
         return ResponseEntity.ok(assembler.toModel(new PageImpl<>(messages, pageable, messages.size())));
-    }
-
-
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
-    public ResponseEntity<String> deleteMessage(@PathVariable String id) {
-        messageService.deleteMessage(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
