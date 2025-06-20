@@ -22,7 +22,7 @@ public class JwtTokenUtils {
         return jwtToken.getSubject();
     }
 
-    public boolean isTokenValid(Jwt jwtToken, UserDetails userDetails){
+    public boolean isTokenValid(Jwt jwtToken, UserDetails userDetails) {
         if (getIfTokenIsExpired(jwtToken)) return false;
         return getUserName(jwtToken).equals(userDetails.getUsername());
     }

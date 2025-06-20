@@ -61,6 +61,16 @@ public class SecurityConfig {
     private final RefreshTokenRepo refreshTokenRepo;
     private final LogoutHandlerServiceImpl logoutHandlerServiceImpl;
 
+    @Order(0)
+    @Bean
+    public SecurityFilterChain wsHandshakeSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http
+                .securityMatcher(new AntPathRequestMatcher("/chat"))
+                .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
+                .csrf(AbstractHttpConfigurer::disable)
+                .build();
+    }
+
     @Order(1)
     @Bean
     public SecurityFilterChain signInSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -81,8 +91,8 @@ public class SecurityConfig {
         return httpSecurity
                 .securityMatcher(new OrRequestMatcher(
                         new AntPathRequestMatcher("/api/**"),
-                        new AntPathRequestMatcher("/chat/**"),
-                        new AntPathRequestMatcher("/valid/**"))
+                        new AntPathRequestMatcher("/valid/**"),
+                        new AntPathRequestMatcher("/chat/**"))
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -225,6 +235,7 @@ public class SecurityConfig {
                 .build();
     }
 
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -255,7 +266,7 @@ public class SecurityConfig {
                 "http://localhost:8000",
                 "https://engly-chats.vercel.app",
                 "https://engly-client-blmg.vercel.app",
-                "https://equal-aardvark-java-service-74283cac.koyeb.app")
+                "https://engly-server-practika-5d017e7c.koyeb.app")
         );
 
         configuration.setAllowedMethods(Arrays.asList(

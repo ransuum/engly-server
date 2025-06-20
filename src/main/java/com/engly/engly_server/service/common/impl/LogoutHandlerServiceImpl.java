@@ -3,6 +3,7 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.security.cookiemanagement.CookieUtils;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 @Service
@@ -37,9 +39,18 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
                     return refreshTokenRepo.save(token);
                 }).orElse(null);
 
-        response.setHeader("Set-Cookie",
-                String.format(
-                        "refreshToken=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=None; Domain=%s",
-                        url));
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            Arrays.stream(cookies).forEach(cookie -> {
+                Cookie toDelete = new Cookie(cookie.getName(), "");
+                toDelete.setPath(cookie.getPath() != null ? cookie.getPath() : "/");
+                if (cookie.getDomain() != null) toDelete.setDomain(cookie.getDomain());
+                toDelete.setMaxAge(0);
+                toDelete.setHttpOnly(cookie.isHttpOnly());
+                toDelete.setSecure(cookie.getSecure());
+
+                response.addCookie(toDelete);
+            });
+        }
     }
 }
