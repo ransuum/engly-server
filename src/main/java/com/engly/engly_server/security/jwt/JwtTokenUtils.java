@@ -44,11 +44,13 @@ public class JwtTokenUtils {
                 .orElseThrow(() -> new UsernameNotFoundException("Your account can be banned or deleted from the chat"));
     }
 
-    public Authentication getAuthentication(String token) {
-        Jwt jwt = jwtDecoder.decode(token);
-        String username = getUserName(jwt);
+    public Authentication validateToken(String jwt) {
+        Jwt token = jwtDecoder.decode(jwt);
+        String username = getUserName(token);
         UserDetails userDetails = userDetails(username);
-        if (!isTokenValid(jwt, userDetails)) throw new TokenNotFoundException("Invalid JWT token");
+        if (!isTokenValid(token, userDetails))
+            throw new TokenNotFoundException("Invalid JWT token");
+
         return new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities()
         );

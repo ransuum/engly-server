@@ -21,15 +21,30 @@ public class JwtChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
-        StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        final var accessor = StompHeaderAccessor.wrap(message);
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-            String authHeader = accessor.getFirstNativeHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
-                Authentication auth = jwtTokenUtils.getAuthentication(token);
+            String jwt = accessor.getFirstNativeHeader("Authorization");
+
+            if (jwt != null && jwt.startsWith("Bearer ")) {
+                jwt = jwt.substring(7);
+                Authentication auth = jwtTokenUtils.validateToken(jwt);
                 accessor.setUser(auth);
             }
+        } else {
+            final var user = accessor.getUser();
+            if (user instanceof Authentication authentication) {
+                SecurityContext context = SecurityContextHolder.createEmptyContext();
+                context.setAuthentication(authentication);
+                SecurityContextHolder.setContext(context);
+            }
         }
+
         return message;
+    }
+
+    @Override
+    public void afterSendCompletion(@NotNull Message<?> message, @NotNull MessageChannel channel,
+                                    boolean sent, Exception ex) {
+        SecurityContextHolder.clearContext();
     }
 }
