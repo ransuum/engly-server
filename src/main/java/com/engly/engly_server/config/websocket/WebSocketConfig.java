@@ -1,6 +1,6 @@
 package com.engly.engly_server.config.websocket;
 
-import com.engly.engly_server.security.jwt.JwtStompChannelInterceptor;
+import com.engly.engly_server.security.websocket.AuthChannelInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +16,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    private final JwtStompChannelInterceptor jwtStompChannelInterceptor;
+    private final AuthChannelInterceptor authChannelInterceptor;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -34,7 +34,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(jwtStompChannelInterceptor, new SecurityContextChannelInterceptor());
+        registration.interceptors(authChannelInterceptor, new SecurityContextChannelInterceptor());
     }
 
     @Bean

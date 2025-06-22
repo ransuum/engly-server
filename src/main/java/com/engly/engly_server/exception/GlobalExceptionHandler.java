@@ -41,6 +41,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "You need to authorize!", ex.getMessage());
     }
 
+    @ExceptionHandler(WebSocketException.class)
+    public ResponseEntity<ApiErrorResponse> handleWebSocketException(WebSocketException ex) {
+        return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid token", ex.getMessage());
+    }
+
     @ExceptionHandler(SignInException.class)
     public ResponseEntity<ApiErrorResponse> handleSignInException(SignInException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Password or email is not correct", ex.getMessage());
