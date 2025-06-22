@@ -10,6 +10,13 @@ import org.mapstruct.factory.Mappers;
 public interface ChatParticipantMapper {
     ChatParticipantMapper INSTANCE = Mappers.getMapper(ChatParticipantMapper.class);
 
-    @Mapping(target = "room", ignore = true)
+    @Mapping(
+            target = "username",
+            expression = "java(chatParticipants.getUser().getUsername())"
+    )
+    @Mapping(
+            target = "userId",
+            expression = "java(chatParticipants.getUser().getId())"
+    )
     ChatParticipantsDto toDtoForRooms(ChatParticipants chatParticipants);
 }
