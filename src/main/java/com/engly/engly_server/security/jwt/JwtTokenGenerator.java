@@ -2,7 +2,6 @@ package com.engly.engly_server.security.jwt;
 
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.security.config.SecurityService;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

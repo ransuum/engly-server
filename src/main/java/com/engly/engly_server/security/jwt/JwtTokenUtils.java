@@ -6,6 +6,8 @@ import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -13,6 +15,8 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 @Component
@@ -48,11 +52,17 @@ public class JwtTokenUtils {
         Jwt token = jwtDecoder.decode(jwt);
         String username = getUserName(token);
         UserDetails userDetails = userDetails(username);
-        if (!isTokenValid(token, userDetails))
-            throw new TokenNotFoundException("Invalid JWT token");
 
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        Object scopeObj = token.getClaim("scope");
+        if (scopeObj instanceof String scopeStr)
+            for (String s : scopeStr.split(" "))
+                authorities.add(new SimpleGrantedAuthority("SCOPE_" + s));
+        authorities.addAll(userDetails.getAuthorities());
+
+        if (!isTokenValid(token, userDetails)) throw new TokenNotFoundException("Invalid JWT token");
         return new UsernamePasswordAuthenticationToken(
-                userDetails, null, userDetails.getAuthorities()
+                userDetails, null, authorities
         );
     }
 }
