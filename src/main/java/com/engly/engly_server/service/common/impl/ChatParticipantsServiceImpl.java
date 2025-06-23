@@ -11,7 +11,10 @@ import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,17 +27,29 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     private final ChatParticipantRepo chatParticipantRepo;
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#chatParticipantsRequestDto.rooms().id"),
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#chatParticipantsRequestDto.rooms().id + '-' + #chatParticipantsRequestDto.user().id")
+    })
     public void addParticipant(ChatParticipantsRequestDto chatParticipantsRequestDto) {
-        final var chatParticipant = ChatParticipants.builder()
-                .room(chatParticipantsRequestDto.rooms())
-                .user(chatParticipantsRequestDto.user())
-                .role(chatParticipantsRequestDto.role())
-                .build();
-        log.info("User adds to room with email {}", chatParticipant.getUser().getEmail());
-        chatParticipantRepo.save(chatParticipant);
+        try {
+            final var chatParticipant = ChatParticipants.builder()
+                    .room(chatParticipantsRequestDto.rooms())
+                    .user(chatParticipantsRequestDto.user())
+                    .role(chatParticipantsRequestDto.role())
+                    .build();
+            log.info("User adds to room with email {}", chatParticipant.getUser().getEmail());
+            chatParticipantRepo.save(chatParticipant);
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("User already exists in this room: {}", ex.getMessage());
+        }
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true),
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
+    })
     public void removeParticipant(String participantId) {
         final var chatParticipant = chatParticipantRepo.findById(participantId)
                 .orElseThrow(() -> new NotFoundException("Participant with id " + participantId + " not found"));
@@ -42,6 +57,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     }
 
     @Override
+    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
     public void updateRoleOfParticipant(String participantId, Roles role) {
         final var chatParticipant = chatParticipantRepo.findById(participantId)
                 .orElseThrow(() -> new NotFoundException("Participant with id " + participantId + " not found"));
@@ -54,5 +70,13 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Cacheable(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#roomId")
     public Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable) {
         return chatParticipantRepo.findAllByRoom_Id(roomId, pageable).map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
+    }
+
+    @Override
+    @Cacheable(value = CacheName.PARTICIPANT_EXISTS,
+            key = "#roomId + '-' + #userId",
+            condition = "#userId != null && #roomId != null")
+    public boolean isParticipantExists(String roomId, String userId) {
+        return chatParticipantRepo.existsByRoomIdAndUserId(roomId, userId);
     }
 }

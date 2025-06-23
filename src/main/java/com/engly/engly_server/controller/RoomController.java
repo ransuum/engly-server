@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -79,7 +80,7 @@ public class RoomController {
             @Parameter(description = "Filter rooms by a specific category.")
             @RequestParam(defaultValue = "NEWS") CategoryType category,
             @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = "name,asc") Pageable pageable,
+                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
         final var rooms = roomService.findAllRoomsByCategoryType(category, pageable);
         return ResponseEntity.ok(assembler.toModel(rooms));
@@ -101,7 +102,7 @@ public class RoomController {
             @PathVariable(value = "category") CategoryType category,
             @RequestParam(value = "keyString") String keyString,
             @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = "name,asc") Pageable pageable,
+                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
         final var rooms = roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString, pageable);
         return ResponseEntity.ok(assembler.toModel(rooms));
@@ -122,7 +123,7 @@ public class RoomController {
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByKeyString(
             @RequestParam String keyString,
             @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = "name,asc") Pageable pageable,
+                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
         final var rooms = roomService.findAllRoomsContainingKeyString(keyString, pageable);
         return ResponseEntity.ok(assembler.toModel(rooms));

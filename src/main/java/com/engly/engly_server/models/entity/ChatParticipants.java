@@ -15,7 +15,8 @@ import java.time.Instant;
 @Data
 @Builder
 @Entity
-@Table(name = "chat_participants")
+@Table(name = "chat_participants",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"user_id"}))
 public class ChatParticipants {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

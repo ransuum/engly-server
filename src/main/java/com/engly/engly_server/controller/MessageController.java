@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
@@ -48,7 +49,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
                                                                                             @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                                    sort = "createdDate,asc") Pageable pageable,
+                                                                                                    sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
         final var messages = messageService.findAllMessageInCurrentRoom(roomId, pageable);
         return ResponseEntity.ok(assembler.toModel(messages));
@@ -75,7 +76,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
                                                                                             @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                                    sort = "createdAt,asc") Pageable pageable,
+                                                                                                    sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
                                                                                             @RequestParam String keyString,
                                                                                             PagedResourcesAssembler<MessagesDto> assembler) {
         final var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);

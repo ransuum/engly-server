@@ -29,6 +29,7 @@ public class CacheName {
     public static final String MESSAGES_SEARCH_RESULTS = "messageSearchResults";
 
     public static final String PARTICIPANTS_BY_ROOM = "participantsByRoom";
+    public static final String PARTICIPANT_EXISTS = "participant-exists";
 
     public static final List<String> CACHES = Arrays.asList(
             USER_ID,
@@ -51,5 +52,6 @@ public class CacheName {
             MESSAGES_BY_ROOM,
             MESSAGES_SEARCH_RESULTS,
 
-            PARTICIPANTS_BY_ROOM);
+            PARTICIPANTS_BY_ROOM,
+            PARTICIPANT_EXISTS);
 }

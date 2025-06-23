@@ -34,6 +34,7 @@ public class MessageServiceImpl implements MessageService {
     private final ChatParticipantsService chatParticipantsService;
 
     @Override
+    @Transactional
     @Caching(
             put = {
                     @CachePut(value = CacheName.MESSAGE_ID, key = "#result.id()")

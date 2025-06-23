@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ChatParticipantRepo extends JpaRepository<ChatParticipants, String> {
     Page<ChatParticipants> findAllByRoom_Id(String roomId, Pageable pageable);
+
+    boolean existsByRoomIdAndUserId(String roomId, String userId);
 }
