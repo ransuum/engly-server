@@ -1,6 +1,5 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
@@ -8,21 +7,30 @@ import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.service.common.RoomService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/rooms")
+@Tag(name = "09. Rooms", description = "APIs for creating, managing, and searching for chat rooms.")
+@SecurityRequirement(name = "bearerAuth")
 public class RoomController {
 
     private final RoomService roomService;
@@ -31,51 +39,50 @@ public class RoomController {
         this.roomService = roomService;
     }
 
+    @Operation(
+            summary = "Create a new room",
+            description = "Creates a new chat room with the specified details and assigns it to a category."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Room created successfully.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RoomsDto.class))),
+            @ApiResponse(responseCode = "400", description = "Bad Request. Invalid room data provided.", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_CREATE_GLOBAL'.", content = @Content)
+    })
     @PostMapping("/create")
-    @Operation(summary = "Create a new room", description = "Creates a new room with the specified category and details")
     @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
     @RateLimiter(name = "RoomController")
-    public ResponseEntity<RoomsDto> createRoom(@RequestParam CategoryType name, @Valid @RequestBody RoomRequestDto roomRequestDto) {
+    public ResponseEntity<RoomsDto> createRoom(
+            @Parameter(description = "The category to assign the new room to.", required = true)
+            @RequestParam CategoryType name,
+            @Valid @RequestBody RoomRequestDto roomRequestDto) {
         return new ResponseEntity<>(roomService.createRoom(name, roomRequestDto), HttpStatus.CREATED);
     }
 
 
+    @Operation(
+            summary = "Get a paginated list of rooms",
+            description = """
+                          Retrieves a paginated list of rooms.
+                          This endpoint supports optional filtering by category and searching by a query string.
+                          
+                          - To filter by category, use the `category` parameter (e.g., `?category=NEWS`).
+                          """
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "List of rooms retrieved successfully.", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
+    })
     @GetMapping("/by-category")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    @Operation(summary = "Get rooms by category",
-            description = """
-                    Retrieves paginated list of rooms filtered by category
-                    page starts from 0
-                    How to use?
-                    You can use in 3 different ways
-                    {
-                      "page": 2,
-                      "size": 20,
-                      "sort": "id"
-                    }
-                    ///////
-                    {
-                       "page": 1,
-                       "size": 10,
-                       "sort": "id,ASC"
-                     }
-                     ////
-                    {
-                       "page": 0,
-                       "size": 10,
-                       "sort": "id,DESC"
-                    }
-                    ///
-                    id can be replaced by different fields in RoomsDto
-                    \s"""
-    )
     public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> getRoomsByCategory(
+            @Parameter(description = "Filter rooms by a specific category.")
             @RequestParam(defaultValue = "NEWS") CategoryType category,
             @ParameterObject @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
-        final var rooms = roomService.findAllRoomsByCategoryType(category);
-        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(rooms, pageable, rooms.size())));
+        final var rooms = roomService.findAllRoomsByCategoryType(category, pageable);
+        return ResponseEntity.ok(assembler.toModel(rooms));
     }
 
     @GetMapping("/find/in/{category}/by-keyString/")
@@ -96,8 +103,8 @@ public class RoomController {
             @ParameterObject @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
-        final var rooms = roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString);
-        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(rooms, pageable, rooms.size())));
+        final var rooms = roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString, pageable);
+        return ResponseEntity.ok(assembler.toModel(rooms));
     }
 
     @GetMapping("/find")
@@ -117,15 +124,19 @@ public class RoomController {
             @ParameterObject @PageableDefault(page = 0, size = 8,
                     sort = "name,asc") Pageable pageable,
             PagedResourcesAssembler<RoomsDto> assembler) {
-        final var rooms = roomService.findAllRoomsContainingKeyString(keyString);
-        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(rooms, pageable, rooms.size())));
+        final var rooms = roomService.findAllRoomsContainingKeyString(keyString, pageable);
+        return ResponseEntity.ok(assembler.toModel(rooms));
     }
 
+    @Operation(summary = "Delete a room by its ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Room deleted successfully.", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_DELETE_GLOBAL'.", content = @Content)
+    })
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a room", description = "Deletes a room by its ID")
     @PreAuthorize("hasAuthority('SCOPE_DELETE_GLOBAL')")
     @RateLimiter(name = "RoomController")
-    public ResponseEntity<ApiResponse> deleteRoom(@PathVariable String id) {
+    public ResponseEntity<com.engly.engly_server.models.dto.ApiResponse> deleteRoom(@PathVariable String id) {
         return ResponseEntity.ok(roomService.deleteRoomById(id));
     }
 

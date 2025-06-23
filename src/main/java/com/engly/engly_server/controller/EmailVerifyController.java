@@ -5,11 +5,17 @@ import com.engly.engly_server.models.dto.EmailSendInfo;
 import com.engly.engly_server.service.notification.EmailVerificationService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +23,8 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/email-verify")
 @Slf4j
-@Tag(name = "Підтвердження email", description = "Контроллер для підтвердження email")
+@Tag(name = "02. Email Verification", description = "APIs for verifying a user's email address after registration.")
+@SecurityRequirement(name = "bearerAuth")
 public class EmailVerifyController {
 
     private final EmailVerificationService emailVerificationService;
@@ -27,45 +34,69 @@ public class EmailVerifyController {
     }
 
     @Operation(
-            summary = "Надсилання посилання на email для підтвердження пошти",
+            summary = "Request a verification email",
             description = """
-                         Вам на пошту прийде лист з посиланням для підтвердження email перейдіть по ньому і виконається запит `http://localhost:8000/api/email-verify/check?token=your-token`,
-                         але повинен бути аксес токен у Bearer(отриманий при реєстрації)
-                    \s""",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Посилання було надіслано на email"),
-                    @ApiResponse(responseCode = "409", description = "Посилання не було надіслано або token не був згенерований коректно")
-            }
+                    Triggers an email to be sent to the authenticated user's registered email address.
+                    The email contains a unique verification token.
+                    
+                    **Authorization:** This endpoint is only accessible to users who have not yet verified their email (i.e., those with `SCOPE_NOT_VERIFIED`).
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "202",
+                    description = "Request accepted. An email will be sent shortly.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = EmailSendInfo.class))
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden. The user is already verified or does not have the 'SCOPE_NOT_VERIFIED'.",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "429",
+                    description = "Too Many Requests. The user has requested emails too frequently.",
+                    content = @Content
+            )
+    })
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @PostMapping
     @RateLimiter(name = "EmailVerifyController")
     public ResponseEntity<EmailSendInfo> notifyUserEmailVerify() {
-        try {
-            return new ResponseEntity<>(emailVerificationService.sendMessage(), HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new ResponseEntity<>(emailVerificationService.sendMessage(), HttpStatus.ACCEPTED);
     }
 
     @Operation(
-            summary = "Підтвердження email за допомогою посилання",
+            summary = "Verify an email address using a token",
             description = """
-                         1. Перейдіть по згенерованому посиланню яке надійшло на email
-                         На почту приходить повідомлення у вигляді: http://localhost:8000/api/email-verify/check?token=your-token.
-                         Копіюйте тільки your-token та вставляеєте його у параметр. Після чого отримуєте знову але оновлений access token та рефреш токен.
-                         Як ввели аксес токен у Bearer, тепер можете робити запити.
-                        \s
-                    \s""",
-            responses = {
-                    @ApiResponse(responseCode = "202", description = "Успішне підтвердження email"),
-                    @ApiResponse(responseCode = "404", description = "Email не був підтверджений")
-            }
+                    Confirms a user's email address using the token sent to them.
+                    The token is provided as a query parameter in the verification link.
+                    
+                    Upon successful verification, the user's roles are updated (e.g., `SCOPE_NOT_VERIFIED` is removed and `SCOPE_READ`/`SCOPE_WRITE` are added), and a new set of JWTs is issued.
+                    """
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Email successfully verified. Returns new JWT tokens.",
+                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AuthResponseDto.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request. The token is invalid, expired, or does not match the user.",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Forbidden. The user attempting to use the token is not the one it was issued for.",
+                    content = @Content
+            )
+    })
     @GetMapping("/check")
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @RateLimiter(name = "EmailVerifyController")
-    public ResponseEntity<AuthResponseDto> checkToken(@RequestParam("token") String token, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDto> checkToken(@Parameter(description = "The verification token received via email.", required = true, example = "FDGDitreKFfdsd")
+                                                      @RequestParam("token") String token, HttpServletResponse response) {
         return new ResponseEntity<>(emailVerificationService.checkToken(token, response), HttpStatus.OK);
     }
 }

@@ -16,10 +16,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @Slf4j
@@ -32,9 +33,6 @@ public class CategoryServiceImpl implements CategoriesService {
             put = {
                     @CachePut(value = CacheName.CATEGORY_ID, key = "#result.id"),
                     @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()")
-            },
-            evict = {
-                    @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
             }
     )
     public CategoriesDto addCategory(CategoryRequestDto categoryRequestDto) {
@@ -53,7 +51,7 @@ public class CategoryServiceImpl implements CategoriesService {
                     @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()")
             },
             evict = {
-                    @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
+                    @CacheEvict(value = CacheName.CATEGORY_ENTITY_ID, key = "#id")
             }
     )
     public CategoriesDto updateCategory(String id, CategoryRequestDto categoryRequestDto) {
@@ -68,13 +66,9 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
-    @Cacheable(value = CacheName.ALL_CATEGORIES, unless = "#result.isEmpty()")
     @Transactional(readOnly = true)
-    public List<CategoriesDto> getAllCategories() {
-        return categoriesRepo.findAll()
-                .stream()
-                .map(CategoryMapper.INSTANCE::toCategoriesDto)
-                .toList();
+    public Page<CategoriesDto> getAllCategories(Pageable pageable) {
+        return categoriesRepo.findAll(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
     }
 
     @Override
@@ -90,7 +84,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     @Caching(evict = {
             @CacheEvict(value = CacheName.CATEGORY_ID, key = "#categoryId"),
-            @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true),
+            @CacheEvict(value = CacheName.CATEGORY_ENTITY_ID, key = "#categoryId"),
             @CacheEvict(value = CacheName.CATEGORY_NAME, allEntries = true)
     })
     public void deleteCategory(String categoryId) {
@@ -101,10 +95,16 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()")
     @Transactional(readOnly = true)
-    public CategoriesDto findByName(CategoryType name) {
-        return CategoryMapper.INSTANCE.toCategoriesDto(
-                categoriesRepo.findByName(name).orElseThrow(()
-                        -> new NotFoundException("Category not found while finding by category type name"))
-        );
+    public Categories findByName(CategoryType name) {
+        return categoriesRepo.findByName(name).orElseThrow(()
+                        -> new NotFoundException("Category not found while finding by category type name"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.CATEGORY_ENTITY_ID, key = "#id", sync = true)
+    public Categories findCategoryEntityById(String id) {
+        return categoriesRepo.findById(id).orElseThrow(()
+                -> new NotFoundException("Category not found while finding by id: " + id));
     }
 }

@@ -9,6 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -16,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -28,7 +31,7 @@ import java.util.List;
 
 @RestController
 @Slf4j
-@Tag(name = "Автентифікація та Авторизація", description = "Контролер для реєстрації, входу та оновлення токену")
+@Tag(name = "01. Authentication", description = "Endpoints for user sign-up, sign-in, and token management.")
 public class AuthController {
     private final AuthService authService;
 
@@ -37,28 +40,25 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "User Authentication",
-            description = """
-                         Use Basic Auth in Postman:
-                         1. Go to the Authorization tab and select `Basic Auth`
-                         2. Enter username and password
-                         3. Specify URL: `http://localhost:8000/sign-in`
-                         4. Select `POST` method and click `Send`
-                         5. Response: access token, refresh token and details
-                         6. Add access token to Bearer
-                        \s
-                         Use Basic Auth in Swagger:
-                         1. Go to the icon lock and use `Basic Auth`
-                         2. Enter username and password -> authorize
-                         3. Response: access token, refresh token and details
-                         4. Try it out -> execute
-                         4. Add access token to Bearer auth in swagger
-                    \s""",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Successful authentication. Returns access and refresh tokens."),
-                    @ApiResponse(responseCode = "401", description = "Invalid credentials")
-            }
+            summary = "Sign in a user",
+            description = "Authenticates a user with their credentials (e.g., email and password) and returns JWT tokens. " +
+                    "This endpoint uses Basic Authentication."
     )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Authentication successful. Returns new JWT tokens and user details.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AuthResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized. Invalid credentials provided.",
+                    content = @Content
+            )
+    })
     @PostMapping("/sign-in")
     @RateLimiter(name = "AuthController")
     public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody SignInDto signInDto, HttpServletResponse response) {
@@ -66,62 +66,37 @@ public class AuthController {
     }
 
     @Operation(
-            summary = "User Authentication",
+            summary = "Register a new user",
             description = """
-                         Use refresh-token in Postman:
-                         1. Go to the Authorization tab and select `Bearer`
-                         2. Specify URL: `http://localhost:8000/refresh-token` POST
-                         3. Click execute
-                         4. Response: access token, refresh token and details
-                        \s
-                         Use refresh-token in Swagger:
-                         1. Go to the icon lock and select `Bearer` -> put refresh token in there:
-                         2. Write in param refresh token too
-                         3. Click execute
-                         4. Response: access token, refresh token and details
-                    \s""",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Новий Access-токен успішно отримано"),
-                    @ApiResponse(responseCode = "403", description = "Refresh-токен недійсний або закінчився термін дії")
-            }
+                          Creates a new user account with the provided details.
+                          Upon successful registration via email, the user is assigned a `NOT_VERIFIED` role and must verify their email before accessing most protected endpoints.
+                          
+                          Available `goals` enum values:
+                          - `DEFAULT`
+                          - `IMPROVE_ENGLISH`
+                          - `LEARN_NEW_LANGUAGE`
+                          - `MEET_NEW_PEOPLE`
+                          """
     )
-    @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
-    @PostMapping("/refresh-token")
-    @RateLimiter(name = "AuthController")
-    public ResponseEntity<Object> getAccessToken(
-            @CookieValue(value = "refreshToken", required = false) String refreshTokenFromCookie,
-            HttpServletResponse httpServletResponse) {
-        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(refreshTokenFromCookie, httpServletResponse));
-    }
-
-    @Operation(
-            summary = "Реєстрація нового користувача",
-            description = """
-                             For Goals:
-                             DEFAULT("Default"),
-                             IMPROVE_ENGLISH("Improve English"),
-                             LEARN_NEW_LANGUAGE("Learn new language"),
-                             MEET_NEW_PEOPLE("Meet new people");
-                            \s
-                         \s
-                         Після введення всіх полів -> отримання access token + refresh token.
-                         Так як це Email реєстрація буде видана роль NOT_VERIFIED. Це означає що ви не зможете зробити взагалі запит
-                         окрім '/api/notify'. Якщо реєстрація через гугл підтверджувати не треба.
-                    \s""",
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    description = "Дані користувача для реєстрації",
-                    required = true,
-                    content = @Content(schema = @Schema(implementation = SignUpRequestDto.class))
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "User successfully registered. Returns JWT tokens and user details.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AuthResponseDto.class)
+                    )
             ),
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "Користувача успішно зареєстровано"),
-                    @ApiResponse(responseCode = "400", description = "Помилка валідації вхідних даних")
-            }
-    )
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Bad Request. Validation failed (e.g., username/email already exists, password too weak, invalid goal).",
+                    content = @Content
+            )
+    })
     @PostMapping("/sign-up")
     @RateLimiter(name = "AuthController")
-    public ResponseEntity<Object> registerUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
-                                               BindingResult bindingResult, HttpServletResponse httpServletResponse) {
+    public ResponseEntity<Object> signUpUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
+                                             BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
         log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequestDto.username());
         if (bindingResult.hasErrors()) {
@@ -132,5 +107,33 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
         }
         return new ResponseEntity<>(authService.registerUser(signUpRequestDto, httpServletResponse), HttpStatus.CREATED);
+    }
+
+    @Operation(
+            summary = "Refresh an access token",
+            description = "Generates a new access token using a valid refresh token. The refresh token must be provided in an `httpOnly` cookie."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Access token successfully refreshed.",
+                    content = @Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = AuthResponseDto.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Unauthorized. The provided refresh token is invalid, expired, or missing.",
+                    content = @Content
+            )
+    })
+    @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
+    @PostMapping("/refresh-token")
+    @RateLimiter(name = "AuthController")
+    public ResponseEntity<AuthResponseDto> getAccessToken(
+            @CookieValue(value = "refreshToken", required = false) String refreshTokenFromCookie,
+            HttpServletResponse httpServletResponse) {
+        return ResponseEntity.ok(authService.getAccessTokenUsingRefreshToken(refreshTokenFromCookie, httpServletResponse));
     }
 }

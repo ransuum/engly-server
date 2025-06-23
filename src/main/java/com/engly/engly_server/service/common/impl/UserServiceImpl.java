@@ -4,6 +4,7 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.UsersDto;
+import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +29,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
+            @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true)
     })
     public ApiResponse delete(String id) {
         return userRepo.findById(id)
@@ -47,18 +50,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.ALL_USER, sync = true)
-    public List<UsersDto> allUsers() {
-        return userRepo.findAll().stream()
-                .map(UserMapper.INSTANCE::toUsersDto)
-                .toList();
+    public Page<UsersDto> allUsers(Pageable pageable) {
+        return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
     }
 
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.USER_ID, allEntries = true),
-            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
+            @CacheEvict(value = CacheName.USER_ID, allEntries = true)
     })
     public List<UsersDto> deleteSomeUsers(List<String> ids) {
         return ids.stream()
@@ -69,5 +68,13 @@ public class UserServiceImpl implements UserService {
                         })
                         .orElse(null))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email", sync = true)
+    public Users findUserEntityByEmail(String email) {
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
     }
 }

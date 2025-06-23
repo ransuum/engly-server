@@ -8,11 +8,11 @@ import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.repo.RoomRepo;
-import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.service.common.RoomService;
+import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +20,12 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.List;
 
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 
@@ -33,17 +34,12 @@ import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 @RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
     private final RoomRepo roomRepo;
-    private final UserRepo userRepo;
-    private final CategoriesRepo categoriesRepo;
+    private final UserService userService;
+    private final CategoriesService categoriesRepo;
     private final SecurityService service;
 
     @Override
     @Caching(
-            evict = {
-                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, key = "#name"),
-                    @CacheEvict(value = CacheName.ROOMS, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOM_SEARCH_RESULTS, allEntries = true)
-            },
             put = {
                     @CachePut(value = CacheName.ROOM_ID, key = "#result.id")
             }
@@ -51,37 +47,22 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
-        final var category = categoriesRepo.findByName(name)
-                .orElseThrow(() -> new NotFoundException("Category not found"));
-        return userRepo.findByEmail(username)
-                .map(creator -> RoomMapper.INSTANCE.roomToDto(roomRepo.save(
-                        Rooms.builder()
-                                .creator(creator)
-                                .createdAt(Instant.now())
-                                .category(category)
-                                .description(roomRequestDto.description())
-                                .name(roomRequestDto.name())
-                                .build()
-                )))
-                .orElseThrow(() -> new NotFoundException("User not found"));
-    }
-
-    @Override
-    @Cacheable(value = CacheName.ROOMS_BY_CATEGORY, key = "#category", sync = true)
-    @Transactional(readOnly = true)
-    public List<RoomsDto> findAllRoomsByCategoryType(CategoryType category) {
-        return roomRepo.findAllByCategory_Name(category)
-                .stream()
-                .map(RoomMapper.INSTANCE::roomToDto)
-                .toList();
+        final var category = categoriesRepo.findByName(name);
+        final var creator = userService.findUserEntityByEmail(username);
+        final var room = roomRepo.save(Rooms.builder()
+                .creator(creator)
+                .createdAt(Instant.now())
+                .category(category)
+                .description(roomRequestDto.description())
+                .name(roomRequestDto.name())
+                .build());
+        return RoomMapper.INSTANCE.roomToDto(room);
     }
 
     @Override
     @Caching(evict = {
             @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
-            @CacheEvict(value = CacheName.ROOM_SEARCH_RESULTS, allEntries = true),
-            @CacheEvict(value = CacheName.ROOMS, allEntries = true)
+            @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id")
     })
     public ApiResponse deleteRoomById(String id) {
         return roomRepo.findById(id)
@@ -94,25 +75,17 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Caching(
-            put = {
-                    @CachePut(value = CacheName.ROOM_ID, key = "#id")
-            },
-            evict = {
-                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOM_SEARCH_RESULTS, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOMS, allEntries = true)
-            }
+            put = { @CachePut(value = CacheName.ROOM_ID, key = "#id") },
+            evict = { @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id") }
     )
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepo.findById(id)
                 .map(room -> {
                     if (isValid(request.newCategory()))
-                        room.setCategory(categoriesRepo.findByName(request.newCategory())
-                                .orElseThrow(() -> new NotFoundException("Category not found")));
+                        room.setCategory(categoriesRepo.findByName(request.newCategory()));
 
                     if (isValid(request.updateCreatorByEmail()))
-                        room.setCreator(userRepo.findByEmail(request.updateCreatorByEmail())
-                                .orElseThrow(() -> new NotFoundException("Creator not found")));
+                        room.setCreator(userService.findUserEntityByEmail(request.updateCreatorByEmail()));
 
                     if (isValid(request.description())) room.setDescription(request.description());
                     if (isValid(request.name())) room.setName(request.name());
@@ -122,22 +95,28 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    @Cacheable(value = CacheName.ROOMS, key = "'keyString_' + #keyString", sync = true)
     @Transactional(readOnly = true)
-    public List<RoomsDto> findAllRoomsContainingKeyString(String keyString) {
-        return roomRepo.findAllRoomsContainingKeyString(keyString)
-                .stream()
-                .map(RoomMapper.INSTANCE::roomToDto)
-                .toList();
+    public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
+        return roomRepo.findAllByCategory_Name(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
     }
 
     @Override
-    @Cacheable(value = CacheName.ROOM_SEARCH_RESULTS, key = "'category_' + #categoryType + '_key_' + #keyString", sync = true)
     @Transactional(readOnly = true)
-    public List<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString) {
-        return roomRepo.findAllByNameContainingIgnoreCaseAndCategoryName(keyString, categoryType)
-                .stream()
-                .map(RoomMapper.INSTANCE::roomToDto)
-                .toList();
+    public Page<RoomsDto> findAllRoomsContainingKeyString(String keyString, Pageable pageable) {
+        return roomRepo.findAllRoomsContainingKeyString(keyString, pageable).map(RoomMapper.INSTANCE::roomToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString, Pageable pageable) {
+        return roomRepo.findAllByNameContainingIgnoreCaseAndCategoryName(keyString, categoryType, pageable)
+                .map(RoomMapper.INSTANCE::roomToDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.ROOM_ENTITY_ID, key = "#id", sync = true)
+    public Rooms findRoomEntityById(String id) {
+        return roomRepo.findById(id).orElseThrow(() -> new NotFoundException("Room not found"));
     }
 }
