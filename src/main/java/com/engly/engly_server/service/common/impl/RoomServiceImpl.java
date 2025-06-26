@@ -35,7 +35,7 @@ import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 public class RoomServiceImpl implements RoomService {
     private final RoomRepo roomRepo;
     private final UserService userService;
-    private final CategoriesService categoriesRepo;
+    private final CategoriesService categoriesService;
     private final SecurityService service;
 
     @Override
@@ -47,7 +47,7 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
-        final var category = categoriesRepo.findByName(name);
+        final var category = categoriesService.findByName(name);
         final var creator = userService.findUserEntityByEmail(username);
         final var room = roomRepo.save(Rooms.builder()
                 .creator(creator)
@@ -82,7 +82,7 @@ public class RoomServiceImpl implements RoomService {
         return roomRepo.findById(id)
                 .map(room -> {
                     if (isValid(request.newCategory()))
-                        room.setCategory(categoriesRepo.findByName(request.newCategory()));
+                        room.setCategory(categoriesService.findByName(request.newCategory()));
 
                     if (isValid(request.updateCreatorByEmail()))
                         room.setCreator(userService.findUserEntityByEmail(request.updateCreatorByEmail()));

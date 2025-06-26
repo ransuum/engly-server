@@ -14,6 +14,4 @@ public interface ChatParticipantsService {
     void updateRoleOfParticipant(String participantId, Roles role);
 
     Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable);
-
-    boolean isParticipantExists(String roomId, String userId);
 }

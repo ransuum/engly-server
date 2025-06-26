@@ -1,6 +1,5 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.exception.SignInException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.create.SignInDto;
@@ -17,7 +16,6 @@ import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -55,29 +53,24 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
 
     @Override
     public AuthResponseDto getJwtTokensAfterAuthentication(SignInDto signInDto, HttpServletResponse response) {
-        try {
-            final var authentication = jwtAuthenticationService.authenticate(signInDto);
-            return userRepo.findByEmail(signInDto.email())
-                    .map(users -> {
-                        users.setLastLogin(Instant.now());
-                        final var savedUser = userRepo.save(users);
-                        final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
-                        log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
-                        return AuthResponseDto.builder()
-                                .accessToken(jwtHolder.accessToken())
-                                .accessTokenExpiry(15 * 60)
-                                .username(users.getUsername())
-                                .tokenType(TokenType.Bearer)
-                                .build();
-                    })
-                    .orElseThrow(() -> {
-                        log.error("[AuthService:userSignInAuth] User :{} not found", signInDto.email());
-                        return new NotFoundException("USER NOT FOUND");
-                    });
-        } catch (BadCredentialsException e) {
-            log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :{}", e.getMessage());
-            throw new SignInException(e.getMessage());
-        }
+        final var authentication = jwtAuthenticationService.authenticate(signInDto);
+        return userRepo.findByEmail(signInDto.email())
+                .map(users -> {
+                    users.setLastLogin(Instant.now());
+                    final var savedUser = userRepo.save(users);
+                    final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
+                    log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
+                    return AuthResponseDto.builder()
+                            .accessToken(jwtHolder.accessToken())
+                            .accessTokenExpiry(15 * 60)
+                            .username(users.getUsername())
+                            .tokenType(TokenType.Bearer)
+                            .build();
+                })
+                .orElseThrow(() -> {
+                    log.error("[AuthService:userSignInAuth] User :{} not found", signInDto.email());
+                    return new NotFoundException("USER NOT FOUND");
+                });
     }
 
 
