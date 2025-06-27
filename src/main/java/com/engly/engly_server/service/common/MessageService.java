@@ -21,5 +21,5 @@ public interface MessageService {
     Page<MessagesDto> findAllMessageInCurrentRoom(String id, Pageable pageable);
 
     Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable);
-    List<UsersDto> findUsersReadMessage(String messageId);
+    List<UsersDto> findUsersWhoReadMessage(String messageId);
 }

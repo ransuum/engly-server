@@ -123,7 +123,7 @@ public class MessageServiceImpl implements MessageService {
     }
     @Override
     @Transactional(readOnly = true)
-    public List<UsersDto> findUsersReadMessage(String messageId) {
+    public List<UsersDto> findUsersWhoReadMessage(String messageId) {
         final var byId = messageRepo.findById(messageId);
         if (byId.isPresent()) {
             final var message = byId.get();
