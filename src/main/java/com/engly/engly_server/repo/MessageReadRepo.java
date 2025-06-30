@@ -15,7 +15,7 @@ public interface MessageReadRepo extends JpaRepository<MessageRead, String> {
     boolean existsByMessageIdAndUserId(String messageId, String userId);
 
     // Get all users who read a specific message
-    List<MessageRead> findByMessageId(String messageId);
+    Page<MessageRead> findAllByMessageId(String messageId, Pageable pageable);
 
     // Get all messages read by a specific user
     Page<MessageRead> findByUserId(String userId, Pageable pageable);

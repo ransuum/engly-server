@@ -19,5 +19,6 @@ public interface UserMapper {
     @Mapping(target = "messages", ignore = true)
     UsersDto toUsersDto(Users user);
 
+
     UserWhoReadsMessageDto toWhoReadMessage(Users user);
 }

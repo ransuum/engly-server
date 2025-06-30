@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.Instant;
 
 @AllArgsConstructor
@@ -16,7 +18,10 @@ import java.time.Instant;
 @Builder
 @Entity
 @Table(name = "moderation")
-public class Moderation {
+public class Moderation implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)

@@ -21,8 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/message")
 @Tag(name = "08. Messages", description = "APIs for retrieving chat messages within a room.")
@@ -31,7 +29,7 @@ public class MessageController {
     private final MessageService messageService;
     private final MessageReadService messageReadService;
 
-    public MessageController(MessageService messageService, MessageReadService messageReadService) {
+    public MessageController(MessageService messageService, MessageReadService messageReadService){
         this.messageService = messageService;
         this.messageReadService = messageReadService;
     }
@@ -90,23 +88,21 @@ public class MessageController {
     }
 
     @Operation(
-            summary = "Retrieving a list of users who read message",
-            description = """
-                        roomId id of the room where to find
-                        page starts from 0 and more
-                        size is the amount of messages retrieves
-                        messageId is a id of message
-                        If the message doesn't exist it should return 409
-                    \s""",
+            summary = "Get all users who have read a specific message",
+            description = "Retrieves a paginated list of users that have marked a specific message as read.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Все виконано успішно"),
-                    @ApiResponse(responseCode = "409", description = "Повідомлення не існує")
+                    @ApiResponse(responseCode = "200", description = "Successfully retrieved the list of users."),
+                    @ApiResponse(responseCode = "404", description = "The message with the specified ID was not found.")
             }
     )
-    @GetMapping("/find/users/who-read/{messageId}/by-message-id")
+    @GetMapping("/{messageId}/readers")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<List<UserWhoReadsMessageDto>> findAllUsersWhoReadMessage(@PathVariable String messageId) {
-        final var users = messageReadService.getUsersWhoReadMessage(messageId);
-        return ResponseEntity.ok(users);
+    public ResponseEntity<PagedModel<EntityModel<UserWhoReadsMessageDto>>> findAllUsersWhoReadMessage(
+            @PathVariable String messageId,
+            @ParameterObject @PageableDefault(page = 0, size = 8,
+                    sort = {"user.username"}, direction = Sort.Direction.ASC) Pageable pageable,
+            PagedResourcesAssembler<UserWhoReadsMessageDto> assembler) {
+        final var users = messageReadService.getUsersWhoReadMessage(messageId, pageable);
+        return ResponseEntity.ok(assembler.toModel(users));
     }
 }

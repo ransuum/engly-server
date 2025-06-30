@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 
@@ -14,18 +15,27 @@ import java.time.Instant;
 @NoArgsConstructor
 @Data
 @Builder
-@Entity()
+@Entity
 @Table(name = "message_reads")
 @IdClass(MessageRead.MessageReadId.class)
-public class MessageRead {
-    @Id
-    @ManyToOne
-    @JoinColumn(name = "message_id", referencedColumnName = "id")
-    private Message message;
+public class MessageRead implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @Id
-    @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @Column(name = "message_id")
+    private String messageId;
+
+    @Id
+    @Column(name = "user_id")
+    private String userId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "message_id", insertable = false, updatable = false)
+    private Message message;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
     private Users user;
 
     @CreationTimestamp
@@ -35,9 +45,12 @@ public class MessageRead {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public class MessageReadId implements Serializable {
-        private Message message;
-        private Users user;
+    public static class MessageReadId implements Serializable {
+        @Serial
+        private static final long serialVersionUID = 1L;
+
+        private String messageId;
+        private String userId;
     }
 }
 
