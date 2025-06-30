@@ -4,8 +4,8 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.ChatParticipantsRequestDto;
-import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
+import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
@@ -32,6 +32,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserService userService;
     private final SecurityService service;
     private final ChatParticipantsService chatParticipantsService;
+//    private final MessageReadService messageReadService;
 
     @Override
     @Transactional
@@ -86,8 +87,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Caching(
-            put = { @CachePut(value = CacheName.MESSAGE_ID, key = "#id") },
-            evict = { @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#result.room().id()") }
+            put = {@CachePut(value = CacheName.MESSAGE_ID, key = "#id")},
+            evict = {@CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#result.room().id()")}
     )
     public MessagesDto editMessage(String id, String content) {
         return messageRepo.findById(id)
