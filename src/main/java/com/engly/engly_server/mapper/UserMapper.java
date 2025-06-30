@@ -1,5 +1,6 @@
 package com.engly.engly_server.mapper;
 
+import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.entity.Users;
 import org.mapstruct.Mapper;
@@ -17,4 +18,6 @@ public interface UserMapper {
     @Mapping(target = "notifications", ignore = true)
     @Mapping(target = "messages", ignore = true)
     UsersDto toUsersDto(Users user);
+
+    UserWhoReadsMessageDto toWhoReadMessage(Users user);
 }

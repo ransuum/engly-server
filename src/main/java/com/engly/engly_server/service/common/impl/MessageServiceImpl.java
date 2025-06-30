@@ -2,13 +2,10 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.MessageMapper;
-import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.create.ChatParticipantsRequestDto;
-import com.engly.engly_server.models.entity.ChatParticipants;
-import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
+import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
@@ -27,8 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
@@ -37,6 +32,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserService userService;
     private final SecurityService service;
     private final ChatParticipantsService chatParticipantsService;
+//    private final MessageReadService messageReadService;
 
     @Override
     @Transactional
@@ -91,8 +87,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Caching(
-            put = { @CachePut(value = CacheName.MESSAGE_ID, key = "#id") },
-            evict = { @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#result.room().id()") }
+            put = {@CachePut(value = CacheName.MESSAGE_ID, key = "#id")},
+            evict = {@CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#result.room().id()")}
     )
     public MessagesDto editMessage(String id, String content) {
         return messageRepo.findById(id)
@@ -120,21 +116,5 @@ public class MessageServiceImpl implements MessageService {
     public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
         return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString, pageable)
                 .map(MessageMapper.INSTANCE::toMessageDto);
-    }
-    @Override
-    @Transactional(readOnly = true)
-    public List<UsersDto> findUsersWhoReadMessage(String messageId) {
-        final var byId = messageRepo.findById(messageId);
-        if (byId.isPresent()) {
-            final var message = byId.get();
-
-            return message.getRoom().getChatParticipants()
-                    .stream()
-                    .map(ChatParticipants::getUser)
-                    .filter(user -> user.getLastLogin().isAfter(message.getCreatedAt()))
-                    .map(UserMapper.INSTANCE::toUsersDto).toList();
-        } else {
-            throw new NotFoundException("message not found %s".formatted(messageId));
-        }
     }
 }

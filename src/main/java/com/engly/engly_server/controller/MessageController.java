@@ -1,7 +1,8 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.dto.UsersDto;
+import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
+import com.engly.engly_server.service.common.MessageReadService;
 import com.engly.engly_server.service.common.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,9 +29,11 @@ import java.util.List;
 @SecurityRequirement(name = "bearerAuth")
 public class MessageController {
     private final MessageService messageService;
+    private final MessageReadService messageReadService;
 
-    public MessageController(MessageService messageService) {
+    public MessageController(MessageService messageService, MessageReadService messageReadService) {
         this.messageService = messageService;
+        this.messageReadService = messageReadService;
     }
 
     @Operation(
@@ -102,8 +105,8 @@ public class MessageController {
     )
     @GetMapping("/find/users/who-read/{messageId}/by-message-id")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<List<UsersDto>> findAllUsersWhoReadMessage(@PathVariable String messageId) {
-        final var users = messageService.findUsersWhoReadMessage(messageId);
+    public ResponseEntity<List<UserWhoReadsMessageDto>> findAllUsersWhoReadMessage(@PathVariable String messageId) {
+        final var users = messageReadService.getUsersWhoReadMessage(messageId);
         return ResponseEntity.ok(users);
     }
 }
