@@ -267,6 +267,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:8000",
+                "https://engly-server-practika-5d017e7c.koyeb.app",
+                "http://localhost:3000",
                 "https://engly-client-blmg.vercel.app")
         );
 

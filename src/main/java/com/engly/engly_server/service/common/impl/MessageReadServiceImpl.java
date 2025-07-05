@@ -42,6 +42,8 @@ public class MessageReadServiceImpl implements MessageReadService {
         List<MessageRead> newReads = messageIds.parallelStream()
                 .filter(messageId -> !cache.hasUserReadMessage(messageId, userId))
                 .map(messageId -> MessageRead.builder()
+                        .messageId(messageId)
+                        .userId(userId)
                         .message(Message.builder().id(messageId).build())
                         .user(Users.builder().id(userId).build())
                         .build())
