@@ -47,12 +47,10 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
-        final var category = categoriesService.findByName(name);
-        final var creator = userService.findUserEntityByEmail(username);
         final var room = roomRepo.save(Rooms.builder()
-                .creator(creator)
+                .creator(userService.findUserEntityByEmail(username))
                 .createdAt(Instant.now())
-                .category(category)
+                .category(categoriesService.findByName(name))
                 .description(roomRequestDto.description())
                 .name(roomRequestDto.name())
                 .build());

@@ -5,6 +5,8 @@ import com.engly.engly_server.models.dto.GoogleAvailabilityDto;
 
 public interface UserValidationService {
     GoogleAvailabilityDto firstLogin();
+
     AvailabilityResponseDto isUsernameAvailable(String username);
+
     AvailabilityResponseDto isEmailAvailable(String email);
 }

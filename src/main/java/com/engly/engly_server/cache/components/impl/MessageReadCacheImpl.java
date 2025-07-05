@@ -21,10 +21,4 @@ public class MessageReadCacheImpl implements MessageReadCache {
     public boolean hasUserReadMessage(String messageId, String userId) {
         return messageReadRepo.existsByMessageIdAndUserId(messageId, userId);
     }
-
-    @Override
-    @CachePut(value = CacheName.MESSAGE_READ_STATUS, key = "#messageId + '_' + #userId")
-    public boolean updateReadStatus(String messageId, String userId, boolean status) {
-        return status;
-    }
 }

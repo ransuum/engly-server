@@ -9,6 +9,7 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -29,7 +31,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_ID, key = "#id"),
-            @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true)
+            @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
     })
     public ApiResponse delete(String id) {
         return userRepo.findById(id)
@@ -50,6 +54,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.ALL_USER, sync = true)
     public Page<UsersDto> allUsers(Pageable pageable) {
         return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
     }
@@ -57,17 +62,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.USER_ID, allEntries = true)
+            @CacheEvict(value = CacheName.USER_ID, allEntries = true),
+            @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
     })
-    public List<UsersDto> deleteSomeUsers(List<String> ids) {
-        return ids.stream()
-                .map(id -> userRepo.findById(id)
-                        .map(user -> {
-                            userRepo.delete(user);
-                            return UserMapper.INSTANCE.toUsersDto(user);
-                        })
-                        .orElse(null))
-                .toList();
+    public Integer deleteSomeUsers(List<String> ids) {
+        if (ids == null || ids.isEmpty()) return 0;
+        return userRepo.deleteAllByIdIn(ids);
     }
 
     @Override

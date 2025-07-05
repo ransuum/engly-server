@@ -9,6 +9,7 @@ import com.engly.engly_server.models.entity.MessageRead;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repo.MessageReadRepo;
 import com.engly.engly_server.service.common.MessageReadService;
+import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class MessageReadServiceImpl implements MessageReadService {
 
     private final MessageReadRepo messageReadRepository;
     private final CachingManagement cachingManagement;
+    private final RoomService roomService;
 
     @Override
     @Caching(
@@ -44,11 +46,7 @@ public class MessageReadServiceImpl implements MessageReadService {
                         .user(Users.builder().id(userId).build())
                         .build())
                 .toList();
-        if (!newReads.isEmpty()) {
-            messageReadRepository.saveAll(newReads);
-            newReads.forEach(read -> cache.
-                    updateReadStatus(read.getMessage().getId(), read.getUser().getId(), true));
-        }
+        if (!newReads.isEmpty()) messageReadRepository.saveAll(newReads);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
+import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.security.cookiemanagement.CookieUtils;
@@ -33,24 +34,11 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
 
         final var refreshToken = Objects.requireNonNull(authCookie).substring(7);
 
-        refreshTokenRepo.findByTokenAndRevokedIsFalse(refreshToken)
-                .map(token -> {
-                    token.setRevoked(true);
-                    return refreshTokenRepo.save(token);
-                }).orElse(null);
+        RefreshToken refreshToken1 = refreshTokenRepo.findByTokenAndRevokedIsFalse(refreshToken).orElse(null);
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            Arrays.stream(cookies).forEach(cookie -> {
-                Cookie toDelete = new Cookie(cookie.getName(), "");
-                toDelete.setPath(cookie.getPath() != null ? cookie.getPath() : "/");
-                if (cookie.getDomain() != null) toDelete.setDomain(cookie.getDomain());
-                toDelete.setMaxAge(0);
-                toDelete.setHttpOnly(cookie.isHttpOnly());
-                toDelete.setSecure(cookie.getSecure());
-
-                response.addCookie(toDelete);
-            });
+        if (refreshToken1 != null) {
+            refreshToken1.setRevoked(true);
+            refreshTokenRepo.save(refreshToken1);
         }
     }
 }

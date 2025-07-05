@@ -15,7 +15,7 @@ public interface UserService {
 
     Page<UsersDto> allUsers(Pageable pageable);
 
-    List<UsersDto> deleteSomeUsers(List<String> ids);
+    Integer deleteSomeUsers(List<String> ids);
 
     Users findUserEntityByEmail(String email);
 }

@@ -1,7 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.cache.CachingManagement;
-import com.engly.engly_server.cache.components.impl.ChatParticipantCacheImpl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.ChatParticipantMapper;
 import com.engly.engly_server.models.dto.ChatParticipantsDto;

@@ -96,21 +96,16 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
 
     @Override
     public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
-        try {
-            final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
-            final var jwtHolder = jwtAuthenticationService.createAuthObject(user, httpServletResponse);
+        final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
+        final var jwtHolder = jwtAuthenticationService.createAuthObject(user, httpServletResponse);
 
-            log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
-            return AuthResponseDto.builder()
-                    .accessToken(jwtHolder.accessToken())
-                    .accessTokenExpiry(5 * 60)
-                    .username(signUpRequestDto.username())
-                    .tokenType(TokenType.Bearer)
-                    .build();
-        } catch (ValidationException e) {
-            log.error("[AuthService:registerUser]Exception while registering the user due to :{}", e.getMessage());
-            throw new ResponseStatusException(HttpStatus.NOT_ACCEPTABLE, e.getMessage());
-        }
+        log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
+        return AuthResponseDto.builder()
+                .accessToken(jwtHolder.accessToken())
+                .accessTokenExpiry(5 * 60)
+                .username(signUpRequestDto.username())
+                .tokenType(TokenType.Bearer)
+                .build();
     }
 
     @Override

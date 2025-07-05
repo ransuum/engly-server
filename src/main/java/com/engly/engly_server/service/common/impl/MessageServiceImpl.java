@@ -3,6 +3,7 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
+import com.engly.engly_server.models.dto.MessagesViewedEvent;
 import com.engly.engly_server.models.dto.create.ChatParticipantsRequestDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
@@ -12,43 +13,28 @@ import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.*;
 import com.engly.engly_server.utils.cache.CacheName;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.core.task.TaskExecutor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.concurrent.CompletableFuture;
-
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
     private final MessageRepo messageRepo;
     private final RoomService roomService;
     private final UserService userService;
     private final SecurityService service;
     private final ChatParticipantsService chatParticipantsService;
-    private final MessageReadService messageReadService;
-    private final TaskExecutor taskExecutor;
-
-    public MessageServiceImpl(MessageRepo messageRepo, RoomService roomService,
-                              UserService userService, SecurityService service,
-                              ChatParticipantsService chatParticipantsService, MessageReadService messageReadService,
-                              @Qualifier("applicationTaskExecutor") TaskExecutor taskExecutor) {
-        this.messageRepo = messageRepo;
-        this.roomService = roomService;
-        this.userService = userService;
-        this.service = service;
-        this.chatParticipantsService = chatParticipantsService;
-        this.messageReadService = messageReadService;
-        this.taskExecutor = taskExecutor;
-    }
+    private final ApplicationEventPublisher publisher;
 
     @Override
     @Transactional
@@ -62,8 +48,7 @@ public class MessageServiceImpl implements MessageService {
             }
     )
     public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
-        final var name = service.getCurrentUserEmail();
-        final var user = userService.findUserEntityByEmail(name);
+        final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
         final var room = roomService.findRoomEntityById(messageRequestDto.roomId());
         final var savedMessage = messageRepo.save(Message.builder()
                 .isEdited(Boolean.FALSE)
@@ -129,16 +114,13 @@ public class MessageServiceImpl implements MessageService {
 
         final Page<Message> messages = messageRepo.findAllByRoomId(roomId, pageable);
 
-        var messageIds = messages.getContent().stream()
-                .map(Message::getId)
-                .toList();
+        if (!messages.isEmpty()) {
+            final var messageIds = messages.getContent().stream()
+                    .map(Message::getId)
+                    .toList();
 
-        CompletableFuture.runAsync(() ->
-                        messageReadService.markMessageAsRead(messageIds, currentUser.getId()), taskExecutor)
-                .exceptionally(throwable -> {
-                    log.error("Failed to mark messages as read: {}", throwable.getMessage());
-                    return null;
-                });
+            publisher.publishEvent(new MessagesViewedEvent(messageIds, currentUser.getId()));
+        }
 
         return messages.map(MessageMapper.INSTANCE::toMessageDto);
     }

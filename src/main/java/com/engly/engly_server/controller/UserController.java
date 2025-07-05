@@ -4,8 +4,6 @@ import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.service.common.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -13,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -72,17 +69,7 @@ public class UserController {
 
     @DeleteMapping("/some")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<PagedModel<EntityModel<UsersDto>>> deleteSomeUsers(
-            @ParameterObject @PageableDefault(sort = "username,asc", size = 25, page = 5) Pageable pageable,
-            PagedResourcesAssembler<UsersDto> assembler,
-            @Parameter(
-                    description = "A comma-separated list of user IDs to delete.",
-                    required = true,
-                    array = @ArraySchema(schema = @Schema(type = "string", example = "uuid1,uuid2,uuid3"))
-            )
-            @RequestParam List<String> ids
-    ) {
-        final var users = userService.deleteSomeUsers(ids);
-        return ResponseEntity.ok(assembler.toModel(new PageImpl<>(users, pageable, users.size())));
+    public ResponseEntity<Integer> deleteSomeUsers(@RequestParam List<String> ids) {
+        return ResponseEntity.ok(userService.deleteSomeUsers(ids));
     }
 }

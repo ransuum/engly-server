@@ -6,7 +6,6 @@ import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.service.common.impl.AuthServiceImpl;
-import com.engly.engly_server.service.common.impl.LogoutHandlerServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -38,6 +37,7 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
@@ -59,7 +59,7 @@ public class SecurityConfig {
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
-    private final LogoutHandlerServiceImpl logoutHandlerServiceImpl;
+    private final LogoutHandler logoutHandler;
 
     @Order(0)
     @Bean
@@ -165,8 +165,11 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .addLogoutHandler(logoutHandlerServiceImpl)
-                        .logoutSuccessHandler(((request, response, authentication) -> SecurityContextHolder.clearContext()))
+                        .addLogoutHandler(logoutHandler)
+                        .logoutSuccessHandler(((request, response, authentication) -> {
+                            SecurityContextHolder.clearContext();
+                            response.reset();
+                        }))
                 )
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:logoutSecurityFilterChain] Exception due to :{}", ex);
@@ -261,12 +264,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:3000",
+
+        configuration.setAllowedOrigins(List.of(
                 "http://localhost:8000",
-                "https://engly-chats.vercel.app",
-                "https://engly-client-blmg.vercel.app",
-                "https://engly-server-practika-5d017e7c.koyeb.app")
+                "https://engly-client-blmg.vercel.app")
         );
 
         configuration.setAllowedMethods(Arrays.asList(

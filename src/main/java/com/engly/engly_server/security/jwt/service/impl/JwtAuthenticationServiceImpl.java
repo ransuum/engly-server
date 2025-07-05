@@ -66,22 +66,21 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     private JwtHolder generateAndStoreTokens(Users user, Authentication authentication, HttpServletResponse response) {
-        String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
-        String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
+        final String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
+        final String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
         persistRefreshTokenAndSetCookie(user, refreshToken, response);
         return new JwtHolder(refreshToken, accessToken);
     }
 
     private void persistRefreshTokenAndSetCookie(Users user, String refreshToken, HttpServletResponse response) {
         jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
-        refreshTokenRepo.save(
-                RefreshToken.builder()
-                        .user(user)
-                        .token(refreshToken)
-                        .createdAt(Instant.now())
-                        .expiresAt(Instant.now().plus(REFRESH_TOKEN_VALIDITY_DAYS, ChronoUnit.DAYS))
-                        .revoked(false)
-                        .build()
+        refreshTokenRepo.save(RefreshToken.builder()
+                .user(user)
+                .token(refreshToken)
+                .createdAt(Instant.now())
+                .expiresAt(Instant.now().plus(REFRESH_TOKEN_VALIDITY_DAYS, ChronoUnit.DAYS))
+                .revoked(false)
+                .build()
         );
     }
 }
