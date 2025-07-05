@@ -39,8 +39,9 @@ public class MessageRead implements Serializable {
     private Users user;
 
     @CreationTimestamp
+    @Builder.Default
     @Column(nullable = false, name = "read_at")
-    private Instant readAt;
+    private Instant readAt = Instant.now();
 
     @AllArgsConstructor
     @NoArgsConstructor
