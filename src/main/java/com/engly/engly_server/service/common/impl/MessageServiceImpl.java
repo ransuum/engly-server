@@ -1,6 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.listeners.models.ParticipantAddedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.MessagesViewedEvent;
@@ -33,7 +34,6 @@ public class MessageServiceImpl implements MessageService {
     private final RoomService roomService;
     private final UserService userService;
     private final SecurityService service;
-    private final ChatParticipantsService chatParticipantsService;
     private final ApplicationEventPublisher publisher;
 
     @Override
@@ -57,7 +57,7 @@ public class MessageServiceImpl implements MessageService {
                 .user(user)
                 .room(room)
                 .build());
-        chatParticipantsService.addParticipant(new ChatParticipantsRequestDto(room, user, Roles.ROLE_USER));
+        publisher.publishEvent(new ParticipantAddedEvent(room, user, Roles.ROLE_USER));
         return MessageMapper.INSTANCE.toMessageDto(savedMessage);
     }
 

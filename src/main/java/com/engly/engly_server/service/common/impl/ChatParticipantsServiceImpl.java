@@ -33,7 +33,8 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#chatParticipantsRequestDto.rooms().id + '-' + #chatParticipantsRequestDto.user().id")
     })
     public void addParticipant(ChatParticipantsRequestDto chatParticipantsRequestDto) {
-        if (!cachingManagement.getChatParticipantCache().isParticipantExists(chatParticipantsRequestDto.rooms().getId(), chatParticipantsRequestDto.user().getId())) {
+        if (!cachingManagement.getChatParticipantCache().isParticipantExists(
+                chatParticipantsRequestDto.rooms().getId(), chatParticipantsRequestDto.user().getId())) {
             final var chatParticipant = ChatParticipants.builder()
                     .room(chatParticipantsRequestDto.rooms())
                     .user(chatParticipantsRequestDto.user())

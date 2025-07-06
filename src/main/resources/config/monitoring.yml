@@ -1,0 +1,131 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - prometheus
+          - metrics
+          - caches
+          - threaddump
+          - heapdump
+          - configprops
+          - env
+      base-path: /actuator
+
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+    metrics:
+      access: read_only
+    caches:
+      access: read_only
+    threaddump:
+      access: read_only
+
+  health:
+    db:
+      enabled: true
+    diskspace:
+      enabled: true
+    mail:
+      enabled: true
+    ping:
+      enabled: true
+
+  metrics:
+    enable:
+      all: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+    tags:
+      application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  simple:
+    metrics:
+      export:
+        enabled: true
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+    show-extensions: true
+    show-common-extensions: true
+  api-docs:
+    path: /api-docs
+    enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.engly: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    org.springframework.cache: DEBUG
+    org.springframework.scheduling: INFO
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+  file:
+    name: logs/engly-server.log
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+
+---
+# Development Profile
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+logging:
+  level:
+    com.engly: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.springframework.cache: DEBUG
+
+---
+# Production Profile
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+logging:
+  level:
+    root: WARN
+    com.engly: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+
+---
+# Test Profile
+spring:
+  config:
+    activate:
+      on-profile: test
+
+logging:
+  level:
+    root: WARN
+    com.engly: INFO

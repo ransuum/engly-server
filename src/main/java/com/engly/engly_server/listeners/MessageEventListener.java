@@ -1,4 +1,4 @@
-package com.engly.engly_server.listener;
+package com.engly.engly_server.listeners;
 
 import com.engly.engly_server.models.dto.MessagesViewedEvent;
 import com.engly.engly_server.service.common.MessageReadService;
@@ -16,7 +16,7 @@ public class MessageEventListener {
     private final MessageReadService messageReadService;
 
     @EventListener
-    @Async("applicationTaskExecutor")
+    @Async("messageViewedExecutor")
     public void handleMessagesViewed(MessagesViewedEvent event) {
         try {
             log.debug("Marking {} messages as read for user {}",
