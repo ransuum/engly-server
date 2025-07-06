@@ -21,12 +21,9 @@ public interface RoomMapper {
             target = "lastMessage",
             expression = "java(MessageMapper.INSTANCE.getLastMessage(rooms))"
     )
-    @Mapping(target = "chatParticipants", source = "chatParticipants")
     @Mapping(
             target = "members",
             expression = "java(rooms.getChatParticipants() != null ? (long) rooms.getChatParticipants().size() : 0L)"
     )
-    @Mapping(target = "moderation", source = "moderation")
-    @Mapping(target = "statistics", source = "statistics")
     RoomsDto roomToDto(Rooms rooms);
 }

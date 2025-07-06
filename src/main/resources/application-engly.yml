@@ -9,6 +9,7 @@ spring:
       - security
       - monitoring
       - server
+      - ratelimiter
 
   threads:
     virtual:

@@ -1,4 +1,4 @@
-package com.engly.engly_server.models.dto;
+package com.engly.engly_server.listeners.models;
 
 import java.util.List;
 

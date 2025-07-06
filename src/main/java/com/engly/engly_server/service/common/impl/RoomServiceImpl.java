@@ -60,16 +60,9 @@ public class RoomServiceImpl implements RoomService {
     @Caching(evict = {
             @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
             @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
-            @CacheEvict(value = CacheName.ROOM_SEARCH_RESULTS, allEntries = true)
     })
-    public ApiResponse deleteRoomById(String id) {
-        return roomRepo.findById(id)
-                .map(rooms -> {
-                    roomRepo.delete(rooms);
-                    return new ApiResponse("Room deleted successfully", true, Instant.now());
-                })
-                .orElseThrow(() -> new NotFoundException("You can't delete this room"));
+    public void deleteRoomById(String id) {
+        roomRepo.deleteById(id);
     }
 
     @Override
@@ -98,7 +91,7 @@ public class RoomServiceImpl implements RoomService {
     @Cacheable(
             value = CacheName.ROOMS_BY_CATEGORY,
             key = "#category + ':' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            condition = "#pageable.pageNumber < 10"
+            condition = "#pageable.pageNumber < 5"
     )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
         return roomRepo.findAllByCategory_Name(category, pageable).map(RoomMapper.INSTANCE::roomToDto);

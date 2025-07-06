@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -41,7 +40,7 @@ public class UserServiceImpl implements UserService {
         return userRepo.findById(id)
                 .map(users -> {
                     userRepo.delete(users);
-                    return new ApiResponse("User deleted successfully", true, Instant.now());
+                    return new ApiResponse("User deleted successfully");
                 })
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }

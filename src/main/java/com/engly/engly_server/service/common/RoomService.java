@@ -1,6 +1,5 @@
 package com.engly.engly_server.service.common;
 
-import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
@@ -12,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 public interface RoomService {
     RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto);
 
-    ApiResponse deleteRoomById(String id);
+    void deleteRoomById(String id);
 
     RoomsDto updateRoom(String id, RoomUpdateRequest request);
 

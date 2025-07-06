@@ -1,0 +1,46 @@
+2025-07-07 00:00:23 [tomcat-handler-8] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:00:23 [tomcat-handler-8] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/profile/check
+2025-07-07 00:00:23 [tomcat-handler-8] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:00:40 [tomcat-handler-9] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:00:40 [tomcat-handler-9] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/profile/check
+2025-07-07 00:00:40 [tomcat-handler-9] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:00:42 [tomcat-handler-10] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:00:42 [tomcat-handler-10] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/profile/check
+2025-07-07 00:00:42 [tomcat-handler-10] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:01:06 [tomcat-handler-12] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:01:06 [tomcat-handler-12] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/rooms/by-category
+2025-07-07 00:01:06 [tomcat-handler-12] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:01:12 [tomcat-handler-13] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:01:12 [tomcat-handler-13] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/rooms/by-category
+2025-07-07 00:01:12 [tomcat-handler-13] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:01:15 [tomcat-handler-14] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:01:15 [tomcat-handler-14] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/rooms/by-category
+2025-07-07 00:01:15 [tomcat-handler-14] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:01:17 [tomcat-handler-15] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:01:17 [tomcat-handler-15] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/rooms/by-category
+2025-07-07 00:01:17 [tomcat-handler-15] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:01:19 [tomcat-handler-16] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:01:19 [tomcat-handler-16] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/api/rooms/by-category
+2025-07-07 00:01:19 [tomcat-handler-16] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] Completed
+2025-07-07 00:11:46 [tomcat-handler-20] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:11:46 [tomcat-handler-20] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/actuator
+2025-07-07 00:12:21 [tomcat-handler-22] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:12:21 [tomcat-handler-22] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/actuator/health
+2025-07-07 00:12:38 [tomcat-handler-24] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:12:38 [tomcat-handler-24] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/actuator/info
+2025-07-07 00:12:55 [tomcat-handler-28] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:12:55 [tomcat-handler-28] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/actuator/info
+2025-07-07 00:13:04 [tomcat-handler-29] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:13:04 [tomcat-handler-29] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/actuator/caches/
+2025-07-07 00:13:12 [tomcat-handler-30] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:13:12 [tomcat-handler-30] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/actuator/metrics/
+2025-07-07 00:13:15 [tomcat-handler-31] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal] :: Started 
+2025-07-07 00:13:15 [tomcat-handler-31] INFO  c.e.e.s.jwt.JwtAccessTokenFilter - [JwtAccessTokenFilter:doFilterInternal]Filtering the Http Request:/actuator/metrics
+2025-07-07 00:13:38 [SpringApplicationShutdownHook] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-07-07 00:13:38 [tomcat-shutdown] INFO  o.s.b.w.e.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-07-07 00:13:38 [SpringApplicationShutdownHook] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopping...
+2025-07-07 00:13:38 [SpringApplicationShutdownHook] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - BrokerAvailabilityEvent[available=false, SimpleBrokerMessageHandler [org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry@769ba75d]]
+2025-07-07 00:13:38 [SpringApplicationShutdownHook] INFO  o.s.m.s.b.SimpleBrokerMessageHandler - Stopped.
+2025-07-07 00:13:38 [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-07-07 00:13:38 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - EnglyHikariCP - Shutdown initiated...
+2025-07-07 00:13:38 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - EnglyHikariCP - Shutdown completed.

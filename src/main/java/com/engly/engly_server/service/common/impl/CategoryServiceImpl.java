@@ -29,10 +29,15 @@ public class CategoryServiceImpl implements CategoriesService {
     private final CategoriesRepo categoriesRepo;
 
     @Override
+    @Transactional
     @Caching(
             put = {
                     @CachePut(value = CacheName.CATEGORY_ID, key = "#result.id"),
-                    @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()")
+                    @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()"),
+                    @CachePut(value = CacheName.CATEGORY_ENTITY_ID, key = "#result.id")
+            },
+            evict = {
+                    @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
             }
     )
     public CategoriesDto addCategory(CategoryRequestDto categoryRequestDto) {
@@ -67,13 +72,18 @@ public class CategoryServiceImpl implements CategoriesService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ALL_CATEGORIES,
+            key = "#pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 5"
+    )
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {
         return categoriesRepo.findAll(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
     }
 
     @Override
-    @Cacheable(value = CacheName.CATEGORY_ID, key = "#categoryId")
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.CATEGORY_ID, key = "#categoryId", sync = true)
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findById(categoryId).orElseThrow(()
@@ -93,8 +103,8 @@ public class CategoryServiceImpl implements CategoriesService {
     }
 
     @Override
-    @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()")
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()", sync = true)
     public Categories findByName(CategoryType name) {
         return categoriesRepo.findByName(name).orElseThrow(()
                         -> new NotFoundException("Category not found while finding by category type name"));

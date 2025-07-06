@@ -137,8 +137,9 @@ public class RoomController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_DELETE_GLOBAL')")
     @RateLimiter(name = "RoomController")
-    public ResponseEntity<com.engly.engly_server.models.dto.ApiResponse> deleteRoom(@PathVariable String id) {
-        return ResponseEntity.ok(roomService.deleteRoomById(id));
+    public ResponseEntity<Void> deleteRoom(@PathVariable String id) {
+        roomService.deleteRoomById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")

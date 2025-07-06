@@ -26,35 +26,3 @@ server:
     max-connections: 8192
     accept-count: 100
     max-http-form-post-size: 2MB
-
----
-# Development Profile
-spring:
-  config:
-    activate:
-      on-profile: dev
-
-server:
-  servlet:
-    session:
-      cookie:
-        secure: false
-
----
-# Production Profile
-spring:
-  config:
-    activate:
-      on-profile: prod
-
-server:
-  servlet:
-    session:
-      cookie:
-        secure: true
-        same-site: strict
-  tomcat:
-    threads:
-      max: 300
-      min-spare: 50
-    max-connections: 10000

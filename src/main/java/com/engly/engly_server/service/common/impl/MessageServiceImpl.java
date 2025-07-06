@@ -1,10 +1,9 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.listeners.models.ParticipantAddedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.dto.MessagesViewedEvent;
+import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.models.dto.create.ChatParticipantsRequestDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
@@ -44,6 +43,7 @@ public class MessageServiceImpl implements MessageService {
             },
             evict = {
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#messageRequestDto.roomId()"),
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, allEntries = true),
                     @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#messageRequestDto.roomId()")
             }
     )
@@ -57,7 +57,7 @@ public class MessageServiceImpl implements MessageService {
                 .user(user)
                 .room(room)
                 .build());
-        publisher.publishEvent(new ParticipantAddedEvent(room, user, Roles.ROLE_USER));
+        publisher.publishEvent(new ChatParticipantsRequestDto(room, user, Roles.ROLE_USER));
         return MessageMapper.INSTANCE.toMessageDto(savedMessage);
     }
 
@@ -65,7 +65,7 @@ public class MessageServiceImpl implements MessageService {
     @Caching(
             evict = {
                     @CacheEvict(value = CacheName.MESSAGE_ID, key = "#id"),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#result.room().id()")
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, allEntries = true)
             }
     )
     public MessagesDto deleteMessage(String id) {
@@ -88,7 +88,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Caching(
             put = {@CachePut(value = CacheName.MESSAGE_ID, key = "#id")},
-            evict = {@CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#result.room().id()")}
+            evict = {@CacheEvict(value = CacheName.MESSAGES_BY_ROOM, allEntries = true)}
     )
     public MessagesDto editMessage(String id, String content) {
         return messageRepo.findById(id)
@@ -104,8 +104,8 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM,
-            key = "#roomId",
-            condition = "#pageable.pageNumber == 0",
+            key = "#roomId + ':' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 10",
             unless = "#result.isEmpty()"
     )
     public Page<MessagesDto> findAllMessageInCurrentRoom(String roomId, Pageable pageable) {

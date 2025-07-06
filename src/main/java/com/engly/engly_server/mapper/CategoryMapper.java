@@ -13,6 +13,5 @@ public interface CategoryMapper {
     @Mapping(target = "activeRoomsCount", expression = "java(categories.getRooms() != null ? categories.getRooms().size() : 0)")
     @Mapping(target = "icon", expression = "java(categories.getName().getIcon())")
     @Mapping(target = "name", expression = "java(categories.getName().getVal())")
-    @Mapping(target = "rooms", ignore = true)
     CategoriesDto toCategoriesDto(Categories categories);
 }
