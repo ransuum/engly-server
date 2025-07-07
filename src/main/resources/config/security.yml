@@ -1,0 +1,32 @@
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}
+            redirect-uri: ${app.backend.url}/login/oauth2/code/google
+            scope:
+              - openid
+              - profile
+              - email
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${ENGLY_EMAIL}
+    password: ${ENGLY_EMAIL_PASSWORD}
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          ssl:
+            trust: smtp.gmail.com
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connection-timeout: 10000
+          timeout: 10000
+          write-timeout: 10000

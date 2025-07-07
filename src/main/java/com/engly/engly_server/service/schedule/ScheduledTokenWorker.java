@@ -15,11 +15,14 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class ScheduledTokenWorker {
+
     private final VerifyTokenRepo verifyTokenRepo;
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
+
     @Value("classpath:emailTemplates/verificationTemplate.txt")
     private Resource messageTemplate;
+
     @Value("${app.email.notification.check.url}")
     private String urlTemplate;
 

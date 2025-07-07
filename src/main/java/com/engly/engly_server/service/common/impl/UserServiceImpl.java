@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -33,13 +32,15 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = CacheName.USER_ID, key = "#id"),
             @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
             @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
-            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
+            @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, allEntries = true),
+            @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, allEntries = true)
     })
     public ApiResponse delete(String id) {
         return userRepo.findById(id)
                 .map(users -> {
                     userRepo.delete(users);
-                    return new ApiResponse("User deleted successfully", true, Instant.now());
+                    return new ApiResponse("User deleted successfully");
                 })
                 .orElseThrow(() -> new NotFoundException("User not found"));
     }
@@ -54,7 +55,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.ALL_USER, sync = true)
+    @Cacheable(
+            value = CacheName.ALL_USER,
+            key = "#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
+            condition = "#pageable.pageNumber < 5"
+    )
     public Page<UsersDto> allUsers(Pageable pageable) {
         return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
     }
@@ -74,7 +79,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email", sync = true)
+    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public Users findUserEntityByEmail(String email) {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found with email: " + email));

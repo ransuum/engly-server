@@ -2,7 +2,6 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
-import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
@@ -39,12 +38,10 @@ public class RoomServiceImpl implements RoomService {
     private final SecurityService service;
 
     @Override
-    @Caching(
-            put = {
-                    @CachePut(value = CacheName.ROOM_ID, key = "#result.id")
-            }
-    )
     @Transactional
+    @Caching(put = {
+            @CachePut(value = CacheName.ROOM_DTO_ID, key = "#result.id")
+    })
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
         final var room = roomRepo.save(Rooms.builder()
@@ -60,21 +57,21 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Caching(evict = {
             @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id")
+            @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
     })
-    public ApiResponse deleteRoomById(String id) {
-        return roomRepo.findById(id)
-                .map(rooms -> {
-                    roomRepo.delete(rooms);
-                    return new ApiResponse("Room deleted successfully", true, Instant.now());
-                })
-                .orElseThrow(() -> new NotFoundException("You can't delete this room"));
+    public void deleteRoomById(String id) {
+        roomRepo.deleteById(id);
     }
 
     @Override
     @Caching(
-            put = { @CachePut(value = CacheName.ROOM_ID, key = "#id") },
-            evict = { @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id") }
+            put = { @CachePut(value = CacheName.ROOM_DTO_ID, key = "#id") },
+            evict = {
+                    @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
+            }
     )
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepo.findById(id)
@@ -94,6 +91,11 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ROOMS_BY_CATEGORY,
+            key = "#category + ':' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 5"
+    )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
         return roomRepo.findAllByCategory_Name(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
     }

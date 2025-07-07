@@ -1,0 +1,28 @@
+server:
+  port: 8000
+  http2:
+    enabled: true
+  compression:
+    enabled: true
+    mime-types:
+      - application/json
+      - text/html
+      - text/css
+      - application/javascript
+      - text/plain
+      - application/xml
+  servlet:
+    session:
+      timeout: 30m
+      cookie:
+        http-only: true
+        secure: false
+        same-site: lax
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 20
+    connection-timeout: 20000
+    max-connections: 8192
+    accept-count: 100
+    max-http-form-post-size: 2MB

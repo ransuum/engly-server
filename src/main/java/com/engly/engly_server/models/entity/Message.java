@@ -1,10 +1,7 @@
 package com.engly.engly_server.models.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -19,7 +16,15 @@ import java.util.List;
 @Data
 @Builder
 @Entity
-@Table(name = "messages")
+@Table(name = "messages", indexes = {
+        @Index(name = "idx_messages_room_created", columnList = "room_id, created_at DESC"),
+        @Index(name = "idx_messages_room_content", columnList = "room_id, content"),
+        @Index(name = "idx_messages_user", columnList = "user_id"),
+        @Index(name = "idx_messages_created", columnList = "created_at DESC"),
+        @Index(name = "idx_messages_room_user", columnList = "room_id, user_id"),
+        @Index(name = "idx_messages_content", columnList = "content")
+})
+@ToString(exclude = {"room", "user", "messageReads"})
 public class Message implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -38,6 +43,7 @@ public class Message implements Serializable {
     private Users user;
 
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<MessageRead> messageReads = new ArrayList<>();
 
     @Column(nullable = false)
