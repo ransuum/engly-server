@@ -8,15 +8,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.messaging.context.SecurityContextChannelInterceptor;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketTransportRegistration;
-
-import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @Configuration
@@ -28,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic")
-                .setHeartbeatValue(new long[] {10000, 10000})
+                .setHeartbeatValue(new long[]{10000, 10000})
                 .setTaskScheduler(heartbeatTaskScheduler());
         config.setApplicationDestinationPrefixes("/app");
     }
@@ -40,64 +37,40 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Override
-    public void configureClientOutboundChannel(ChannelRegistration registration) {
-        registration.taskExecutor(clientOutboundChannelExecutor());
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(authChannelInterceptor, new SecurityContextChannelInterceptor());
+        registration.taskExecutor()
+                .corePoolSize(8)
+                .maxPoolSize(16)
+                .queueCapacity(200);
     }
 
     @Override
-    public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(authChannelInterceptor, new SecurityContextChannelInterceptor());
-        registration.taskExecutor(clientInboundChannelExecutor());
-    }
-
-    @Bean("heartbeatTaskScheduler")
-    public ThreadPoolTaskScheduler heartbeatTaskScheduler() {
-        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
-        taskScheduler.setPoolSize(2);
-        taskScheduler.setThreadNamePrefix("wss-heartbeat-");
-        taskScheduler.setWaitForTasksToCompleteOnShutdown(true);
-        taskScheduler.setAwaitTerminationSeconds(10);
-        taskScheduler.initialize();
-
-        log.info("WebSocket heartbeat TaskScheduler configured: poolSize={}", taskScheduler.getPoolSize());
-        return taskScheduler;
-    }
-
-    @Bean("clientInboundChannelExecutor")
-    public ThreadPoolTaskExecutor clientInboundChannelExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(100);
-        executor.setKeepAliveSeconds(60);
-        executor.setThreadNamePrefix("ws-inbound-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-
-        log.info("WebSocket inbound channel executor configured");
-        return executor;
-    }
-
-    @Bean("clientOutboundChannelExecutor")
-    public ThreadPoolTaskExecutor clientOutboundChannelExecutor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(4);
-        executor.setMaxPoolSize(8);
-        executor.setQueueCapacity(100);
-        executor.setKeepAliveSeconds(60);
-        executor.setThreadNamePrefix("ws-outbound-");
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        executor.initialize();
-
-        log.info("WebSocket outbound channel executor configured");
-        return executor;
+    public void configureClientOutboundChannel(ChannelRegistration registration) {
+        registration.taskExecutor()
+                .corePoolSize(8)
+                .maxPoolSize(16)
+                .queueCapacity(200);
     }
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
         registration.addDecoratorFactory(CustomExceptionWebSocketHandlerDecorator::new);
-        registration.setMessageSizeLimit(64 * 1024);
-        registration.setSendBufferSizeLimit(512 * 1024);
-        registration.setSendTimeLimit(20000);
+        registration.setMessageSizeLimit(128 * 1024); // Increased for richer messages
+        registration.setSendBufferSizeLimit(1024 * 1024); // Increased buffer
+        registration.setSendTimeLimit(30000); // Longer timeout
+    }
+
+    @Bean("heartbeatTaskScheduler")
+    public ThreadPoolTaskScheduler heartbeatTaskScheduler() {
+        ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
+        taskScheduler.setPoolSize(4);
+        taskScheduler.setThreadNamePrefix("ws-heartbeat-");
+        taskScheduler.setWaitForTasksToCompleteOnShutdown(true);
+        taskScheduler.setAwaitTerminationSeconds(10);
+        taskScheduler.initialize();
+
+        log.info("WebSocket heartbeat TaskScheduler configured");
+        return taskScheduler;
     }
 }

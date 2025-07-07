@@ -106,25 +106,6 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheName.MESSAGES_BY_ROOM,
-            key = "#roomId + ':jpa:' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            condition = "#pageable.pageNumber < 10",
-            unless = "#result.isEmpty()"
-    )
-    public Page<MessagesDto> findAllMessageInCurrentRoom(String roomId, Pageable pageable) {
-        final Page<Message> messages = messageRepo.findAllByRoomId(roomId, pageable);
-
-        if (!messages.isEmpty()) {
-            final Users currentUser = userService.findUserEntityByEmail(service.getCurrentUserEmail());
-            publisher.publishEvent(new MessagesViewedEvent(messages.getContent(), currentUser.getId()));
-        }
-
-        return messages.map(MessageMapper.INSTANCE::toMessageDto);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
         return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString, pageable)
                 .map(MessageMapper.INSTANCE::toMessageDto);
@@ -145,7 +126,7 @@ public class MessageServiceImpl implements MessageService {
 
         final long totalElements = messageRepo.countMessagesByRoomId(roomId);
 
-        final int totalPages = PageUtils.getTotalPages(messages.size(), totalElements);
+        final int totalPages = PageUtils.getTotalPages(size, totalElements);
 
         final var messageDtos = messages.stream()
                 .map(MessageMapper.INSTANCE::toMessageDto)

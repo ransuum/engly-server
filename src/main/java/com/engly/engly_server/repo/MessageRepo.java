@@ -10,7 +10,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface MessageRepo extends JpaRepository<Message, String> {
-    Page<Message> findAllByRoomId(String roomId, Pageable pageable);
 
     @Query(value = "SELECT m FROM Message m WHERE m.room.id = :roomId AND m.content LIKE '%' || :keyString || '%'  ")
     Page<Message> findAllMessagesByRoomIdContainingKeyString(String roomId, String keyString, Pageable pageable);
@@ -19,7 +18,7 @@ public interface MessageRepo extends JpaRepository<Message, String> {
         SELECT * FROM messages
         WHERE room_id = :roomId
         AND (is_deleted IS NULL OR is_deleted = false)
-        ORDER BY created_at DESC
+        ORDER BY created_at
         LIMIT :limit OFFSET :offset
         """, nativeQuery = true)
     List<Message> findMessagesByRoomIdPaginated(

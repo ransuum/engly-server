@@ -16,8 +16,6 @@ public interface MessageService {
 
     MessagesDto editMessage(String id, String content);
 
-    Page<MessagesDto> findAllMessageInCurrentRoom(String id, Pageable pageable);
-
     Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable);
 
     MessagePageResponse findAllMessageInCurrentRoomNative(String roomId, int page, int size);

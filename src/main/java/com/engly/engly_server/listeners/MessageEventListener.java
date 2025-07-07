@@ -13,6 +13,8 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
 @Slf4j
@@ -22,8 +24,9 @@ public class MessageEventListener {
     private final MessageReadService messageReadService;
     private final MeterRegistry meterRegistry;
 
+    @Async
     @EventListener
-    @Async("messageViewedExecutor")
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(retryFor = Exception.class, backoff = @Backoff(delay = 1000))
     public void handleMessagesViewed(MessagesViewedEvent event) {
         Timer.Sample sample = Timer.start(meterRegistry);

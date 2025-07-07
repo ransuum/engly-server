@@ -38,31 +38,6 @@ public class MessageController {
     }
 
     @Operation(
-            summary = "Get all messages in a room (paginated)",
-            description = """
-                    Retrieves a paginated list of all messages within a specific chat room.
-                    The response is structured according to Spring HATEOAS `PagedModel`, including page metadata and navigation links.
-                    """
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "A paginated list of messages.",
-                    content = @Content
-            ),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content),
-    })
-    @GetMapping("/current-room/{roomId}")
-    @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
-                                                                                            @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                                    sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
-                                                                                            PagedResourcesAssembler<MessagesDto> assembler) {
-        final var messages = messageService.findAllMessageInCurrentRoom(roomId, pageable);
-        return ResponseEntity.ok(assembler.toModel(messages));
-    }
-
-    @Operation(
             summary = "Search for messages in a room (paginated)",
             description = """
                     Retrieves a paginated list of messages within a specific room that contain a given search string.
@@ -109,6 +84,21 @@ public class MessageController {
         return ResponseEntity.ok(assembler.toModel(users));
     }
 
+    @Operation(
+            summary = "Get all messages in a room (paginated)",
+            description = """
+                    Retrieves a paginated list of all messages within a specific chat room.
+                    The response is structured according to Native query, including page metadata.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "A paginated list of messages.",
+                    content = @Content
+            ),
+            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content),
+    })
     @GetMapping("/current-room/native/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<MessagePageResponse> findAllAvailableMessagesByRoomId(@PathVariable String roomId,

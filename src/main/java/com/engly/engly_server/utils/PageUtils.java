@@ -6,8 +6,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class PageUtils {
 
-    public static int getTotalPages(int size, long totalElem) {
-        return (int) Math.ceil((double) totalElem / size);
+    public static int getTotalPages(int pageSize, long totalElements) {
+        return (int) Math.ceil((double) totalElements / pageSize);
     }
 
     public static boolean hasNextPage(int page, int totalPages) {

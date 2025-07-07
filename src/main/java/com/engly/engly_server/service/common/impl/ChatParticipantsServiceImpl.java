@@ -36,7 +36,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#rooms.id"),
-            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user().id")
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user.id")
     })
     public void addParticipant(Rooms rooms, Users user, Roles role) {
         if (!chatParticipantCache.isParticipantExists(rooms.getId(), user.getId())) {

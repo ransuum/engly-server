@@ -98,11 +98,6 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheName.ROOMS_BY_CATEGORY,
-            key = "#category + ':' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            condition = "#pageable.pageNumber < 5"
-    )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
         return roomRepo.findAllByCategory_Name(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
     }
