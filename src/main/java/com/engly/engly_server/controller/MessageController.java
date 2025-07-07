@@ -1,5 +1,6 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.MessagePageResponse;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
 import com.engly.engly_server.service.common.MessageReadService;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -104,5 +107,13 @@ public class MessageController {
             PagedResourcesAssembler<UserWhoReadsMessageDto> assembler) {
         final var users = messageReadService.getUsersWhoReadMessage(messageId, pageable);
         return ResponseEntity.ok(assembler.toModel(users));
+    }
+
+    @GetMapping("/current-room/native/{roomId}")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public ResponseEntity<MessagePageResponse> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
+                                                                                @RequestParam(defaultValue = "0") @Min(0) int page,
+                                                                                @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
+        return ResponseEntity.ok(messageService.findAllMessageInCurrentRoomNative(roomId, page, size));
     }
 }

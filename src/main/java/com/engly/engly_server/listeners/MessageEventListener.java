@@ -1,6 +1,7 @@
 package com.engly.engly_server.listeners;
 
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
+import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.service.common.MessageReadService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -28,9 +29,11 @@ public class MessageEventListener {
         Timer.Sample sample = Timer.start(meterRegistry);
         try {
             log.debug("Marking {} messages as read for user {}",
-                    event.messageIds().size(), event.userId());
-
-            messageReadService.markMessageAsRead(event.messageIds(), event.userId());
+                    event.messages().size(), event.userId());
+            final var messageIds = event.messages().stream()
+                    .map(Message::getId)
+                    .toList();
+            messageReadService.markMessageAsRead(messageIds, event.userId());
 
             meterRegistry.counter("message.viewed.success").increment();
             log.debug("Successfully marked messages as read for user {}", event.userId());

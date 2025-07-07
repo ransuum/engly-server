@@ -14,7 +14,7 @@ import java.util.Comparator;
 public interface MessageMapper {
     MessageMapper INSTANCE = Mappers.getMapper(MessageMapper.class);
 
-    @Mapping(target = "room", ignore = true)
+    @Mapping(source = "message.room.id", target = "roomId")
     MessagesDto toMessageDto(Message message);
 
     @Named("getLastMessage")

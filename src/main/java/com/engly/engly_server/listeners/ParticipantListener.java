@@ -1,6 +1,6 @@
 package com.engly.engly_server.listeners;
 
-import com.engly.engly_server.models.dto.create.ChatParticipantsRequestDto;
+import com.engly.engly_server.listeners.models.ChatParticipantsAddEevent;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
@@ -24,19 +24,13 @@ public class ParticipantListener {
     @EventListener
     @Async("chatParticipantsExecutor")
     @Retryable(retryFor = Exception.class, backoff = @Backoff(delay = 1000))
-    public void handleAddingChatParticipant(ChatParticipantsRequestDto event) {
+    public void handleAddingChatParticipant(ChatParticipantsAddEevent event) {
         Timer.Sample sample = Timer.start(meterRegistry);
         try {
-            if (event.user() == null || event.rooms() == null) {
-                log.warn("Invalid ChatParticipantsRequestDto: user or room is null");
-                return;
-            }
-
-            chatParticipantsService.addParticipant(event);
+            chatParticipantsService.addParticipant(event.rooms(), event.user(), event.role());
 
             meterRegistry.counter("participant.added.success").increment();
             log.debug("Successfully added user as new participant {}", event.user().getEmail());
-
         } catch (Exception e) {
             meterRegistry.counter("participant.added.failure").increment();
             log.error("Failed to add user as new participant {}", event.user().getEmail(), e);
@@ -47,7 +41,7 @@ public class ParticipantListener {
     }
 
     @Recover
-    public void recover(Exception ex, ChatParticipantsRequestDto event) {
+    public void recover(Exception ex, ChatParticipantsAddEevent event) {
         log.error("Failed to add participant after retries for user {}: {}",
                 event.user().getEmail(), ex.getMessage(), ex);
     }

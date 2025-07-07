@@ -2,7 +2,6 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
-import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
@@ -41,8 +40,7 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     @Caching(put = {
-            @CachePut(value = CacheName.ROOM_ID, key = "#result.id"),
-            @CachePut(value = CacheName.ROOM_ENTITY_ID, key = "#result.id")
+            @CachePut(value = CacheName.ROOM_DTO_ID, key = "#result.id")
     })
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
@@ -59,7 +57,9 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Caching(evict = {
             @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#id"),
             @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
     })
     public void deleteRoomById(String id) {
         roomRepo.deleteById(id);
@@ -67,8 +67,11 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Caching(
-            put = { @CachePut(value = CacheName.ROOM_ID, key = "#id") },
-            evict = { @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id") }
+            put = { @CachePut(value = CacheName.ROOM_DTO_ID, key = "#id") },
+            evict = {
+                    @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
+            }
     )
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepo.findById(id)

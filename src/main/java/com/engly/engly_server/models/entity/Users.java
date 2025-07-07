@@ -2,10 +2,7 @@ package com.engly.engly_server.models.entity;
 
 import com.engly.engly_server.models.enums.*;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -20,6 +17,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "users")
+@ToString(exclude = {"refreshTokens", "rooms", "activityLogs", "moderations", "notifications", "messages"})
 public class Users implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

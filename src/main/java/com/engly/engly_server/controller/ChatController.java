@@ -25,7 +25,7 @@ public class ChatController {
     public void sendMessage(@Payload MessageRequestDto messageRequestDto) {
         final var message = messageService.sendMessage(messageRequestDto);
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + messageRequestDto.roomId(),
+                TOPIC_MESSAGES + message.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_SEND, message));
     }
 
@@ -34,7 +34,7 @@ public class ChatController {
     public void editMessage(@Payload EditMessageRequest request) {
         final var message = messageService.editMessage(request.id(), request.content());
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + message.room().id(),
+                TOPIC_MESSAGES + message.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_EDIT, message));
     }
 
@@ -43,7 +43,7 @@ public class ChatController {
     public void deleteMessage(@Payload String id) {
         final var message = messageService.deleteMessage(id);
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + message.room().id(),
+                TOPIC_MESSAGES + message.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_DELETE, message));
     }
 }

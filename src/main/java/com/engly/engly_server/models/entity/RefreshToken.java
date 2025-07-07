@@ -1,10 +1,7 @@
 package com.engly.engly_server.models.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -16,6 +13,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "refresh_tokens")
+@ToString(exclude = {"user"})
 public class RefreshToken implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

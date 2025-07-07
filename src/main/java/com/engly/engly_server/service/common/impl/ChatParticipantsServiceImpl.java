@@ -5,8 +5,9 @@ import com.engly.engly_server.cache.components.ChatParticipantCache;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.ChatParticipantMapper;
 import com.engly.engly_server.models.dto.ChatParticipantsDto;
-import com.engly.engly_server.models.dto.create.ChatParticipantsRequestDto;
 import com.engly.engly_server.models.entity.ChatParticipants;
+import com.engly.engly_server.models.entity.Rooms;
+import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.ChatParticipantRepo;
 import com.engly.engly_server.service.common.ChatParticipantsService;
@@ -33,16 +34,15 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#chatParticipantsRequestDto.rooms().id"),
-            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#chatParticipantsRequestDto.rooms().id + '-' + #chatParticipantsRequestDto.user().id")
+            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#rooms.id"),
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user().id")
     })
-    public void addParticipant(ChatParticipantsRequestDto chatParticipantsRequestDto) {
-        if (!chatParticipantCache.isParticipantExists(
-                chatParticipantsRequestDto.rooms().getId(), chatParticipantsRequestDto.user().getId())) {
+    public void addParticipant(Rooms rooms, Users user, Roles role) {
+        if (!chatParticipantCache.isParticipantExists(rooms.getId(), user.getId())) {
             final var chatParticipant = ChatParticipants.builder()
-                    .room(chatParticipantsRequestDto.rooms())
-                    .user(chatParticipantsRequestDto.user())
-                    .role(chatParticipantsRequestDto.role())
+                    .room(rooms)
+                    .user(user)
+                    .role(role)
                     .build();
             log.info("User adds to room with email {}", chatParticipant.getUser().getEmail());
             chatParticipantRepo.save(chatParticipant);
