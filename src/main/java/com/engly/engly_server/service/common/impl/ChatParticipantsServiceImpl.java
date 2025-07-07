@@ -35,7 +35,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#rooms.id"),
+            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#rooms.id() + ':native'"),
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user.id")
     })
     public void addParticipant(Rooms rooms, Users user, Roles role) {
@@ -72,7 +72,12 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#roomId")
+    @Cacheable(
+            value = CacheName.PARTICIPANTS_BY_ROOM,
+            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            unless = "#result.content.isEmpty()"
+    )
     public Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable) {
         return chatParticipantRepo.findAllByRoom_Id(roomId, pageable).map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
     }

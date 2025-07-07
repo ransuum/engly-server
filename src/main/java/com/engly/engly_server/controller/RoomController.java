@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -76,14 +77,12 @@ public class RoomController {
     })
     @GetMapping("/by-category")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> getRoomsByCategory(
+    public ResponseEntity<Page<RoomsDto>> getRoomsByCategory(
             @Parameter(description = "Filter rooms by a specific category.")
             @RequestParam(defaultValue = "NEWS") CategoryType category,
             @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable,
-            PagedResourcesAssembler<RoomsDto> assembler) {
-        final var rooms = roomService.findAllRoomsByCategoryType(category, pageable);
-        return ResponseEntity.ok(assembler.toModel(rooms));
+                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(roomService.findAllRoomsByCategoryType(category, pageable));
     }
 
     @GetMapping("/find/in/{category}/by-keyString/")

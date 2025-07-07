@@ -6,11 +6,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-import java.util.List;
+import org.springframework.data.repository.query.Param;
 
 public interface RoomRepo extends JpaRepository<Rooms, String> {
-    Page<Rooms> findAllByCategory_Name(CategoryType name, Pageable pageable);
+
+    @Query(value = """
+        SELECT r.* FROM rooms r
+        JOIN categories c ON r.category_id = c.id
+        WHERE c.name = :#{#name.name()}
+        """, nativeQuery = true)
+    Page<Rooms> findAllByCategoryName(@Param("name") CategoryType name, Pageable pageable);
 
     @Query(value = """
             SELECT r FROM Rooms r WHERE

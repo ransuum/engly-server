@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -28,6 +29,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
     }
 
     @Override
+    @Transactional
     public void batchSaveMessageReads(List<MessageRead> messageReads) {
         if (messageReads == null || messageReads.isEmpty()) {
             log.debug("No message reads to save");

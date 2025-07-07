@@ -72,8 +72,14 @@ public class CategoryServiceImpl implements CategoriesService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ALL_CATEGORIES,
+            key = "':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            unless = "#result.content.isEmpty()"
+    )
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {
-        return categoriesRepo.findAll(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
+        return categoriesRepo.findAllNative(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
     }
 
     @Override
