@@ -1,12 +1,14 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.listeners.models.ChatParticipantsAddEevent;
 import com.engly.engly_server.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
+import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.CategoriesService;
@@ -19,6 +21,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,12 +39,14 @@ public class RoomServiceImpl implements RoomService {
     private final UserService userService;
     private final CategoriesService categoriesService;
     private final SecurityService service;
+    private final ApplicationEventPublisher publisher;
 
     @Override
     @Transactional
-    @Caching(put = {
-            @CachePut(value = CacheName.ROOM_DTO_ID, key = "#result.id")
-    })
+    @Caching(
+            put = @CachePut(value = CacheName.ROOM_DTO_ID, key = "#result.id"),
+            evict = @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#result.id()")
+    )
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
         final var room = roomRepo.save(Rooms.builder()
@@ -51,6 +56,8 @@ public class RoomServiceImpl implements RoomService {
                 .description(roomRequestDto.description())
                 .name(roomRequestDto.name())
                 .build());
+
+        publisher.publishEvent(new ChatParticipantsAddEevent(room, room.getCreator(), Roles.ROLE_ADMIN));
         return RoomMapper.INSTANCE.roomToDto(room);
     }
 
@@ -67,7 +74,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Caching(
-            put = { @CachePut(value = CacheName.ROOM_DTO_ID, key = "#id") },
+            put = {@CachePut(value = CacheName.ROOM_DTO_ID, key = "#id")},
             evict = {
                     @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
                     @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)

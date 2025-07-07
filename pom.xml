@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.6</version>
+		<version>3.5.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.engly</groupId>
@@ -30,8 +30,10 @@
 		<java.version>24</java.version>
 		<spring-native.version>0.12.1</spring-native.version>
 		<resilience4j.version>2.3.0</resilience4j.version>
-		<springdoc-openapi.version>2.8.8</springdoc-openapi.version>
+		<springdoc-openapi.version>2.8.9</springdoc-openapi.version>
 		<mapstruct.version>1.6.3</mapstruct.version>
+		<flywaydb.version>11.10.1</flywaydb.version>
+		<caffeine.v>3.2.1</caffeine.v>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -98,14 +100,14 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-database-postgresql</artifactId>
-			<version>11.8.2</version>
+			<version>${flywaydb.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine -->
 		<dependency>
 			<groupId>com.github.ben-manes.caffeine</groupId>
 			<artifactId>caffeine</artifactId>
-			<version>3.2.0</version>
+			<version>${caffeine.v}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
 		<dependency>
@@ -121,7 +123,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.5</version>
+			<version>42.7.7</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>

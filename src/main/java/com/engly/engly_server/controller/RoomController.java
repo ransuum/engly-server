@@ -51,7 +51,7 @@ public class RoomController {
             @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_CREATE_GLOBAL'.", content = @Content)
     })
     @PostMapping("/create")
-    @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
+    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     @RateLimiter(name = "RoomController")
     public ResponseEntity<RoomsDto> createRoom(
             @Parameter(description = "The category to assign the new room to.", required = true)
