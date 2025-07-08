@@ -11,5 +11,6 @@ public enum EventType {
 
     USER_ONLINE,
     USER_OFFLINE,
-    USER_TYPING
+    USER_TYPING,
+    USER_STOPPED_TYPING
 }
