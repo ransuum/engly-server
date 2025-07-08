@@ -3,6 +3,8 @@ package com.engly.engly_server.utils.fieldvalidation;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 
@@ -34,5 +36,10 @@ public final class FieldUtil {
 
     public static boolean isValid(Object o) {
         return o != null;
+    }
+
+    public static void isValid(String email, String name, String providerId) {
+        if (!isValid(email)|| !isValid(name) || !isValid(providerId))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
     }
 }

@@ -1,6 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.models.builder.GoogleRedirectUrl;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.enums.*;
@@ -10,6 +11,7 @@ import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.AuthService;
 import com.engly.engly_server.security.registration.RegistrationChooser;
+import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ValidationException;
@@ -119,8 +121,7 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
         final String name = oauth2User.getAttribute("name");
         final String providerId = oauth2User.getAttribute("sub");
 
-        if (email == null || name == null || providerId == null)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
+        FieldUtil.isValid(email, name, providerId);
 
         final var user = userRepo.findByEmail(email)
                 .map(existingUser -> {
@@ -132,13 +133,8 @@ public class AuthServiceImpl implements AuthService, AuthenticationSuccessHandle
                                 EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
 
         final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
-
-        final String redirectUrl = frontendUrl + "/google-auth/callback?" +
-                "access_token=" + URLEncoder.encode(jwtHolder.accessToken(), StandardCharsets.UTF_8) +
-                "&refresh_token=" + URLEncoder.encode(jwtHolder.refreshToken(), StandardCharsets.UTF_8) +
-                "&expires_in=" + (15 * 60) +
-                "&token_type=Bearer" +
-                "&username=" + URLEncoder.encode(user.getUsername(), StandardCharsets.UTF_8);
-        response.sendRedirect(redirectUrl);
+        log.info("[AuthService:onAuthenticationSuccess] User:{} successfully authenticated with Google", user.getUsername());
+        response.sendRedirect(new GoogleRedirectUrl(frontendUrl, jwtHolder.accessToken(),
+                jwtHolder.refreshToken(), user.getUsername()).getRedirectUrl());
     }
 }

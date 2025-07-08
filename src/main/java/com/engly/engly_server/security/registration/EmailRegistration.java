@@ -31,7 +31,7 @@ public final class EmailRegistration implements RegistrationChooser {
     public Users registration(SignUpRequestDto signUpRequestDto) {
         try {
             log.info("[AuthService:registerUser]User Registration Started with :::{}", signUpRequestDto);
-            userRepo.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
+            userRepo.findByEmail(signUpRequestDto.email()).ifPresent(_ -> {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exist");
             });
 
