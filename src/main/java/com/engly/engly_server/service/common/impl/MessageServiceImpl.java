@@ -1,7 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.listeners.models.ChatParticipantsAddEevent;
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
@@ -33,6 +32,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserService userService;
     private final SecurityService service;
     private final ApplicationEventPublisher publisher;
+    private final ChatParticipantsService chatParticipantsService;
 
     @Override
     @Transactional
@@ -51,6 +51,9 @@ public class MessageServiceImpl implements MessageService {
     public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
         final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
         final var room = roomService.findRoomEntityById(messageRequestDto.roomId());
+
+        chatParticipantsService.addParticipant(room, user, Roles.ROLE_USER);
+
         final var savedMessage = messageRepo.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
@@ -58,7 +61,6 @@ public class MessageServiceImpl implements MessageService {
                 .user(user)
                 .room(room)
                 .build());
-        publisher.publishEvent(new ChatParticipantsAddEevent(room, user, Roles.ROLE_USER));
         return MessageMapper.INSTANCE.toMessageDto(savedMessage);
     }
 

@@ -35,7 +35,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#rooms.id() + ':native'"),
+            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#rooms.id + ':native'"),
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user.id")
     })
     public void addParticipant(Rooms rooms, Users user, Roles role) {

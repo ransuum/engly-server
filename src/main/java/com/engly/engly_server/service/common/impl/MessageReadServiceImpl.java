@@ -37,7 +37,8 @@ public class MessageReadServiceImpl implements MessageReadService {
     @Transactional
     @Caching(
             evict = {
-                    @CacheEvict(value = CacheName.USERS_WHO_READ_MESSAGE, allEntries = true)
+                    @CacheEvict(value = CacheName.USERS_WHO_READ_MESSAGE, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGE_READ_STATUS, allEntries = true)
             }
     )
     public void markMessageAsRead(List<String> messageIds, String userId) {

@@ -6,7 +6,6 @@ import com.engly.engly_server.repo.MessageReadRepo;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,9 +37,9 @@ public class MessageReadCacheImpl implements MessageReadCache {
 
         log.debug("Batch saving {} message reads", messageReads.size());
 
-        int batchSize = 100;
+        final int batchSize = 100;
         for (int i = 0; i < messageReads.size(); i += batchSize) {
-            int end = Math.min(i + batchSize, messageReads.size());
+            final int end = Math.min(i + batchSize, messageReads.size());
             List<MessageRead> batch = messageReads.subList(i, end);
 
             try {
