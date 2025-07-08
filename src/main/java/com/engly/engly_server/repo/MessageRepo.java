@@ -13,7 +13,6 @@ public interface MessageRepo extends JpaRepository<Message, String> {
             SELECT * FROM messages
             WHERE room_id = :roomId
             AND content LIKE '%' || :keyString || '%'
-            LIMIT :limit OFFSET :offset
             """, nativeQuery = true)
     Page<Message> findAllMessagesByRoomIdContainingKeyString(@Param("roomId") String roomId,
                                                              Pageable pageable,
@@ -23,8 +22,6 @@ public interface MessageRepo extends JpaRepository<Message, String> {
             SELECT * FROM messages
             WHERE room_id = :roomId
             AND (is_deleted IS NULL OR is_deleted = false)
-            ORDER BY created_at
-            LIMIT :limit OFFSET :offset
             """, nativeQuery = true)
     Page<Message> findMessagesByRoomIdPaginated(
             @Param("roomId") String roomId, Pageable pageable);

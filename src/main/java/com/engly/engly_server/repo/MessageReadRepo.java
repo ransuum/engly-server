@@ -17,8 +17,8 @@ public interface MessageReadRepo extends JpaRepository<MessageRead, String> {
     boolean existsByMessageIdAndUserId(String messageId, String userId);
 
     @Query(value = """
-            select * from message_reads
-            where message_id = :messageId
+            SELECT * FROM message_reads
+            WHERE message_id = :messageId
             """, nativeQuery = true)
     Page<MessageRead> findAllByMessageId(@Param("messageId") String messageId, Pageable pageable);
 

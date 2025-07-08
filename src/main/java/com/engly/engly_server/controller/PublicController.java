@@ -53,7 +53,7 @@ public class PublicController {
     @GetMapping("/get-all-categories")
     public ResponseEntity<Page<CategoriesDto>> getAll(
             @ParameterObject
-            @PageableDefault(size = 8, sort = {"createdAt"}, direction = Sort.Direction.ASC)
+            @PageableDefault(size = 8, sort = {"created_at"}, direction = Sort.Direction.ASC)
             Pageable pageable) {
         return ResponseEntity.ok(categoriesService.getAllCategories(pageable));
     }
