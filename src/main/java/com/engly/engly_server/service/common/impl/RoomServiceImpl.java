@@ -1,7 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.listeners.models.ChatParticipantsAddEevent;
 import com.engly.engly_server.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.RoomsDto;
 import com.engly.engly_server.models.dto.create.RoomRequestDto;
@@ -45,7 +44,10 @@ public class RoomServiceImpl implements RoomService {
     @Transactional
     @Caching(
             put = @CachePut(value = CacheName.ROOM_DTO_ID, key = "#result.id"),
-            evict = @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#result.id()")
+            evict = {
+                    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#result.id()"),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, key = "#result.id() + ':native'")
+            }
     )
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         final var username = service.getCurrentUserEmail();
@@ -98,8 +100,14 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ROOMS_BY_CATEGORY,
+            key = "#category.name() + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            unless = "#result.content.isEmpty()"
+    )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
-        return roomRepo.findAllByCategory_Name(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
+        return roomRepo.findAllByCategoryName(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
     }
 
     @Override

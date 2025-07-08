@@ -37,7 +37,8 @@ public class MessageReadServiceImpl implements MessageReadService {
     @Transactional
     @Caching(
             evict = {
-                    @CacheEvict(value = CacheName.USERS_WHO_READ_MESSAGE, allEntries = true)
+                    @CacheEvict(value = CacheName.USERS_WHO_READ_MESSAGE, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGE_READ_STATUS, allEntries = true)
             }
     )
     public void markMessageAsRead(List<String> messageIds, String userId) {
@@ -63,8 +64,9 @@ public class MessageReadServiceImpl implements MessageReadService {
     @Override
     @Cacheable(
             value = CacheName.USERS_WHO_READ_MESSAGE,
-            key = "#messageId + '_page_' + #pageable.pageNumber + '_size_' + #pageable.pageSize",
-            unless = "#result.isEmpty()"
+            key = "#messageId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            unless = "#result.content.isEmpty()"
     )
     public Page<UserWhoReadsMessageDto> getUsersWhoReadMessage(String messageId, Pageable pageable) {
         return messageReadRepository.findAllByMessageId(messageId, pageable)

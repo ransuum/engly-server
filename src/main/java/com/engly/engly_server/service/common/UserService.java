@@ -18,4 +18,6 @@ public interface UserService {
     Integer deleteSomeUsers(List<String> ids);
 
     Users findUserEntityByEmail(String email);
+
+    String getUserIdByEmail(String email);
 }

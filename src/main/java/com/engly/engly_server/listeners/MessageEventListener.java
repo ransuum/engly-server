@@ -7,7 +7,6 @@ import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.event.EventListener;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
@@ -24,8 +23,7 @@ public class MessageEventListener {
     private final MessageReadService messageReadService;
     private final MeterRegistry meterRegistry;
 
-    @Async
-    @EventListener
+    @Async("messageReadExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(retryFor = Exception.class, backoff = @Backoff(delay = 1000))
     public void handleMessagesViewed(MessagesViewedEvent event) {
@@ -33,6 +31,7 @@ public class MessageEventListener {
         try {
             log.debug("Marking {} messages as read for user {}",
                     event.messages().size(), event.userId());
+
             final var messageIds = event.messages().stream()
                     .map(Message::getId)
                     .toList();
@@ -55,5 +54,6 @@ public class MessageEventListener {
     public void recover(Exception ex, MessagesViewedEvent event) {
         log.error("Failed to process MessagesViewedEvent after retries for user {}: {}",
                 event.userId(), ex.getMessage(), ex);
+        meterRegistry.counter("message.read.abandoned").increment();
     }
 }

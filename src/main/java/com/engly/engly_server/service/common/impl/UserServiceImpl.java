@@ -84,4 +84,11 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
     }
+
+    @Override
+    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    public String getUserIdByEmail(String email) {
+        return userRepo.findByEmail(email).map(Users::getId)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+    }
 }

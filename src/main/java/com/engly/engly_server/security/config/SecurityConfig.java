@@ -38,8 +38,6 @@ import org.springframework.security.oauth2.server.resource.web.access.BearerToke
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -65,7 +63,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain wsHandshakeSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .securityMatcher(new AntPathRequestMatcher("/chat"))
+                .securityMatcher("/chat")
                 .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
@@ -75,7 +73,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain signInSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new AntPathRequestMatcher("/sign-in/**"))
+                .securityMatcher("/sign-in/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().anonymous())
@@ -89,11 +87,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new OrRequestMatcher(
-                        new AntPathRequestMatcher("/api/**"),
-                        new AntPathRequestMatcher("/valid/**"),
-                        new AntPathRequestMatcher("/chat/**"))
-                )
+                .securityMatcher("/api/**", "/valid/**", "/chat/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
@@ -118,9 +112,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, AuthServiceImpl oauth2SuccessHandler) throws Exception {
         return http
-                .securityMatcher(new OrRequestMatcher(
-                        new AntPathRequestMatcher("/oauth2/**"),
-                        new AntPathRequestMatcher("/login/oauth2/**")))
+                .securityMatcher("/oauth2/**", "/login/oauth2/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
@@ -136,7 +128,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new AntPathRequestMatcher("/refresh-token/**"))
+                .securityMatcher("/refresh-token/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
@@ -156,7 +148,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new AntPathRequestMatcher("/logout/**"))
+                .securityMatcher("/logout/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
@@ -183,9 +175,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain registerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new OrRequestMatcher(
-                        new AntPathRequestMatcher("/sign-up/**"),
-                        new AntPathRequestMatcher("/public/**")))
+                .securityMatcher("/sign-up/**", "/public/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->
@@ -198,14 +188,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(
-                        new OrRequestMatcher(
-                                new AntPathRequestMatcher("/swagger-ui/**"),
-                                new AntPathRequestMatcher("/v3/api-docs"),
-                                new AntPathRequestMatcher("/v3/api-docs/**"),
-                                new AntPathRequestMatcher("/swagger-ui.html")
-                        )
-                )
+                .securityMatcher("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth ->
@@ -219,7 +202,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .securityMatcher(new AntPathRequestMatcher("/actuator/**"))
+                .securityMatcher("/actuator/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth

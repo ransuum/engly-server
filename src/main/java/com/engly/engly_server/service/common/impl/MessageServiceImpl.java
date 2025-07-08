@@ -1,19 +1,15 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.listeners.models.ChatParticipantsAddEevent;
-import com.engly.engly_server.mapper.MessageMapper;
-import com.engly.engly_server.models.dto.MessagePageResponse;
-import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
+import com.engly.engly_server.mapper.MessageMapper;
+import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.*;
-import com.engly.engly_server.utils.PageUtils;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +32,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserService userService;
     private final SecurityService service;
     private final ApplicationEventPublisher publisher;
+    private final ChatParticipantsService chatParticipantsService;
 
     @Override
     @Transactional
@@ -54,6 +51,9 @@ public class MessageServiceImpl implements MessageService {
     public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
         final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
         final var room = roomService.findRoomEntityById(messageRequestDto.roomId());
+
+        chatParticipantsService.addParticipant(room, user, Roles.ROLE_USER);
+
         final var savedMessage = messageRepo.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
@@ -61,7 +61,6 @@ public class MessageServiceImpl implements MessageService {
                 .user(user)
                 .room(room)
                 .build());
-        publisher.publishEvent(new ChatParticipantsAddEevent(room, user, Roles.ROLE_USER));
         return MessageMapper.INSTANCE.toMessageDto(savedMessage);
     }
 
@@ -106,8 +105,14 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.MESSAGES_BY_ROOM_CURSOR,
+            key = "#roomId + ':cursor:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            unless = "#result.content.isEmpty()"
+    )
     public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
-        return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, keyString, pageable)
+        return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, pageable, keyString)
                 .map(MessageMapper.INSTANCE::toMessageDto);
     }
 
@@ -115,39 +120,16 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_NATIVE,
-            key = "#roomId + ':native:' + #page + ':' + #size",
-            condition = "#page < 10 && #size <= 100",
-            unless = "#result.messages.isEmpty()"
+            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            unless = "#result.content.isEmpty()"
     )
-    public MessagePageResponse findAllMessageInCurrentRoomNative(String roomId, int page, int size) {
-        final int offset = page * size;
+    public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {
+        final var messages = messageRepo.findMessagesByRoomIdPaginated(roomId, pageable);
+        final var id = userService.getUserIdByEmail(service.getCurrentUserEmail());
 
-        final var messages = messageRepo.findMessagesByRoomIdPaginated(roomId, size, offset);
+        publisher.publishEvent(new MessagesViewedEvent(messages.getContent(), id));
 
-        final long totalElements = messageRepo.countMessagesByRoomId(roomId);
-
-        final int totalPages = PageUtils.getTotalPages(size, totalElements);
-
-        final var messageDtos = messages.stream()
-                .map(MessageMapper.INSTANCE::toMessageDto)
-                .toList();
-
-        if (!messageDtos.isEmpty()) {
-            final Users currentUser = userService.findUserEntityByEmail(service.getCurrentUserEmail());
-            publisher.publishEvent(new MessagesViewedEvent(messages, currentUser.getId()));
-        }
-
-        return MessagePageResponse.builder()
-                .messages(messageDtos)
-                .currentPage(page)
-                .pageSize(size)
-                .totalElements(totalElements)
-                .totalPages(totalPages)
-                .hasNext(PageUtils.hasNextPage(page, totalPages))
-                .hasPrevious(PageUtils.hasPreviousPage(page))
-                .isFirst(page == 0)
-                .isLast(page == totalPages - 1)
-                .numberOfElements(messageDtos.size())
-                .build();
+        return messages.map(MessageMapper.INSTANCE::toMessageDto);
     }
 }

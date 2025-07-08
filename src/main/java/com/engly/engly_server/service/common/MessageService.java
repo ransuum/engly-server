@@ -1,11 +1,9 @@
 package com.engly.engly_server.service.common;
 
-import com.engly.engly_server.models.dto.MessagePageResponse;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
 
 public interface MessageService {
     MessagesDto sendMessage(MessageRequestDto messageRequestDto);
@@ -18,5 +16,5 @@ public interface MessageService {
 
     Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable);
 
-    MessagePageResponse findAllMessageInCurrentRoomNative(String roomId, int page, int size);
+    Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable);
 }

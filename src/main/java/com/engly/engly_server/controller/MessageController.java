@@ -1,6 +1,5 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.MessagePageResponse;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
 import com.engly.engly_server.service.common.MessageReadService;
@@ -11,15 +10,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -56,13 +51,11 @@ public class MessageController {
     })
     @GetMapping("/current-room/{roomId}/by-keyString")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<PagedModel<EntityModel<MessagesDto>>> findAllMessageInCurrentRoom(@PathVariable String roomId,
-                                                                                            @ParameterObject @PageableDefault(page = 0, size = 8,
+    public ResponseEntity<Page<MessagesDto>> findAllMessageInCurrentRoom(@PathVariable String roomId,
+                                                                         @ParameterObject @PageableDefault(page = 0, size = 8,
                                                                                                     sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
-                                                                                            @RequestParam String keyString,
-                                                                                            PagedResourcesAssembler<MessagesDto> assembler) {
-        final var messages = messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);
-        return ResponseEntity.ok(assembler.toModel(messages));
+                                                                         @RequestParam String keyString) {
+        return ResponseEntity.ok(messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable));
     }
 
     @Operation(
@@ -75,13 +68,11 @@ public class MessageController {
     )
     @GetMapping("/{messageId}/readers")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<PagedModel<EntityModel<UserWhoReadsMessageDto>>> findAllUsersWhoReadMessage(
+    public ResponseEntity<Page<UserWhoReadsMessageDto>> findAllUsersWhoReadMessage(
             @PathVariable String messageId,
             @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = {"user.username"}, direction = Sort.Direction.ASC) Pageable pageable,
-            PagedResourcesAssembler<UserWhoReadsMessageDto> assembler) {
-        final var users = messageReadService.getUsersWhoReadMessage(messageId, pageable);
-        return ResponseEntity.ok(assembler.toModel(users));
+                    sort = {"user.username"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(messageReadService.getUsersWhoReadMessage(messageId, pageable));
     }
 
     @Operation(
@@ -101,9 +92,9 @@ public class MessageController {
     })
     @GetMapping("/current-room/native/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<MessagePageResponse> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
-                                                                                @RequestParam(defaultValue = "0") @Min(0) int page,
-                                                                                @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return ResponseEntity.ok(messageService.findAllMessageInCurrentRoomNative(roomId, page, size));
+    public ResponseEntity<Page<MessagesDto>> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
+                                                                                @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                                                        sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(messageService.findAllMessageInCurrentRoomNative(roomId, pageable));
     }
 }
