@@ -16,14 +16,7 @@ import java.util.List;
 @Data
 @Builder
 @Entity
-@Table(name = "messages", indexes = {
-        @Index(name = "idx_messages_room_created", columnList = "room_id, created_at DESC"),
-        @Index(name = "idx_messages_room_content", columnList = "room_id, content"),
-        @Index(name = "idx_messages_user", columnList = "user_id"),
-        @Index(name = "idx_messages_created", columnList = "created_at DESC"),
-        @Index(name = "idx_messages_room_user", columnList = "room_id, user_id"),
-        @Index(name = "idx_messages_content", columnList = "content")
-})
+@Table(name = "messages")
 @ToString(exclude = {"room", "user", "messageReads"})
 public class Message implements Serializable {
     @Serial
