@@ -12,9 +12,6 @@ import java.util.Optional;
 public interface CategoriesRepo extends JpaRepository<Categories, String> {
     Optional<Categories> findByName(CategoryType name);
 
-    @Query(value = """
-            SELECT * FROM categories
-            ORDER BY created_at
-            """, nativeQuery = true)
+    @Query(value = " SELECT * FROM categories", nativeQuery = true)
     Page<Categories> findAllNative(Pageable pageable);
 }

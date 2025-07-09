@@ -35,7 +35,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#rooms.id + ':native'"),
+            @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true),
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user.id")
     })
     public void addParticipant(Rooms rooms, Users user, Roles role) {
@@ -74,7 +74,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.PARTICIPANTS_BY_ROOM,
-            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
             condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
             unless = "#result.content.isEmpty()"
     )

@@ -42,10 +42,10 @@ public class MessageServiceImpl implements MessageService {
             },
             evict = {
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#messageRequestDto.roomId()"),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, key = "#messageRequestDto.roomId() + ':native'"),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, key = "#messageRequestDto.roomId() + ':cursor'"),
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
                     @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, key = "#messageRequestDto.roomId()"),
-                    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#messageRequestDto.roomId()")
+                    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
             }
     )
     public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
@@ -107,7 +107,7 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_CURSOR,
-            key = "#roomId + ':cursor:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            key = "#roomId + ':cursor:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
             condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
             unless = "#result.content.isEmpty()"
     )
@@ -120,7 +120,7 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_NATIVE,
-            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
             condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
             unless = "#result.content.isEmpty()"
     )

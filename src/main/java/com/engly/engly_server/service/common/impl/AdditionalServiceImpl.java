@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
+import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.enums.TokenType;
@@ -56,6 +57,6 @@ public class AdditionalServiceImpl implements AdditionalService {
 
                     return new AuthResponseDto(jwtHolder.accessToken(), 300, TokenType.Bearer, savedUser.getUsername());
                 })
-                .orElseThrow(() -> new UsernameNotFoundException("Invalid User"));
+                .orElseThrow(() -> new NotFoundException("Invalid User"));
     }
 }

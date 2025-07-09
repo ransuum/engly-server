@@ -20,9 +20,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -97,35 +94,12 @@ public class RoomController {
                     \s"""
     )
     @RateLimiter(name = "RoomController")
-    public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByCategoryAndKeyString(
+    public ResponseEntity<Page<RoomsDto>> findRoomsByCategoryAndKeyString(
             @PathVariable(value = "category") CategoryType category,
             @RequestParam(value = "keyString") String keyString,
             @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable,
-            PagedResourcesAssembler<RoomsDto> assembler) {
-        final var rooms = roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString, pageable);
-        return ResponseEntity.ok(assembler.toModel(rooms));
-    }
-
-    @GetMapping("/find")
-    @PreAuthorize("hasAuthority('SCOPE_READ')")
-    @Operation(summary = "Find appropriate rooms by keyString which will find it in order category, name, description",
-            description = """
-                    Retrieves paginated list of rooms filtered by category, name and description
-                    Searching is done ignore case of keyString and fields
-                    page starts from 0
-                    keyString is a string that needs to be found
-                    id can be replaced by different fields in RoomsDto
-                    \s"""
-    )
-    @RateLimiter(name = "RoomController")
-    public ResponseEntity<PagedModel<EntityModel<RoomsDto>>> findRoomsByKeyString(
-            @RequestParam String keyString,
-            @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable,
-            PagedResourcesAssembler<RoomsDto> assembler) {
-        final var rooms = roomService.findAllRoomsContainingKeyString(keyString, pageable);
-        return ResponseEntity.ok(assembler.toModel(rooms));
+                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        return ResponseEntity.ok(roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString, pageable));
     }
 
     @Operation(summary = "Delete a room by its ID")

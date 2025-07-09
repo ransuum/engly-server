@@ -14,17 +14,16 @@ public interface RoomRepo extends JpaRepository<Rooms, String> {
         SELECT r.* FROM rooms r
         JOIN categories c ON r.category_id = c.id
         WHERE c.name = :#{#name.name()}
-        """, nativeQuery = true)
+        """,nativeQuery = true)
     Page<Rooms> findAllByCategoryName(@Param("name") CategoryType name, Pageable pageable);
 
-    @Query(value = """
-            SELECT r FROM Rooms r WHERE
-            LOWER(r.category.name) LIKE LOWER('%' || :keyString || '%') OR
-            LOWER(r.name) LIKE LOWER('%' || :keyString || '%') OR
-            LOWER(r.description) LIKE LOWER('%' || :keyString || '%')
-            """
-    )
-    Page<Rooms> findAllRoomsContainingKeyString(String keyString, Pageable pageable);
-
-    Page<Rooms> findAllByNameContainingIgnoreCaseAndCategoryName(String keyString, CategoryType categoryName, Pageable pageable);
+    @Query("""
+            SELECT r FROM Rooms r
+            WHERE r.category.name = :categoryName
+            AND (LOWER(r.name) LIKE LOWER(CONCAT('%', :keyString, '%'))
+                 OR LOWER(r.description) LIKE LOWER(CONCAT('%', :keyString, '%')))
+            """)
+    Page<Rooms> findRoomsByCategoryAndKeyword(@Param("keyString") String keyString,
+                                              @Param("categoryName") CategoryType categoryName,
+                                              Pageable pageable);
 }

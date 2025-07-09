@@ -64,7 +64,7 @@ public class MessageReadServiceImpl implements MessageReadService {
     @Override
     @Cacheable(
             value = CacheName.USERS_WHO_READ_MESSAGE,
-            key = "#messageId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            key = "#messageId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
             condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
             unless = "#result.content.isEmpty()"
     )
