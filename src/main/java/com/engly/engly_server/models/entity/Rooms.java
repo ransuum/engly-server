@@ -18,14 +18,7 @@ import java.util.List;
 @Data
 @Builder
 @Entity
-@Table(name = "rooms", indexes = {
-        @Index(name = "idx_rooms_category", columnList = "category_id"),
-        @Index(name = "idx_rooms_creator", columnList = "creator_id"),
-        @Index(name = "idx_rooms_name", columnList = "name"),
-        @Index(name = "idx_rooms_created", columnList = "created_at DESC"),
-        @Index(name = "idx_rooms_category_created", columnList = "category_id, created_at DESC"),
-        @Index(name = "idx_rooms_name_category", columnList = "name, category_id")
-})
+@Table(name = "rooms")
 public class Rooms implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

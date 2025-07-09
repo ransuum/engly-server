@@ -53,7 +53,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<Page<MessagesDto>> findAllMessageInCurrentRoom(@PathVariable String roomId,
                                                                          @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                                    sort = {"created_at"}, direction = Sort.Direction.ASC) Pageable pageable,
+                                                                                                    sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
                                                                          @RequestParam String keyString) {
         return ResponseEntity.ok(messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable));
     }
@@ -71,7 +71,7 @@ public class MessageController {
     public ResponseEntity<Page<UserWhoReadsMessageDto>> findAllUsersWhoReadMessage(
             @PathVariable String messageId,
             @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = {"read_at"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                    sort = {"readAt"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(messageReadService.getUsersWhoReadMessage(messageId, pageable));
     }
 
@@ -94,7 +94,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<Page<MessagesDto>> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
                                                                                 @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                        sort = {"created_at"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                                                                                        sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(messageService.findAllMessageInCurrentRoomNative(roomId, pageable));
     }
 }

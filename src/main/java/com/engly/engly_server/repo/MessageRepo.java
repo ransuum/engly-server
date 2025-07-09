@@ -9,20 +9,9 @@ import org.springframework.data.repository.query.Param;
 
 public interface MessageRepo extends JpaRepository<Message, String> {
 
-    @Query(value = """
-            SELECT * FROM messages
-            WHERE room_id = :roomId
-            AND content LIKE '%' || :keyString || '%'
-            """, nativeQuery = true)
-    Page<Message> findAllMessagesByRoomIdContainingKeyString(@Param("roomId") String roomId,
-                                                             Pageable pageable,
-                                                             @Param("keyString") String keyString);
+    @Query("SELECT m FROM Message m WHERE m.room.id = :roomId AND m.content LIKE %:content% AND m.isDeleted = false")
+    Page<Message> search(@Param("roomId") String roomId, @Param("content") String content, Pageable pageable);
 
-    @Query(value = """
-            SELECT * FROM messages
-            WHERE room_id = :roomId
-            AND (is_deleted IS NULL OR is_deleted = false)
-            """, nativeQuery = true)
-    Page<Message> findMessagesByRoomIdPaginated(
-            @Param("roomId") String roomId, Pageable pageable);
+    @Query("SELECT m FROM Message m WHERE m.room.id = :roomId AND m.isDeleted = false ORDER BY m.createdAt DESC")
+    Page<Message> findActive(@Param("roomId") String roomId, Pageable pageable);
 }

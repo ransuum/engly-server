@@ -115,7 +115,7 @@ public class MessageServiceImpl implements MessageService {
             unless = "#result.content.isEmpty()"
     )
     public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
-        return messageRepo.findAllMessagesByRoomIdContainingKeyString(roomId, pageable, keyString)
+        return messageRepo.search(roomId, keyString, pageable)
                 .map(MessageMapper.INSTANCE::toMessageDto);
     }
 
@@ -128,7 +128,7 @@ public class MessageServiceImpl implements MessageService {
             unless = "#result.content.isEmpty()"
     )
     public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {
-        final var messages = messageRepo.findMessagesByRoomIdPaginated(roomId, pageable);
+        final var messages = messageRepo.findActive(roomId, pageable);
         final var id = userService.getUserIdByEmail(service.getCurrentUserEmail());
 
         publisher.publishEvent(new MessagesViewedEvent(messages.getContent(), id));

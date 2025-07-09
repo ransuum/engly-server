@@ -108,7 +108,7 @@ public class RoomServiceImpl implements RoomService {
             unless = "#result.content.isEmpty()"
     )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
-        return roomRepo.findAllByCategoryName(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
+        return roomRepo.findByCategoryName(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
     }
 
     @Override
@@ -120,7 +120,7 @@ public class RoomServiceImpl implements RoomService {
             unless = "#result.content.isEmpty()"
     )
     public Page<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString, Pageable pageable) {
-        return roomRepo.findRoomsByCategoryAndKeyword(keyString, categoryType, pageable)
+        return roomRepo.searchRooms(categoryType, keyString, pageable)
                 .map(RoomMapper.INSTANCE::roomToDto);
     }
 

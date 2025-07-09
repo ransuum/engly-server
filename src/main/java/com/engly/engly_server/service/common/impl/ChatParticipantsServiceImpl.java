@@ -79,6 +79,6 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             unless = "#result.content.isEmpty()"
     )
     public Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable) {
-        return chatParticipantRepo.findAllByRoom_Id(roomId, pageable).map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
+        return chatParticipantRepo.findAllByRoomId(roomId, pageable).map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
     }
 }

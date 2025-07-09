@@ -79,7 +79,7 @@ public class CategoryServiceImpl implements CategoriesService {
             unless = "#result.content.isEmpty()"
     )
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {
-        return categoriesRepo.findAllNative(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
+        return categoriesRepo.findAll(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
     }
 
     @Override

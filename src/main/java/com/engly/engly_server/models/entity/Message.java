@@ -50,6 +50,11 @@ public class Message implements Serializable {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    private Boolean isEdited;
-    private Boolean isDeleted;
+    @Column(name = "is_edited", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean isEdited = null;
+
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
+    @Builder.Default
+    private Boolean isDeleted = null;
 }
