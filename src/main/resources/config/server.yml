@@ -26,3 +26,7 @@ server:
     max-connections: 8192
     accept-count: 100
     max-http-form-post-size: 2MB
+logging:
+  level:
+    org.apache.coyote.http11.Http11NioProtocol: INFO
+    org.apache.catalina.core: INFO

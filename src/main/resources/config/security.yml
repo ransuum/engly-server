@@ -30,3 +30,9 @@ spring:
           connection-timeout: 10000
           timeout: 10000
           write-timeout: 10000
+logging:
+  level:
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
