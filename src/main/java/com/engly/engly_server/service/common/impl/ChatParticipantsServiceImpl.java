@@ -62,7 +62,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     }
 
     @Override
-    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#result.room.id")
+    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
     public void updateRoleOfParticipant(String participantId, Roles role) {
         final var chatParticipant = chatParticipantRepo.findById(participantId)
                 .orElseThrow(() -> new NotFoundException("Participant with id " + participantId + " not found"));
@@ -74,8 +74,8 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.PARTICIPANTS_BY_ROOM,
-            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
             unless = "#result.content.isEmpty()"
     )
     public Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable) {

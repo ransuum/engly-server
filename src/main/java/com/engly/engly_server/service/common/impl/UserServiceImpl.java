@@ -30,15 +30,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_ID, key = "#id"),
-            @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
-            @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
-            @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
-            @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, allEntries = true),
-            @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, allEntries = true)
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
     })
     public ApiResponse delete(String id) {
         return userRepo.findById(id)
                 .map(users -> {
+                    this.clearUserSpecificCaches(users.getEmail(), users.getUsername());
                     userRepo.delete(users);
                     return new ApiResponse("User deleted successfully");
                 })
@@ -53,12 +50,24 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found")));
     }
 
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_PROFILES, key = "#username"),
+            @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, key = "#username.toLowerCase()"),
+            @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_FIRST_LOGIN, allEntries = true)
+    })
+    public void clearUserSpecificCaches(String email, String username) {
+        log.debug("Cleared user-specific caches for email: {}, username: {}", email, username);
+    }
+
     @Override
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.ALL_USER,
-            key = "#pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 5"
+            key = "'page:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20"
     )
     public Page<UsersDto> allUsers(Pageable pageable) {
         return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
@@ -70,7 +79,9 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = CacheName.USER_ID, allEntries = true),
             @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
             @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
-            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
+            @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, allEntries = true),
+            @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, allEntries = true)
     })
     public Integer deleteSomeUsers(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;
@@ -86,7 +97,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    @Cacheable(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public String getUserIdByEmail(String email) {
         return userRepo.findByEmail(email).map(Users::getId)
                 .orElseThrow(() -> new NotFoundException("User not found with email: " + email));

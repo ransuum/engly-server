@@ -49,20 +49,20 @@ public class JwtTokenUtils {
     }
 
     public Authentication validateToken(String jwt) {
-        Jwt token = jwtDecoder.decode(jwt);
-        String username = getUserName(token);
-        UserDetails userDetails = userDetails(username);
+        final Jwt token = jwtDecoder.decode(jwt);
+        final var username = getUserName(token);
+        final UserDetails userDetails = userDetails(username);
 
         Collection<GrantedAuthority> authorities = new ArrayList<>();
-        Object scopeObj = token.getClaim("scope");
+        final Object scopeObj = token.getClaim("scope");
+
         if (scopeObj instanceof String scopeStr)
             for (String s : scopeStr.split(" "))
                 authorities.add(new SimpleGrantedAuthority("SCOPE_" + s));
+
         authorities.addAll(userDetails.getAuthorities());
 
         if (!isTokenValid(token, userDetails)) throw new TokenNotFoundException("Invalid JWT token");
-        return new UsernamePasswordAuthenticationToken(
-                userDetails, null, authorities
-        );
+        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
     }
 }

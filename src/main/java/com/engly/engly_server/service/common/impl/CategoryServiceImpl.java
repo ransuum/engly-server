@@ -74,8 +74,8 @@ public class CategoryServiceImpl implements CategoriesService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.ALL_CATEGORIES,
-            key = "':all:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            key = "':all:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 50",
             unless = "#result.content.isEmpty()"
     )
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {

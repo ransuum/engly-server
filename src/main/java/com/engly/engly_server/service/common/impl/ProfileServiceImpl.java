@@ -11,6 +11,7 @@ import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.USER_PROFILES,
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()"
+    )
     public UsersDto getProfile() {
         final var email = securityService.getCurrentUserEmail();
         return UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
@@ -34,12 +39,15 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = CacheName.USER_PROFILES, key = "#profileUpdateData.username()")
+                    @CachePut(value = CacheName.USER_PROFILES, key = "#result.username"),
+                    @CachePut(value = CacheName.USER_ID, key = "#result.id"),
+                    @CachePut(value = CacheName.USER_BY_EMAIL,
+                            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName().toLowerCase()")
             },
             evict = {
-                    @CacheEvict(value = CacheName.USER_ID, allEntries = true),
                     @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
-                    @CacheEvict(value = CacheName.USER_ID, key = "#result.id")
+                    @CacheEvict(value = CacheName.USERNAME_AVAILABILITY,
+                            key = "#profileUpdateData.username().toLowerCase()", condition = "#profileUpdateData.username() != null")
             }
     )
     @Transactional

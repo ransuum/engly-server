@@ -41,11 +41,9 @@ public class MessageServiceImpl implements MessageService {
                     @CachePut(value = CacheName.MESSAGE_ID, key = "#result.id()")
             },
             evict = {
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, key = "#messageRequestDto.roomId()"),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
                     @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, key = "#messageRequestDto.roomId()"),
-                    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true)
             }
     )
     public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
@@ -68,7 +66,9 @@ public class MessageServiceImpl implements MessageService {
     @Caching(
             evict = {
                     @CacheEvict(value = CacheName.MESSAGE_ID, key = "#id"),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM, allEntries = true)
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true)
             }
     )
     public MessagesDto deleteMessage(String id) {
@@ -91,7 +91,10 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Caching(
             put = {@CachePut(value = CacheName.MESSAGE_ID, key = "#id")},
-            evict = {@CacheEvict(value = CacheName.MESSAGES_BY_ROOM, allEntries = true)}
+            evict = {
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true)
+            }
     )
     public MessagesDto editMessage(String id, String content) {
         return messageRepo.findById(id)
@@ -107,8 +110,8 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_CURSOR,
-            key = "#roomId + ':cursor:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            key = "#roomId + ':cursor:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
             unless = "#result.content.isEmpty()"
     )
     public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
@@ -120,8 +123,8 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_NATIVE,
-            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
             unless = "#result.content.isEmpty()"
     )
     public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {

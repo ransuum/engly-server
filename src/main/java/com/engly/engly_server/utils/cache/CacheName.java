@@ -12,6 +12,8 @@ public class CacheName {
     public static final String ALL_USER = "all-users";
     public static final String USER_BY_EMAIL = "user-by-email";
     public static final String USER_PROFILES = "user-profiles";
+    public static final String USER_ID_BY_EMAIL = "user-id-by-email";
+
     public static final String USERNAME_AVAILABILITY = "username-availability";
     public static final String EMAIL_AVAILABILITY = "email-availability";
     public static final String USER_FIRST_LOGIN = "user-first-login";
@@ -28,7 +30,7 @@ public class CacheName {
     public static final String ALL_CATEGORIES = "all-categories";
 
     public static final String MESSAGE_ID = "message-by-id";
-    public static final String MESSAGES_BY_ROOM = "messages-by-room";           // JPA queries
+    public static final String MESSAGES_BY_ROOM = "messages-by-room";
     public static final String MESSAGES_BY_ROOM_NATIVE = "messages-by-room-native";
     public static final String MESSAGES_BY_ROOM_CURSOR = "messages-by-room-cursor";
     public static final String MESSAGE_COUNT_BY_ROOM = "message-count-by-room";
@@ -40,11 +42,11 @@ public class CacheName {
     public static final String USERS_WHO_READ_MESSAGE = "users-who-read-message";
 
     public static final List<String> CACHES = Arrays.asList(
-            USER_ID, ALL_USER, USER_BY_EMAIL, USER_PROFILES, USERNAME_AVAILABILITY,
-            EMAIL_AVAILABILITY, USER_FIRST_LOGIN, ROOM_ID, ROOM_DTO_ID, ROOMS_BY_CATEGORY,
-            ROOM_BY_CATEGORY_AND_KEY, ROOM_ENTITY_ID, CATEGORY_ID, CATEGORY_ENTITY_ID,
-            CATEGORY_NAME, ALL_CATEGORIES, MESSAGE_ID, MESSAGES_BY_ROOM, MESSAGES_BY_ROOM_NATIVE,
-            MESSAGE_COUNT_BY_ROOM, MESSAGES_BY_ROOM_CURSOR, PARTICIPANTS_BY_ROOM, PARTICIPANT_EXISTS,
-            MESSAGE_READ_STATUS, USERS_WHO_READ_MESSAGE
+            USER_ID, ALL_USER, USER_BY_EMAIL, USER_PROFILES, USER_ID_BY_EMAIL,
+            USERNAME_AVAILABILITY, EMAIL_AVAILABILITY, USER_FIRST_LOGIN, ROOM_ID, ROOM_DTO_ID,
+            ROOMS_BY_CATEGORY, ROOM_BY_CATEGORY_AND_KEY, ROOM_ENTITY_ID, CATEGORY_ID,
+            CATEGORY_ENTITY_ID, CATEGORY_NAME, ALL_CATEGORIES, MESSAGE_ID, MESSAGES_BY_ROOM,
+            MESSAGES_BY_ROOM_NATIVE, MESSAGE_COUNT_BY_ROOM, MESSAGES_BY_ROOM_CURSOR,
+            PARTICIPANTS_BY_ROOM, PARTICIPANT_EXISTS, MESSAGE_READ_STATUS, USERS_WHO_READ_MESSAGE
     );
 }

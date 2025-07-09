@@ -24,14 +24,24 @@ public class UserValidationServiceImpl implements UserValidationService {
     }
 
     @Override
-    @Cacheable(value = CacheName.USERNAME_AVAILABILITY, key = "#username.toLowerCase()", unless = "#result.available == false")
+    @Cacheable(
+            value = CacheName.USERNAME_AVAILABILITY,
+            key = "#username.toLowerCase()",
+            unless = "#result.available == false",
+            condition = "#username != null && #username.length() > 2"
+    )
     public AvailabilityResponseDto isUsernameAvailable(String username) {
         final boolean isAvailable = !userRepo.existsByUsername(username);
         return new AvailabilityResponseDto(isAvailable) ;
     }
 
     @Override
-    @Cacheable(value = CacheName.EMAIL_AVAILABILITY, key = "#email.toLowerCase()", unless = "#result.available == false")
+    @Cacheable(
+            value = CacheName.EMAIL_AVAILABILITY,
+            key = "#email.toLowerCase()",
+            unless = "#result.available == false",
+            condition = "#email != null && #email.contains('@')"
+    )
     public AvailabilityResponseDto isEmailAvailable(String email) {
         final boolean isAvailable = !userRepo.existsByEmail(email);
         return new AvailabilityResponseDto(isAvailable);
