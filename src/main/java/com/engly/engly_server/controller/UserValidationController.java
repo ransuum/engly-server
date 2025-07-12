@@ -15,7 +15,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,7 +67,7 @@ public class UserValidationController {
             )
             @RequestParam
             String username) {
-        return new ResponseEntity<>(userValidationService.isUsernameAvailable(username), HttpStatus.OK);
+        return ResponseEntity.ok(userValidationService.isUsernameAvailable(username));
     }
 
     @Operation(
@@ -99,6 +98,6 @@ public class UserValidationController {
             @NotBlank(message = "Email is blank")
             @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
             String email) {
-        return new ResponseEntity<>(userValidationService.isEmailAvailable(email), HttpStatus.OK);
+        return ResponseEntity.ok(userValidationService.isEmailAvailable(email));
     }
 }

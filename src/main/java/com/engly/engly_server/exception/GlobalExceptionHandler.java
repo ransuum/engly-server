@@ -31,6 +31,11 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getPropertyName(), ex.getMessage());
     }
 
+    @ExceptionHandler(EntityAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(EntityAlreadyExistsException ex) {
+        return buildResponse(HttpStatus.CONFLICT, "Entity mismatch", ex.getMessage());
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, "Access denied", ex.getMessage());

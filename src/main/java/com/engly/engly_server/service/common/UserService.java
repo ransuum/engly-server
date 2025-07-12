@@ -6,6 +6,7 @@ import com.engly.engly_server.models.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface UserService {
@@ -22,4 +23,8 @@ public interface UserService {
     Users findUserEntityByEmail(String email);
 
     String getUserIdByEmail(String email);
+
+    List<Users> findAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore);
+
+    void deleteAll(List<Users> users);
 }

@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -63,7 +62,7 @@ public class EmailVerifyController {
     @PostMapping
     @RateLimiter(name = "EmailVerifyController")
     public ResponseEntity<EmailSendInfo> notifyUserEmailVerify() {
-        return new ResponseEntity<>(emailVerificationService.sendMessage(), HttpStatus.ACCEPTED);
+        return ResponseEntity.status(202).body(emailVerificationService.sendMessage());
     }
 
     @Operation(
@@ -97,6 +96,6 @@ public class EmailVerifyController {
     @RateLimiter(name = "EmailVerifyController")
     public ResponseEntity<AuthResponseDto> checkToken(@Parameter(description = "The verification token received via email.", required = true, example = "FDGDitreKFfdsd")
                                                       @RequestParam("token") String token, HttpServletResponse response) {
-        return new ResponseEntity<>(emailVerificationService.checkToken(token, response), HttpStatus.OK);
+        return ResponseEntity.ok(emailVerificationService.checkToken(token, response));
     }
 }

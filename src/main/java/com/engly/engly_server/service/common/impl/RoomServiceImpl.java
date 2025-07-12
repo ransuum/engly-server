@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
+import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.RoomsDto;
@@ -50,6 +51,9 @@ public class RoomServiceImpl implements RoomService {
             }
     )
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
+        if (roomRepo.existsByName(roomRequestDto.name()))
+            throw new EntityAlreadyExistsException("Room with this name already exists");
+
         final var username = service.getCurrentUserEmail();
         final var creator = userService.findUserEntityByEmail(username);
         final var room = roomRepo.save(Rooms.builder()

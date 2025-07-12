@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 
 @Slf4j
@@ -112,5 +113,15 @@ public class UserServiceImpl implements UserService {
     public String getUserIdByEmail(String email) {
         return userRepo.findByEmail(email).map(Users::getId)
                 .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+    }
+
+    @Override
+    public List<Users> findAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore) {
+        return userRepo.findAllByRolesAndCreatedAtBefore(roles, expireBefore);
+    }
+
+    @Override
+    public void deleteAll(List<Users> users) {
+        if (users != null) userRepo.deleteAll(users);
     }
 }

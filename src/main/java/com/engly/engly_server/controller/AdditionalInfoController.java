@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,7 +37,7 @@ public class AdditionalInfoController {
                           
                           **Authorization:** Requires an authenticated user with the 'SCOPE_ADDITIONAL_INFO'. This scope is typically granted temporarily after a successful Google login but before this step is completed.
                           """,
-            security = @SecurityRequirement(name = "bearerAuth") // This links to a global security scheme
+            security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponses({
             @ApiResponse(
@@ -67,7 +66,9 @@ public class AdditionalInfoController {
     })
     @PreAuthorize("hasAuthority('SCOPE_ADDITIONAL_INFO')")
     @PostMapping("/for-google")
-    public ResponseEntity<AuthResponseDto> addInfo(@RequestBody AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto, HttpServletResponse httpServletResponse) {
-        return new ResponseEntity<>(additionalService.additionalRegistration(additionalRequestForGoogleUserDto, httpServletResponse), HttpStatus.CREATED);
+    public ResponseEntity<AuthResponseDto> addInfo(@RequestBody AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto,
+                                                   HttpServletResponse httpServletResponse) {
+        return ResponseEntity.status(201).body(additionalService
+                .additionalRegistration(additionalRequestForGoogleUserDto, httpServletResponse));
     }
 }

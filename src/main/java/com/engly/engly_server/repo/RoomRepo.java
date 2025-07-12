@@ -17,4 +17,6 @@ public interface RoomRepo extends JpaRepository<Rooms, String> {
     Page<Rooms> searchRooms(@Param("categoryName") CategoryType categoryName,
                             @Param("keyword") String keyword,
                             Pageable pageable);
+
+    boolean existsByName(String name);
 }

@@ -10,22 +10,16 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -62,7 +56,7 @@ public class AuthController {
     @PostMapping("/sign-in")
     @RateLimiter(name = "AuthController")
     public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody SignInDto signInDto, HttpServletResponse response) {
-        return new ResponseEntity<>(authService.getJwtTokensAfterAuthentication(signInDto, response), HttpStatus.OK);
+        return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(signInDto, response));
     }
 
     @Operation(
@@ -104,9 +98,9 @@ public class AuthController {
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .toList();
             log.error("[AuthController:registerUser]Errors in user:{}", errorMessage);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorMessage);
+            return ResponseEntity.status(400).body(errorMessage);
         }
-        return new ResponseEntity<>(authService.registerUser(signUpRequestDto, httpServletResponse), HttpStatus.CREATED);
+        return ResponseEntity.status(201).body(authService.registerUser(signUpRequestDto, httpServletResponse));
     }
 
     @Operation(

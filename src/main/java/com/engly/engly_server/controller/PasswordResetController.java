@@ -17,7 +17,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,7 +70,7 @@ public class PasswordResetController {
             @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
             @RequestParam
             String email) {
-        return new ResponseEntity<>(passwordResetService.sendMessage(email), HttpStatus.ACCEPTED);
+        return ResponseEntity.status(202).body(passwordResetService.sendMessage(email));
     }
 
     @Operation(
@@ -99,6 +98,6 @@ public class PasswordResetController {
     @PostMapping
     @RateLimiter(name = "PasswordResetController")
     public ResponseEntity<AuthResponseDto> passwordReset(@Valid @RequestBody PasswordResetRequest data, HttpServletResponse response) {
-        return new ResponseEntity<>(passwordResetService.passwordReset(data, response), HttpStatus.OK);
+        return ResponseEntity.ok(passwordResetService.passwordReset(data, response));
     }
 }

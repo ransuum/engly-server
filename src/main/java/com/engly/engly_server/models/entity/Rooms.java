@@ -32,7 +32,7 @@ public class Rooms implements Serializable {
     @JoinColumn(name = "category_id", referencedColumnName = "id")
     private Categories category;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
     private String description;
