@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_PROFILES, key = "#username"),
             @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, key = "#username.toLowerCase()"),
             @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, key = "#email.toLowerCase()"),
@@ -74,10 +75,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    public String getUsernameByEmail(String email) {
+        return userRepo.findUsernameByEmail(email)
+                .orElseThrow(() -> new NotFoundException("User not found: " + email));
+    }
+
+    @Override
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_ID, allEntries = true),
             @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, allEntries = true),
             @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
             @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, allEntries = true),

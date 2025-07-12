@@ -94,7 +94,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<Page<MessagesDto>> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
                                                                                 @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                        sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                                                                                        sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(messageService.findAllMessageInCurrentRoomNative(roomId, pageable));
     }
 }

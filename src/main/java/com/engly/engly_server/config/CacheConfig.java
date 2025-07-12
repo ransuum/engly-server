@@ -48,7 +48,7 @@ public class CacheConfig {
 
     private CacheSpec getCacheSpec(String cacheName) {
         return switch (cacheName) {
-            case CacheName.USER_ID, CacheName.USER_BY_EMAIL, CacheName.USER_ID_BY_EMAIL ->
+            case CacheName.USER_ID, CacheName.USER_BY_EMAIL, CacheName.USER_ID_BY_EMAIL, CacheName.USERNAME_BY_EMAIL ->
                     new CacheSpec(50, Duration.ofMinutes(10), Duration.ofMinutes(3));
             case CacheName.USER_PROFILES ->
                     new CacheSpec(25, Duration.ofMinutes(5), Duration.ofMinutes(2));

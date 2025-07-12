@@ -12,6 +12,6 @@ public interface MessageRepo extends JpaRepository<Message, String> {
     @Query("SELECT m FROM Message m WHERE m.room.id = :roomId AND m.content LIKE %:content% AND m.isDeleted = false")
     Page<Message> search(@Param("roomId") String roomId, @Param("content") String content, Pageable pageable);
 
-    @Query("SELECT m FROM Message m WHERE m.room.id = :roomId AND m.isDeleted = false ORDER BY m.createdAt DESC")
+    @Query("SELECT m FROM Message m WHERE m.room.id = :roomId AND m.isDeleted = false ORDER BY m.createdAt ASC")
     Page<Message> findActive(@Param("roomId") String roomId, Pageable pageable);
 }

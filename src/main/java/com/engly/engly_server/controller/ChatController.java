@@ -5,8 +5,10 @@ import com.engly.engly_server.models.dto.create.TypingRequestDto;
 import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.dto.update.EditMessageRequest;
+import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.MessageService;
 import com.engly.engly_server.config.websocket.WebSocketEvent;
+import com.engly.engly_server.service.common.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -20,6 +22,8 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class ChatController {
     private final MessageService messageService;
+    private final UserService userService;
+    private final SecurityService securityService;
     private final SimpMessagingTemplate messagingTemplate;
 
     private static final String TOPIC_MESSAGES = "/topic/messages/";
@@ -54,9 +58,10 @@ public class ChatController {
     @MessageMapping("/chat/user.typing")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     public void userTyping(@Payload TypingRequestDto typingRequestDto) {
+        final var username = userService.getUsernameByEmail(securityService.getCurrentUserEmail());
         final var typingEvent = new TypingEvent(
                 typingRequestDto.roomId(),
-                typingRequestDto.username(),
+                username,
                 typingRequestDto.isTyping(),
                 Instant.now()
         );
