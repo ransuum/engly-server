@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 public record MessageRequestDto(@NotBlank(message = "Room is empty") String roomId,
 
                                 @Size(max = 200)
-                                @NotBlank(message = "Please input content")
-                                String content) {
+                                String content,
+                                @Size(max = 150)
+                                String imageUrl) {
 }

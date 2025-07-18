@@ -4,22 +4,24 @@ import com.google.api.client.http.InputStreamContent;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.File;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Collections;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class GoogleDriveService {
-
-
     private final Drive drive;
+    @Value("${google.drive.folderId}")
+    public String folderId;
 
 
     public FileUploadResponse uploadImageToDrive(MultipartFile multipartFile) {
         try {
-            String folderId = "19bFkshK4Ts-cUxHlWJhoNrPYDrbf9a6R";
             File fileMetaData = new File();
             fileMetaData.setName(multipartFile.getName());
             fileMetaData.setMimeType(multipartFile.getContentType());
@@ -33,9 +35,8 @@ public class GoogleDriveService {
             Object webViewLink = uploadedFile.get("webViewLink");
             return new FileUploadResponse(200, "Image Successfully Uploaded To Drive", webViewLink.toString());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            log.error("GoogleDriveService: error during file upload description", e);
             return new FileUploadResponse(500, "Error during multipartFile upload", "");
         }
     }
-
 }

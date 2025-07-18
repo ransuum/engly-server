@@ -21,6 +21,10 @@ public class GoogleDriveConfig {
     Resource resourceFile;
     @Value("${google.drive.refreshToken}")
     String refreshToken;
+    @Value("${google.drive.clientSecret}")
+    String clientSecret;
+    @Value("${google.drive.clientId}")
+    String clientId;
 
     /**
      * Authorizes the installed application to access user's protected data.
@@ -41,8 +45,6 @@ public class GoogleDriveConfig {
 
         // Refresh the access token
         credentials.refresh();
-
-        System.out.println("Access Token: " + credentials.getAccessToken().getTokenValue());
         return credentials;
     }
 
