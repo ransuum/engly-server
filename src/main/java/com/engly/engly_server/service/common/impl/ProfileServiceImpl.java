@@ -33,7 +33,7 @@ public class ProfileServiceImpl implements ProfileService {
     public UsersDto getProfile() {
         final var email = securityService.getCurrentUserEmail();
         return UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User Not Found")));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE)));
     }
 
     @Override
@@ -64,6 +64,6 @@ public class ProfileServiceImpl implements ProfileService {
 
                     return UserMapper.INSTANCE.toUsersDto(userRepo.save(user));
                 })
-                .orElseThrow(() -> new NotFoundException("User Not Found"));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
     }
 }

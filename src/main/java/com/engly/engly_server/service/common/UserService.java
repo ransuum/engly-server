@@ -8,11 +8,14 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     ApiResponse delete(String id);
 
     UsersDto findById(String id);
+
+    Optional<Users> findByEmail(String email);
 
     Page<UsersDto> allUsers(Pageable pageable);
 

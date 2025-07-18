@@ -5,7 +5,7 @@ import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
 import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
-import com.engly.engly_server.service.common.impl.AuthServiceImpl;
+import com.engly.engly_server.service.common.impl.GoogleAuthorizationServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -61,7 +61,7 @@ public class SecurityConfig {
 
     @Order(0)
     @Bean
-    public SecurityFilterChain wsHandshakeSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain wsHandshakeSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .securityMatcher("/chat")
                 .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
@@ -71,7 +71,7 @@ public class SecurityConfig {
 
     @Order(1)
     @Bean
-    public SecurityFilterChain signInSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain signInSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher("/sign-in/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -85,7 +85,7 @@ public class SecurityConfig {
 
     @Order(2)
     @Bean
-    public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher("/api/**", "/valid/**", "/chat/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -110,7 +110,7 @@ public class SecurityConfig {
 
     @Order(3)
     @Bean
-    public SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, AuthServiceImpl oauth2SuccessHandler) throws Exception {
+    SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, GoogleAuthorizationServiceImpl oauth2SuccessHandler) throws Exception {
         return http
                 .securityMatcher("/oauth2/**", "/login/oauth2/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -126,7 +126,7 @@ public class SecurityConfig {
 
     @Order(4)
     @Bean
-    public SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher("/refresh-token/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -146,7 +146,7 @@ public class SecurityConfig {
 
     @Order(5)
     @Bean
-    public SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher("/logout/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -158,7 +158,7 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .addLogoutHandler(logoutHandler)
-                        .logoutSuccessHandler(((request, response, authentication) -> {
+                        .logoutSuccessHandler(((_, response, _) -> {
                             SecurityContextHolder.clearContext();
                             response.reset();
                         }))
@@ -173,7 +173,7 @@ public class SecurityConfig {
 
     @Order(6)
     @Bean
-    public SecurityFilterChain registerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain registerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher("/sign-up/**", "/public/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -186,7 +186,7 @@ public class SecurityConfig {
 
     @Order(7)
     @Bean
-    public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -200,7 +200,7 @@ public class SecurityConfig {
 
     @Order(8)
     @Bean
-    public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .securityMatcher("/actuator/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -215,7 +215,7 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:actuatorSecurityFilterChain] Exception due to :{}", ex);
-                    ex.authenticationEntryPoint((request, response, authException) ->
+                    ex.authenticationEntryPoint((_, response, authException) ->
                             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()));
                 })
                 .build();
@@ -228,7 +228,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
@@ -245,7 +245,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource() {
         var configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
@@ -278,7 +278,7 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }

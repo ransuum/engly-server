@@ -21,7 +21,7 @@ public class CacheConfig {
 
     @Bean
     @Primary
-    public CacheManager cacheManager() {
+    CacheManager cacheManager() {
         var cacheManager = new SimpleCacheManager();
 
         final List<CaffeineCache> caches = CacheName.CACHES.stream()

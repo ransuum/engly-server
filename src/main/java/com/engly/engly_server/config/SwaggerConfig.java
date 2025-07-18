@@ -24,7 +24,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
     private String url;
 
     @Bean
-    public OpenAPI customOpenAPI() {
+    OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .servers(List.of(new Server().url(url)))
                 .info(new Info()

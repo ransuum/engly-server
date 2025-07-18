@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class ChatParticipantsServiceImpl implements ChatParticipantsService {
+
     private final ChatParticipantRepo chatParticipantRepo;
     private final ChatParticipantCache chatParticipantCache;
 
@@ -56,16 +57,14 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
     })
     public void removeParticipant(String participantId) {
-        final var chatParticipant = chatParticipantRepo.findById(participantId)
-                .orElseThrow(() -> new NotFoundException("Participant with id " + participantId + " not found"));
-        chatParticipantRepo.delete(chatParticipant);
+        chatParticipantRepo.deleteById(participantId);
     }
 
     @Override
     @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
     public void updateRoleOfParticipant(String participantId, Roles role) {
         final var chatParticipant = chatParticipantRepo.findById(participantId)
-                .orElseThrow(() -> new NotFoundException("Participant with id " + participantId + " not found"));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId)));
         chatParticipant.setRole(role);
         chatParticipantRepo.save(chatParticipant);
     }
@@ -79,6 +78,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             unless = "#result.content.isEmpty()"
     )
     public Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable) {
-        return chatParticipantRepo.findAllByRoomId(roomId, pageable).map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
+        return chatParticipantRepo.findAllByRoomId(roomId, pageable)
+                .map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
     }
 }

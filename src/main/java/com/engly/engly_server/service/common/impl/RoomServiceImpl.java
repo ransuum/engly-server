@@ -52,10 +52,11 @@ public class RoomServiceImpl implements RoomService {
     )
     public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
         if (roomRepo.existsByName(roomRequestDto.name()))
-            throw new EntityAlreadyExistsException("Room with this name already exists");
+            throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 
         final var username = service.getCurrentUserEmail();
         final var creator = userService.findUserEntityByEmail(username);
+
         final var room = roomRepo.save(Rooms.builder()
                 .creator(creator)
                 .createdAt(Instant.now())
@@ -63,6 +64,7 @@ public class RoomServiceImpl implements RoomService {
                 .description(roomRequestDto.description())
                 .name(roomRequestDto.name())
                 .build());
+
         chatParticipantsService.addParticipant(room, creator, Roles.ROLE_ADMIN);
         return RoomMapper.INSTANCE.roomToDto(room);
     }
@@ -100,7 +102,7 @@ public class RoomServiceImpl implements RoomService {
                     if (isValid(request.name())) room.setName(request.name());
                     return RoomMapper.INSTANCE.roomToDto(roomRepo.save(room));
                 })
-                .orElseThrow(() -> new NotFoundException("Room not found"));
+                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
     }
 
     @Override
@@ -132,6 +134,6 @@ public class RoomServiceImpl implements RoomService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.ROOM_ENTITY_ID, key = "#id", sync = true)
     public Rooms findRoomEntityById(String id) {
-        return roomRepo.findById(id).orElseThrow(() -> new NotFoundException("Room not found"));
+        return roomRepo.findById(id).orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
     }
 }

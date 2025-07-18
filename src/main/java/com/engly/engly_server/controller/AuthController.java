@@ -27,6 +27,7 @@ import java.util.List;
 @Slf4j
 @Tag(name = "01. Authentication", description = "Endpoints for user sign-up, sign-in, and token management.")
 public class AuthController {
+
     private final AuthService authService;
 
     public AuthController(AuthService authService) {

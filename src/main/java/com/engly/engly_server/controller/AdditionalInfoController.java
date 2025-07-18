@@ -68,7 +68,7 @@ public class AdditionalInfoController {
     @PostMapping("/for-google")
     public ResponseEntity<AuthResponseDto> addInfo(@RequestBody AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto,
                                                    HttpServletResponse httpServletResponse) {
-        return ResponseEntity.status(201).body(additionalService
-                .additionalRegistration(additionalRequestForGoogleUserDto, httpServletResponse));
+        return ResponseEntity.status(201)
+                .body(additionalService.additionalRegistration(additionalRequestForGoogleUserDto, httpServletResponse));
     }
 }

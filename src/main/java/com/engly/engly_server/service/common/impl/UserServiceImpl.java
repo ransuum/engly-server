@@ -20,11 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+
     private final UserRepo userRepo;
 
     @Override
@@ -51,9 +53,16 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found")));
     }
 
+    @Override
+    @Cacheable(value = CacheName.USER_ENTITY_BY_EMAIL, key = "#email", sync = true)
+    public Optional<Users> findByEmail(String email) {
+        return userRepo.findByEmail(email);
+    }
+
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_ENTITY_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_PROFILES, key = "#username"),
             @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, key = "#username.toLowerCase()"),
@@ -93,6 +102,7 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
             @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, allEntries = true),
+            @CacheEvict(value = CacheName.USER_ENTITY_BY_EMAIL, allEntries = true),
             @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, allEntries = true)
     })
     public Integer deleteSomeUsers(List<String> ids) {
@@ -121,6 +131,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteAll(List<Users> users) {
         if (users != null) userRepo.deleteAll(users);
     }

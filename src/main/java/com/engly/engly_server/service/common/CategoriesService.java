@@ -8,6 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface CategoriesService {
+
+    String CATEGORY_NOT_FOUND_MESSAGE = "Category with id %s not found";
+
     CategoriesDto addCategory(CategoryRequestDto categoryRequestDto);
 
     CategoriesDto updateCategory(String id, CategoryRequestDto categoryRequestDto);

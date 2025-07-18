@@ -6,6 +6,8 @@ import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
+import com.engly.engly_server.models.entity.Rooms;
+import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
@@ -22,6 +24,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.function.BiFunction;
 
 @Service
 @Slf4j
@@ -52,14 +56,15 @@ public class MessageServiceImpl implements MessageService {
 
         chatParticipantsService.addParticipant(room, user, Roles.ROLE_USER);
 
-        final var savedMessage = messageRepo.save(Message.builder()
-                .isEdited(Boolean.FALSE)
-                .isDeleted(Boolean.FALSE)
-                .content(messageRequestDto.content())
-                .user(user)
-                .room(room)
-                .build());
-        return MessageMapper.INSTANCE.toMessageDto(savedMessage);
+        final var message = messageRepo.save(Message.builder()
+                        .isEdited(Boolean.FALSE)
+                        .isDeleted(Boolean.FALSE)
+                        .content(messageRequestDto.content())
+                        .user(user)
+                        .room(room)
+                        .build());
+
+        return MessageMapper.INSTANCE.toMessageDto(message);
     }
 
     @Override
@@ -71,12 +76,8 @@ public class MessageServiceImpl implements MessageService {
                     @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true)
             }
     )
-    public MessagesDto deleteMessage(String id) {
-        return messageRepo.findById(id).map(message -> {
-                    messageRepo.delete(message);
-                    return MessageMapper.INSTANCE.toMessageDto(message);
-                })
-                .orElseThrow(() -> new NotFoundException("Cannot found this message"));
+    public void deleteMessage(String id) {
+        messageRepo.deleteById(id);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class MessageServiceImpl implements MessageService {
     public MessagesDto findById(String id) {
         return messageRepo.findById(id)
                 .map(MessageMapper.INSTANCE::toMessageDto)
-                .orElseThrow(() -> new NotFoundException("Message not found"));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
     }
 
     @Override
@@ -103,7 +104,7 @@ public class MessageServiceImpl implements MessageService {
                     message.setIsEdited(Boolean.TRUE);
                     return MessageMapper.INSTANCE.toMessageDto(messageRepo.save(message));
                 })
-                .orElseThrow(() -> new NotFoundException("Cannot found this message"));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
     }
 
     @Override

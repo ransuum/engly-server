@@ -10,7 +10,8 @@ import org.mapstruct.factory.Mappers;
 public interface CategoryMapper {
     CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
-    @Mapping(target = "activeRoomsCount", expression = "java(categories.getRooms() != null ? categories.getRooms().size() : 0)")
+    @Mapping(target = "activeRoomsCount",
+            expression = "java(categories.getRooms() != null ? categories.getRooms().size() : 0)")
     @Mapping(target = "icon", expression = "java(categories.getName().getIcon())")
     @Mapping(target = "name", expression = "java(categories.getName().getVal())")
     CategoriesDto toCategoriesDto(Categories categories);

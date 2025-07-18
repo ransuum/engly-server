@@ -49,10 +49,11 @@ public class ChatController {
     @MessageMapping("/chat/message.delete")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     public void deleteMessage(@Payload String id) {
-        final var message = messageService.deleteMessage(id);
+        messageService.deleteMessage(id);
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + message.roomId(),
-                new WebSocketEvent<>(EventType.MESSAGE_DELETE, message));
+                TOPIC_MESSAGES + id,
+                new WebSocketEvent<>(EventType.MESSAGE_DELETE,
+                        "Message with ID " + id + " has been deleted"));
     }
 
     @MessageMapping("/chat/user.typing")

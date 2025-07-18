@@ -20,6 +20,7 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
     private final AuthChannelInterceptor authChannelInterceptor;
 
     @Override
@@ -62,7 +63,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
 
     @Bean("heartbeatTaskScheduler")
-    public ThreadPoolTaskScheduler heartbeatTaskScheduler() {
+    ThreadPoolTaskScheduler heartbeatTaskScheduler() {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.setPoolSize(4);
         taskScheduler.setThreadNamePrefix("ws-heartbeat-");

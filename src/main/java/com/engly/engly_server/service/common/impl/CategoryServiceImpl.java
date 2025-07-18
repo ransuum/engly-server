@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoriesService {
+
     private final CategoriesRepo categoriesRepo;
 
     @Override
@@ -67,7 +68,7 @@ public class CategoryServiceImpl implements CategoriesService {
 
                     return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepo.save(category));
                 })
-                .orElseThrow(() -> new NotFoundException("Category not found while updating"));
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(id)));
     }
 
     @Override
@@ -88,7 +89,7 @@ public class CategoryServiceImpl implements CategoriesService {
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.findById(categoryId).orElseThrow(()
-                        -> new NotFoundException("Category not found by id: " + categoryId))
+                        -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(categoryId)))
         );
     }
 
@@ -99,8 +100,7 @@ public class CategoryServiceImpl implements CategoriesService {
             @CacheEvict(value = CacheName.CATEGORY_NAME, allEntries = true)
     })
     public void deleteCategory(String categoryId) {
-        categoriesRepo.delete(categoriesRepo.findById(categoryId).orElseThrow(()
-                -> new NotFoundException("Category not found while deleting")));
+        categoriesRepo.deleteById(categoryId);
     }
 
     @Override
@@ -108,7 +108,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()", sync = true)
     public Categories findByName(CategoryType name) {
         return categoriesRepo.findByName(name).orElseThrow(()
-                        -> new NotFoundException("Category not found while finding by category type name"));
+                        -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
     }
 
     @Override
@@ -116,6 +116,6 @@ public class CategoryServiceImpl implements CategoriesService {
     @Cacheable(value = CacheName.CATEGORY_ENTITY_ID, key = "#id", sync = true)
     public Categories findCategoryEntityById(String id) {
         return categoriesRepo.findById(id).orElseThrow(()
-                -> new NotFoundException("Category not found while finding by id: " + id));
+                -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(id)));
     }
 }
