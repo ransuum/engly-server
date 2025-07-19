@@ -39,8 +39,11 @@ public class Message implements Serializable {
     @Builder.Default
     private List<MessageRead> messageReads = new ArrayList<>();
 
-    @Column(nullable = false)
+    @Column(name = "content")
     private String content;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @CreationTimestamp
     @Column(nullable = false, name = "created_at")
