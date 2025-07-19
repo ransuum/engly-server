@@ -1,17 +1,19 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.googleDrive.GoogleDriveService;
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
-import com.engly.engly_server.models.entity.Rooms;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
-import com.engly.engly_server.service.common.*;
+import com.engly.engly_server.service.common.ChatParticipantsService;
+import com.engly.engly_server.service.common.MessageService;
+import com.engly.engly_server.service.common.RoomService;
+import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.function.BiFunction;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -37,6 +37,7 @@ public class MessageServiceImpl implements MessageService {
     private final SecurityService service;
     private final ApplicationEventPublisher publisher;
     private final ChatParticipantsService chatParticipantsService;
+    private final GoogleDriveService driveService;
 
     @Override
     @Transactional
@@ -56,15 +57,15 @@ public class MessageServiceImpl implements MessageService {
 
         chatParticipantsService.addParticipant(room, user, Roles.ROLE_USER);
 
-        final var message = messageRepo.save(Message.builder()
-                        .isEdited(Boolean.FALSE)
-                        .isDeleted(Boolean.FALSE)
-                        .content(messageRequestDto.content())
-                        .user(user)
-                        .room(room)
-                        .build());
-
-        return MessageMapper.INSTANCE.toMessageDto(message);
+        final var savedMessage = messageRepo.save(Message.builder()
+                .isEdited(Boolean.FALSE)
+                .isDeleted(Boolean.FALSE)
+                .content(messageRequestDto.content())
+                .imageUrl(driveService.getImageWebViewLink(messageRequestDto.imageId()))
+                .user(user)
+                .room(room)
+                .build());
+        return MessageMapper.INSTANCE.toMessageDto(savedMessage);
     }
 
     @Override
