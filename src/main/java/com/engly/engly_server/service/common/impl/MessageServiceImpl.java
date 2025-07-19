@@ -1,14 +1,12 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.googledrive.GoogleDriveService;
+import com.engly.engly_server.googleDrive.GoogleDriveService;
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
-import com.engly.engly_server.models.entity.Rooms;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
@@ -28,8 +26,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.function.BiFunction;
 
 @Service
 @Slf4j

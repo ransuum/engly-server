@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.googledrive.FileUploadResponse;
-import com.engly.engly_server.googledrive.GoogleDriveService;
+import com.engly.engly_server.googleDrive.FileUploadResponse;
+import com.engly.engly_server.googleDrive.GoogleDriveService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
