@@ -1,7 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.googledrive.FileUploadResponse;
 import com.engly.engly_server.googledrive.GoogleDriveService;
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
@@ -18,7 +17,6 @@ import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -63,7 +61,7 @@ public class MessageServiceImpl implements MessageService {
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
                 .content(messageRequestDto.content())
-                .imageUrl(messageRequestDto.imageUrl())
+                .imageUrl(driveService.getImageWebViewLink(messageRequestDto.imageId()))
                 .user(user)
                 .room(room)
                 .build());

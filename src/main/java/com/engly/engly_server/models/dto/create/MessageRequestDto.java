@@ -8,5 +8,5 @@ public record MessageRequestDto(@NotBlank(message = "Room is empty") String room
                                 @Size(max = 200)
                                 String content,
                                 @Size(max = 150)
-                                String imageUrl) {
+                                String imageId) {
 }
