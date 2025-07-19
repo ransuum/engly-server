@@ -59,13 +59,12 @@ public class GoogleDriveService {
     }
 
     private boolean ifFileIsImage(MultipartFile multipartFile) {
-        System.out.println("multipartFile.getContentType() = " + multipartFile.getContentType());
         String contentType = multipartFile.getContentType();
 
         if (contentType != null && contentType.startsWith("image/")) {
-            log.info("GoogleDriveService: file is not image");
             return true;
         }
+        log.info("GoogleDriveService: file is not image");
         return false;
     }
 
