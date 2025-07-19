@@ -8,7 +8,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import java.text.SimpleDateFormat;
 import java.util.Locale;
+import java.util.TimeZone;
 
 @Configuration
 public class AppConfig {
@@ -25,6 +27,8 @@ public class AppConfig {
         var mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+        mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
         return mapper;
     }
 }

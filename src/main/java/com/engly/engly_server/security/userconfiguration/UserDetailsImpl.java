@@ -1,7 +1,6 @@
 package com.engly.engly_server.security.userconfiguration;
 
 import com.engly.engly_server.models.entity.Users;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,9 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Arrays;
 import java.util.Collection;
 
-@RequiredArgsConstructor
-public class UserDetailsImpl implements UserDetails {
-    private final transient Users user;
+public record UserDetailsImpl(Users user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

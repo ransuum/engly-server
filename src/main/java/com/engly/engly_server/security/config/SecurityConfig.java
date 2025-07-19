@@ -1,9 +1,7 @@
 package com.engly.engly_server.security.config;
 
-import com.engly.engly_server.repo.RefreshTokenRepo;
-import com.engly.engly_server.security.jwt.JwtAccessTokenFilter;
-import com.engly.engly_server.security.jwt.JwtRefreshTokenFilter;
-import com.engly.engly_server.security.jwt.JwtTokenUtils;
+import com.engly.engly_server.security.jwt.JwtAccessTokenGeneralFilter;
+import com.engly.engly_server.security.jwt.JwtRefreshTokenGeneralFilter;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.service.common.impl.GoogleAuthorizationServiceImpl;
 import com.nimbusds.jose.jwk.JWK;
@@ -55,16 +53,16 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final RSAKeyRecord rsaKeyRecord;
-    private final JwtTokenUtils jwtTokenUtils;
-    private final RefreshTokenRepo refreshTokenRepo;
     private final LogoutHandler logoutHandler;
+    private final JwtAccessTokenGeneralFilter jwtAccessTokenFilter;
+    private final JwtRefreshTokenGeneralFilter jwtRefreshTokenFilter;
 
     @Order(0)
     @Bean
     SecurityFilterChain wsHandshakeSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .securityMatcher("/chat")
-                .authorizeHttpRequests(authz -> authz.anyRequest().permitAll())
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .csrf(AbstractHttpConfigurer::disable)
                 .build();
     }
@@ -82,7 +80,6 @@ public class SecurityConfig {
                 .build();
     }
 
-
     @Order(2)
     @Bean
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -98,7 +95,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAccessTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:apiSecurityFilterChain] Exception due to :{}", ex);
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
@@ -123,7 +120,6 @@ public class SecurityConfig {
                 .build();
     }
 
-
     @Order(4)
     @Bean
     SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -134,7 +130,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtRefreshTokenFilter(rsaKeyRecord, jwtTokenUtils, refreshTokenRepo), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtRefreshTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:refreshTokenSecurityFilterChain] Exception due to :{}", ex);
                     ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint());
@@ -154,7 +150,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAccessTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .addLogoutHandler(logoutHandler)
@@ -212,7 +208,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(withDefaults())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
-                .addFilterBefore(new JwtAccessTokenFilter(rsaKeyRecord, jwtTokenUtils), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAccessTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:actuatorSecurityFilterChain] Exception due to :{}", ex);
                     ex.authenticationEntryPoint((_, response, authException) ->
@@ -220,7 +216,6 @@ public class SecurityConfig {
                 })
                 .build();
     }
-
 
     @Bean
     PasswordEncoder passwordEncoder() {
