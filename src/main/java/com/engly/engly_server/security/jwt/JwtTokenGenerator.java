@@ -31,8 +31,6 @@ public class JwtTokenGenerator {
     private String url;
 
     public Authentication createAuthenticationObject(Users users) {
-        final var username = users.getEmail();
-        final var password = users.getPassword();
         final var roles = users.getRoles();
 
         final String[] roleArray = roles.split(",");
@@ -40,7 +38,7 @@ public class JwtTokenGenerator {
                 .map(String::trim)
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-        return new UsernamePasswordAuthenticationToken(username, password, authorities);
+        return new UsernamePasswordAuthenticationToken(users.getEmail(), users.getPassword(), authorities);
     }
 
     public String generateAccessToken(Authentication authentication) {

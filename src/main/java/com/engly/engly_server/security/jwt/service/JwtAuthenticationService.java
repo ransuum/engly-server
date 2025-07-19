@@ -11,7 +11,7 @@ public interface JwtAuthenticationService {
 
     JwtHolder authenticateData(Users users, Authentication authentication, HttpServletResponse response);
 
-    Authentication authenticate(SignInDto sign);
+    Authentication authenticateCredentials(SignInDto sign);
 
     JwtHolder createAuthObjectForVerification(Users users, HttpServletResponse response);
 }

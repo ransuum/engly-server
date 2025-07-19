@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto getJwtTokensAfterAuthentication(SignInDto signInDto, HttpServletResponse response) {
-        final var authentication = jwtAuthenticationService.authenticate(signInDto);
+        final var authentication = jwtAuthenticationService.authenticateCredentials(signInDto);
         return userRepo.findByEmail(signInDto.email())
                 .map(users -> {
                     users.setLastLogin(Instant.now());

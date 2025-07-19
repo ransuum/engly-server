@@ -9,6 +9,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -28,16 +29,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 public class JwtRefreshTokenFilter extends OncePerRequestFilter {
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final RefreshTokenRepo refreshTokenRepo;
-
-    public JwtRefreshTokenFilter(RSAKeyRecord rsaKeyRecord, JwtTokenUtils jwtTokenUtils, RefreshTokenRepo refreshTokenRepo) {
-        this.rsaKeyRecord = rsaKeyRecord;
-        this.jwtTokenUtils = jwtTokenUtils;
-        this.refreshTokenRepo = refreshTokenRepo;
-    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -46,7 +42,7 @@ public class JwtRefreshTokenFilter extends OncePerRequestFilter {
         try {
             log.info("[JwtRefreshTokenFilter:doFilterInternal] :: Started ");
             log.info("[JwtRefreshTokenFilter:doFilterInternal]Filtering the Http Request:{}", request.getRequestURI());
-            String token = new CookieUtils(request.getCookies()).getRefreshTokenCookie();
+            final String token = new CookieUtils(request.getCookies()).getRefreshTokenCookie();
 
             if (token == null) {
                 filterChain.doFilter(request, response);

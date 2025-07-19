@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -24,14 +25,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Slf4j
+@RequiredArgsConstructor
 public class JwtAccessTokenFilter extends OncePerRequestFilter {
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
-
-    public JwtAccessTokenFilter(RSAKeyRecord rsaKeyRecord, JwtTokenUtils jwtTokenUtils) {
-        this.rsaKeyRecord = rsaKeyRecord;
-        this.jwtTokenUtils = jwtTokenUtils;
-    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
