@@ -10,7 +10,6 @@ import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.function.TriFunction;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,22 +28,21 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     private final RefreshTokenRepo refreshTokenRepo;
     private final AuthenticationManager authenticationManager;
 
-    private final TriFunction<Users, Authentication, HttpServletResponse, JwtHolder> tokenProcessor =
-            (user, auth, response) -> {
-                final String accessToken = jwtTokenGenerator.generateAccessToken(auth);
-                final String refreshToken = jwtTokenGenerator.generateRefreshToken(auth);
+    private JwtHolder processTokens(Users user, Authentication auth, HttpServletResponse response) {
+        final String accessToken = this.jwtTokenGenerator.generateAccessToken(auth);
+        final String refreshToken = this.jwtTokenGenerator.generateRefreshToken(auth);
 
-                jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
-                refreshTokenRepo.save(RefreshToken.builder()
-                        .user(user)
-                        .token(refreshToken)
-                        .createdAt(Instant.now())
-                        .expiresAt(Instant.now().plus(REFRESH_TOKEN_VALIDITY_DAYS, ChronoUnit.DAYS))
-                        .revoked(false)
-                        .build());
+        jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
+        refreshTokenRepo.save(RefreshToken.builder()
+                .user(user)
+                .token(refreshToken)
+                .createdAt(Instant.now())
+                .expiresAt(Instant.now().plus(REFRESH_TOKEN_VALIDITY_DAYS, ChronoUnit.DAYS))
+                .revoked(false)
+                .build());
 
-                return new JwtHolder(refreshToken, accessToken);
-            };
+        return new JwtHolder(refreshToken, accessToken);
+    }
 
     /**
      * Creates access and refresh tokens and sends refresh token in cookie.
@@ -52,7 +50,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     @Override
     public JwtHolder createAuthObject(Users user, HttpServletResponse response) {
         final var authentication = jwtTokenGenerator.createAuthenticationObject(user);
-        return tokenProcessor.apply(user, authentication, response);
+        return processTokens(user, authentication, response);
     }
 
     /**
@@ -60,7 +58,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
      */
     @Override
     public JwtHolder authenticateData(Users user, Authentication authentication, HttpServletResponse response) {
-        return tokenProcessor.apply(user, authentication, response);
+        return processTokens(user, authentication, response);
     }
 
     /**
@@ -81,6 +79,6 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         final Authentication authentication = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), user.getPassword(), new UserDetailsImpl(user).getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return tokenProcessor.apply(user, authentication, response);
+        return processTokens(user, authentication, response);
     }
 }

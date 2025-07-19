@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.TokenNotFoundException;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import com.engly.engly_server.service.common.UserService;
-import org.graalvm.collections.Pair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -45,7 +45,7 @@ public class JwtTokenUtils {
         authorities.addAll(userDetails.getAuthorities());
 
         if (!isTokenValid(jwt, userDetails)) throw new TokenNotFoundException("Invalid JWT token");
-        return Pair.create(userDetails, authorities);
+        return Pair.of(userDetails, authorities);
     };
 
     public String getUserName(Jwt jwtToken) {
