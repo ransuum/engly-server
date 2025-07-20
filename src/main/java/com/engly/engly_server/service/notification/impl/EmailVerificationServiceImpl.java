@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -60,6 +61,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
 
     @Override
+    @Transactional
     public AuthResponseDto checkToken(String token, HttpServletResponse response) {
         final var email = service.getCurrentUserEmail();
         return tokenRepo.findByTokenAndEmail(token, email).map(verifyToken -> {

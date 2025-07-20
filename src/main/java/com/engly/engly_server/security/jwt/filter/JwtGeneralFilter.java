@@ -1,6 +1,7 @@
-package com.engly.engly_server.security.jwt;
+package com.engly.engly_server.security.jwt.filter;
 
-import com.engly.engly_server.exception.ApiErrorResponse;
+import com.engly.engly_server.exception.ExceptionResponse;
+import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import jakarta.servlet.FilterChain;
@@ -87,7 +88,7 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
     }
 
     private void handleException(HttpServletResponse response, Exception e) throws IOException {
-        new ApiErrorResponse("Session Problem", HttpStatus.NOT_ACCEPTABLE.value(),
+        new ExceptionResponse("Session Problem", HttpStatus.NOT_ACCEPTABLE.value(),
                 e.getMessage(), LocalDateTime.now())
                 .responseConfiguration(response)
                 .throwException(response.getOutputStream());

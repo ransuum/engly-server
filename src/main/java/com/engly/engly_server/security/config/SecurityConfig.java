@@ -1,7 +1,7 @@
 package com.engly.engly_server.security.config;
 
-import com.engly.engly_server.security.jwt.JwtAccessTokenGeneralFilter;
-import com.engly.engly_server.security.jwt.JwtRefreshTokenGeneralFilter;
+import com.engly.engly_server.security.jwt.filter.JwtAccessTokenGeneralFilter;
+import com.engly.engly_server.security.jwt.filter.JwtRefreshTokenGeneralFilter;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.service.common.impl.GoogleAuthorizationServiceImpl;
 import com.nimbusds.jose.jwk.JWK;

@@ -18,6 +18,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         return userRepo.findByEmail(email)
                 .map(UserDetailsImpl::new)
-                .orElseThrow(() -> new UsernameNotFoundException("UserEmail: " + email + " does not exist"));
+                .orElseThrow(() -> new UsernameNotFoundException("Invalid credentials"));
     }
 }

@@ -23,82 +23,82 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneralExceptions(Exception ex) {
+    public ResponseEntity<ExceptionResponse> handleGeneralExceptions(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error occurred", ex);
     }
 
     @ExceptionHandler(TypeMismatchException.class)
-    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(TypeMismatchException ex) {
+    public ResponseEntity<ExceptionResponse> handleTypeMismatch(TypeMismatchException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getPropertyName(), ex.getMessage());
     }
 
     @ExceptionHandler(EntityAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponse> handleTypeMismatch(EntityAlreadyExistsException ex) {
+    public ResponseEntity<ExceptionResponse> handleTypeMismatch(EntityAlreadyExistsException ex) {
         return buildResponse(HttpStatus.CONFLICT, "Entity mismatch", ex.getMessage());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+    public ResponseEntity<ExceptionResponse> handleAccessDeniedException(AccessDeniedException ex) {
         return buildResponse(HttpStatus.FORBIDDEN, "Access denied", ex.getMessage());
     }
 
     @ExceptionHandler(AuthenticationCredentialsNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AuthenticationCredentialsNotFoundException ex) {
+    public ResponseEntity<ExceptionResponse> handleAccessDeniedException(AuthenticationCredentialsNotFoundException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "You need to authorize!", ex.getMessage());
     }
 
     @ExceptionHandler(WebSocketException.class)
-    public ResponseEntity<ApiErrorResponse> handleWebSocketException(WebSocketException ex) {
+    public ResponseEntity<ExceptionResponse> handleWebSocketException(WebSocketException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid token", ex.getMessage());
     }
 
     @ExceptionHandler(SignInException.class)
-    public ResponseEntity<ApiErrorResponse> handleSignInException(SignInException ex) {
+    public ResponseEntity<ExceptionResponse> handleSignInException(SignInException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Password or email is not correct", ex.getMessage());
     }
 
     @ExceptionHandler(PasswordGeneratorException.class)
-    public ResponseEntity<ApiErrorResponse> handlePasswordGeneratorException(PasswordGeneratorException ex) {
+    public ResponseEntity<ExceptionResponse> handlePasswordGeneratorException(PasswordGeneratorException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Password Generate Error", ex.getMessage());
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<ApiErrorResponse> handleResponseStatusException(ResponseStatusException ex) {
+    public ResponseEntity<ExceptionResponse> handleResponseStatusException(ResponseStatusException ex) {
         return buildResponse((HttpStatus) ex.getStatusCode(), ex.getReason(), ex);
     }
 
     @ExceptionHandler(PropertyReferenceException.class)
-    public ResponseEntity<ApiErrorResponse> handlePropertyReferenceException(PropertyReferenceException ex) {
+    public ResponseEntity<ExceptionResponse> handlePropertyReferenceException(PropertyReferenceException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Invalid data", ex);
     }
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotFoundException(NotFoundException ex) {
+    public ResponseEntity<ExceptionResponse> handleNotFoundException(NotFoundException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Resource not found", ex);
     }
 
     @ExceptionHandler(GenerateTokenException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotificationException(GenerateTokenException ex) {
+    public ResponseEntity<ExceptionResponse> handleNotificationException(GenerateTokenException ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot generate token for verify email", ex);
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolationException() {
+    public ResponseEntity<ExceptionResponse> handleDataIntegrityViolationException() {
         return buildResponse(HttpStatus.CONFLICT, "Duplicate entry", "A record with the same unique identifier already exists");
     }
 
     @ExceptionHandler(TokenNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleTokenNotFoundException(TokenNotFoundException ex) {
+    public ResponseEntity<ExceptionResponse> handleTokenNotFoundException(TokenNotFoundException ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid token", ex);
     }
 
     @ExceptionHandler(FieldValidationException.class)
-    public ResponseEntity<ApiErrorResponse> handleFieldValidationException(FieldValidationException ex) {
+    public ResponseEntity<ExceptionResponse> handleFieldValidationException(FieldValidationException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation error", ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         var errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ApiErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+    public ResponseEntity<ExceptionResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         var errors = ex.getConstraintViolations()
                 .stream()
                 .map(ConstraintViolation::getMessage)
@@ -119,23 +119,23 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<ApiErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+    public ResponseEntity<ExceptionResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, "Max upload size exceeded max size = %d".formatted(ex.getMaxUploadSize()), ex);
     }
 
-    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, Exception ex) {
+    private ResponseEntity<ExceptionResponse> buildResponse(HttpStatus status, String message, Exception ex) {
         return ResponseEntity.status(status)
-                .body(new ApiErrorResponse(message, status.value(), ex.getMessage(), LocalDateTime.now()));
+                .body(new ExceptionResponse(message, status.value(), ex.getMessage(), LocalDateTime.now()));
     }
 
-    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, String ex) {
+    private ResponseEntity<ExceptionResponse> buildResponse(HttpStatus status, String message, String ex) {
         return ResponseEntity.status(status)
-                .body(new ApiErrorResponse(message, status.value(), ex, LocalDateTime.now()));
+                .body(new ExceptionResponse(message, status.value(), ex, LocalDateTime.now()));
     }
 
-    private ResponseEntity<ApiErrorResponse> buildResponse(String message, List<String> errors) {
+    private ResponseEntity<ExceptionResponse> buildResponse(String message, List<String> errors) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ApiErrorResponse(message, HttpStatus.BAD_REQUEST.value(), String.join(", ", errors), LocalDateTime.now()));
+                .body(new ExceptionResponse(message, HttpStatus.BAD_REQUEST.value(), String.join(", ", errors), LocalDateTime.now()));
     }
 }
 

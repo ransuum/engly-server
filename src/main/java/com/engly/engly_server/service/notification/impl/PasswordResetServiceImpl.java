@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -61,6 +62,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
 
     @Override
+    @Transactional
     public AuthResponseDto passwordReset(PasswordResetRequest data, HttpServletResponse response) {
         return tokenRepo.findById(data.token()).map(verifyToken -> {
             if (!verifyToken.getTokenType().equals(TokenType.PASSWORD_RESET))

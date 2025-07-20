@@ -10,12 +10,12 @@ import org.springframework.http.MediaType;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public record ApiErrorResponse(String message,
-                               int code,
-                               String details,
-                               LocalDateTime timestamp) {
+public record ExceptionResponse(String message,
+                                int code,
+                                String details,
+                                LocalDateTime timestamp) {
 
-    public ApiErrorResponse responseConfiguration(HttpServletResponse httpServletResponse) {
+    public ExceptionResponse responseConfiguration(HttpServletResponse httpServletResponse) {
         httpServletResponse.setStatus(code);
         httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
         return this;

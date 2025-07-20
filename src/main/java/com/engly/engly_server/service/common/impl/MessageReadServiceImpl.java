@@ -1,6 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.cache.CachingManagement;
+import com.engly.engly_server.cache.CachingService;
 import com.engly.engly_server.cache.components.MessageReadCache;
 import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
@@ -28,7 +28,7 @@ public class MessageReadServiceImpl implements MessageReadService {
     private final MessageReadRepo messageReadRepository;
     private final MessageReadCache messageReadCache;
 
-    public MessageReadServiceImpl(MessageReadRepo messageReadRepository, CachingManagement messageReadCache) {
+    public MessageReadServiceImpl(MessageReadRepo messageReadRepository, CachingService messageReadCache) {
         this.messageReadRepository = messageReadRepository;
         this.messageReadCache = messageReadCache.getMessageReadCache();
     }
