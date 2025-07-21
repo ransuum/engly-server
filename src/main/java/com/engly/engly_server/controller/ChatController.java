@@ -21,6 +21,7 @@ import java.time.Instant;
 
 @Controller
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority('SCOPE_WRITE')")
 public class ChatController {
     private final MessageService messageService;
     private final UserService userService;
