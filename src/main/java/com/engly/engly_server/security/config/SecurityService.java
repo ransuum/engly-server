@@ -1,6 +1,5 @@
 package com.engly.engly_server.security.config;
 
-import com.engly.engly_server.models.enums.Authority;
 import com.engly.engly_server.models.enums.Roles;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -45,14 +44,14 @@ public class SecurityService {
                 .toList();
         log.info("[SecurityService:getPermissionsFromRoles] Roles: {}", roleList);
 
-        final Set<Authority> authorities = Roles.getPermissionsForRoles(roleList);
+        final var authorities = Roles.getPermissionsForRoles(roleList);
         return authorities.stream()
                 .map(Enum::name)
                 .collect(Collectors.joining(" "));
     }
 
     private Collection<SimpleGrantedAuthority> getCurrentUserRoles() {
-        final Optional<Authentication> authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+        final var authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
         return authentication.map(authentication1 ->
                         authentication1.getAuthorities()
                                 .stream()
@@ -63,7 +62,7 @@ public class SecurityService {
     }
 
     private Authentication getAuthenticationOrThrow() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated())
             throw new AuthenticationCredentialsNotFoundException("No authenticated user found in SecurityContext");
 

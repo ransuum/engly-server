@@ -17,6 +17,8 @@ public interface UserService {
 
     Optional<Users> findByEmail(String email);
 
+    UsersDto findByEmailDto(String email);
+
     Page<UsersDto> allUsers(Pageable pageable);
 
     String getUsernameByEmail(String email);

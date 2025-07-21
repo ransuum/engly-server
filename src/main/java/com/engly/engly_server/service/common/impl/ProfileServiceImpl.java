@@ -26,14 +26,12 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheName.USER_PROFILES,
-            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()"
-    )
+    @Cacheable(value = CacheName.USER_PROFILES, key = "@securityService.getCurrentUserEmail()")
     public UsersDto getProfile() {
         final var email = securityService.getCurrentUserEmail();
-        return UserMapper.INSTANCE.toUsersDto(userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE)));
+        final var user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
+        return UserMapper.INSTANCE.toUsersDto(user);
     }
 
     @Override
@@ -41,8 +39,7 @@ public class ProfileServiceImpl implements ProfileService {
             put = {
                     @CachePut(value = CacheName.USER_PROFILES, key = "#result.username"),
                     @CachePut(value = CacheName.USER_ID, key = "#result.id"),
-                    @CachePut(value = CacheName.USER_BY_EMAIL,
-                            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName().toLowerCase()")
+                    @CachePut(value = CacheName.USER_BY_EMAIL_DTO, key = "@securityService.getCurrentUserEmail()")
             },
             evict = {
                     @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
@@ -62,7 +59,8 @@ public class ProfileServiceImpl implements ProfileService {
                     if (isValid(profileUpdateData.nativeLanguage()))
                         user.getAdditionalInfo().setNativeLanguage(profileUpdateData.nativeLanguage());
 
-                    return UserMapper.INSTANCE.toUsersDto(userRepo.save(user));
+                    final var savedUser = userRepo.save(user);
+                    return UserMapper.INSTANCE.toUsersDto(savedUser);
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
     }

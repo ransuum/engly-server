@@ -59,9 +59,17 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email);
     }
 
+    @Override
+    @Cacheable(value = CacheName.USER_BY_EMAIL_DTO, key = "#email", sync = true)
+    public UsersDto findByEmailDto(String email) {
+        return userRepo.findByEmail(email).map(UserMapper.INSTANCE::toUsersDto)
+                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+    }
+
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_BY_EMAIL_DTO, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_ENTITY_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_PROFILES, key = "#username"),
