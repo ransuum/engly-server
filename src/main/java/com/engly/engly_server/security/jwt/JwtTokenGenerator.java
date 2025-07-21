@@ -1,6 +1,8 @@
 package com.engly.engly_server.security.jwt;
 
+import com.engly.engly_server.models.entity.ChatParticipants;
 import com.engly.engly_server.models.entity.Users;
+import com.engly.engly_server.repo.ChatParticipantRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 public class JwtTokenGenerator {
     private final JwtEncoder jwtEncoder;
     private final SecurityService securityService;
+    private final ChatParticipantRepo chatParticipantsRepository;
 
     @Value("${app.backend-cookie.url}")
     private String url;
@@ -47,6 +50,8 @@ public class JwtTokenGenerator {
         final var roles = securityService.getRolesOfUser(authentication);
         final var permissions = securityService.getPermissionsFromRoles(roles);
 
+        final var roomRoles = getRoomRolesForUser(authentication.getName());
+
         final var claims = JwtClaimsSet.builder()
                 .id(jti)
                 .issuer("chat-engly")
@@ -54,6 +59,7 @@ public class JwtTokenGenerator {
                 .expiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
+                .claim("roomRoles", roomRoles)
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
@@ -84,5 +90,15 @@ public class JwtTokenGenerator {
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+    }
+
+    private Map<String, String> getRoomRolesForUser(String email) {
+        List<ChatParticipants> participants = chatParticipantsRepository.findActiveParticipantsByUserEmail(email);
+
+        return participants.stream()
+                .collect(Collectors.toMap(
+                        p -> p.getRoom().getId(),
+                        p -> p.getRole().name()
+                ));
     }
 }

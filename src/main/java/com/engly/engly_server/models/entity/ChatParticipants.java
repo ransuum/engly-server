@@ -1,6 +1,6 @@
 package com.engly.engly_server.models.entity;
 
-import com.engly.engly_server.models.enums.Roles;
+import com.engly.engly_server.models.enums.RoomRoles;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,5 +42,5 @@ public class ChatParticipants implements Serializable {
     private Instant leaveAt;
 
     @Enumerated(EnumType.STRING)
-    private Roles role;
+    private RoomRoles role;
 }

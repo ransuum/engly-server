@@ -8,6 +8,7 @@ import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.enums.Roles;
+import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.ChatParticipantsService;
@@ -55,7 +56,7 @@ public class MessageServiceImpl implements MessageService {
         final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
         final var room = roomService.findRoomEntityById(messageRequestDto.roomId());
 
-        chatParticipantsService.addParticipant(room, user, Roles.ROLE_USER);
+        chatParticipantsService.addParticipant(room, user, RoomRoles.USER);
 
         final var savedMessage = messageRepo.save(Message.builder()
                 .isEdited(Boolean.FALSE)

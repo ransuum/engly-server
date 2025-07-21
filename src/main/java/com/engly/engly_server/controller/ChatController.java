@@ -4,8 +4,9 @@ import com.engly.engly_server.listeners.models.TypingEvent;
 import com.engly.engly_server.models.dto.create.TypingRequestDto;
 import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
-import com.engly.engly_server.models.dto.update.EditMessageRequest;
+import com.engly.engly_server.models.dto.update.EditMessageRequestDto;
 import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.security.root.RequireRoomPermission;
 import com.engly.engly_server.service.common.MessageService;
 import com.engly.engly_server.config.websocket.WebSocketEvent;
 import com.engly.engly_server.service.common.UserService;
@@ -29,7 +30,7 @@ public class ChatController {
     private static final String TOPIC_MESSAGES = "/topic/messages/";
 
     @MessageMapping("/chat/message.send")
-    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
+    @RequireRoomPermission(permission = "ROOM_WRITE")
     public void sendMessage(@Payload MessageRequestDto messageRequestDto) {
         final var message = messageService.sendMessage(messageRequestDto);
         messagingTemplate.convertAndSend(
@@ -39,15 +40,16 @@ public class ChatController {
 
     @MessageMapping("/chat/message.edit")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
-    public void editMessage(@Payload EditMessageRequest request) {
+    @RequireRoomPermission(permission = "ROOM_WRITE")
+    public void editMessage(@Payload EditMessageRequestDto request) {
         final var message = messageService.editMessage(request.id(), request.content());
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + message.roomId(),
+                TOPIC_MESSAGES + request.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_EDIT, message));
     }
 
     @MessageMapping("/chat/message.delete")
-    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
+    @RequireRoomPermission(permission = "ROOM_WRITE")
     public void deleteMessage(@Payload String id) {
         messageService.deleteMessage(id);
         messagingTemplate.convertAndSend(
@@ -57,7 +59,7 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/user.typing")
-    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
+    @RequireRoomPermission(permission = "ROOM_WRITE")
     public void userTyping(@Payload TypingRequestDto typingRequestDto) {
         final var username = userService.getUsernameByEmail(securityService.getCurrentUserEmail());
         final var typingEvent = new TypingEvent(

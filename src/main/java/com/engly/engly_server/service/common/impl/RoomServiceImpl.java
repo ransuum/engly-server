@@ -9,6 +9,7 @@ import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.enums.Roles;
+import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.CategoriesService;
@@ -65,7 +66,7 @@ public class RoomServiceImpl implements RoomService {
                 .name(roomRequestDto.name())
                 .build());
 
-        chatParticipantsService.addParticipant(room, creator, Roles.ROLE_ADMIN);
+        chatParticipantsService.addParticipant(room, creator, RoomRoles.ADMIN);
         return RoomMapper.INSTANCE.roomToDto(room);
     }
 

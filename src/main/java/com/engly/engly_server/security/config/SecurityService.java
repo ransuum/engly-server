@@ -61,7 +61,7 @@ public class SecurityService {
                 .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("No authenticated user found"));
     }
 
-    private Authentication getAuthenticationOrThrow() {
+    public Authentication getAuthenticationOrThrow() {
         final var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated())
             throw new AuthenticationCredentialsNotFoundException("No authenticated user found in SecurityContext");

@@ -9,6 +9,7 @@ import com.engly.engly_server.models.entity.ChatParticipants;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Roles;
+import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repo.ChatParticipantRepo;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.utils.cache.CacheName;
@@ -39,7 +40,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true),
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user.id")
     })
-    public void addParticipant(Rooms rooms, Users user, Roles role) {
+    public void addParticipant(Rooms rooms, Users user, RoomRoles role) {
         if (!chatParticipantCache.isParticipantExists(rooms.getId(), user.getId())) {
             final var chatParticipant = ChatParticipants.builder()
                     .room(rooms)
@@ -67,7 +68,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
 
     @Override
     @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
-    public void updateRoleOfParticipant(String participantId, Roles role) {
+    public void updateRoleOfParticipant(String participantId, RoomRoles role) {
         final var chatParticipant = chatParticipantRepo.findById(participantId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId)));
         chatParticipant.setRole(role);
