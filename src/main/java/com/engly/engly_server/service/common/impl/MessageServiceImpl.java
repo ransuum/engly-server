@@ -7,7 +7,6 @@ import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.MessageRequestDto;
 import com.engly.engly_server.models.entity.Message;
-import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repo.MessageRepo;
 import com.engly.engly_server.security.config.SecurityService;
@@ -18,6 +17,7 @@ import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,6 +39,7 @@ public class MessageServiceImpl implements MessageService {
     private final ApplicationEventPublisher publisher;
     private final ChatParticipantsService chatParticipantsService;
     private final GoogleDriveService driveService;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
@@ -49,7 +50,11 @@ public class MessageServiceImpl implements MessageService {
             evict = {
                     @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, key = "#messageRequestDto.roomId()"),
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true)
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#messageRequestDto.roomId()"),
+                    @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#messageRequestDto.roomId()"),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOM_BY_CATEGORY_AND_KEY, allEntries = true)
             }
     )
     public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
@@ -75,11 +80,16 @@ public class MessageServiceImpl implements MessageService {
                     @CacheEvict(value = CacheName.MESSAGE_ID, key = "#id"),
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
-                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true)
+                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOM_BY_CATEGORY_AND_KEY, allEntries = true)
             }
     )
     public void deleteMessage(String id) {
-        messageRepo.deleteById(id);
+        messageRepo.findById(id).ifPresentOrElse(_ -> messageRepo.deleteById(id),
+                () -> {
+                    throw new NotFoundException(NOT_FOUND_MESSAGE);
+                });
     }
 
     @Override
