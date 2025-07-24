@@ -59,20 +59,26 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
     })
     public void removeParticipant(String participantId) {
-        final var chatParticipant = chatParticipantRepo.findById(participantId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId)));
-
-        log.info("User with email {} removed from room", chatParticipant.getUser().getEmail());
-        chatParticipantRepo.delete(chatParticipant);
+        chatParticipantRepo.findById(participantId)
+                .ifPresentOrElse(chatParticipants -> {
+                    chatParticipantRepo.deleteById(chatParticipants.getId());
+                    log.info("User with email {} removed from room", chatParticipants.getUser().getEmail());
+                }, () -> {
+                    throw new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId));
+                });
     }
 
     @Override
     @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
     public void updateRoleOfParticipant(String participantId, RoomRoles role) {
-        final var chatParticipant = chatParticipantRepo.findById(participantId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId)));
-        chatParticipant.setRole(role);
-        chatParticipantRepo.save(chatParticipant);
+        chatParticipantRepo.findById(participantId)
+                .ifPresentOrElse(chatParticipants -> {
+                    chatParticipants.setRole(role);
+                    chatParticipantRepo.save(chatParticipants);
+                }, () -> {
+                    throw new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId));
+                });
+
     }
 
     @Override

@@ -71,6 +71,7 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
+    @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
             @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#id"),
@@ -79,7 +80,10 @@ public class RoomServiceImpl implements RoomService {
             @CacheEvict(value = CacheName.ROOM_BY_CATEGORY_AND_KEY, allEntries = true)
     })
     public void deleteRoomById(String id) {
-        roomRepo.deleteById(id);
+        roomRepo.findById(id).ifPresentOrElse(room -> roomRepo.deleteById(room.getId()),
+                () -> {
+                    throw new NotFoundException(ROOM_NOT_FOUND);
+                });
     }
 
     @Override

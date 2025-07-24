@@ -1,6 +1,6 @@
 package com.engly.engly_server.config.websocket;
 
-import com.engly.engly_server.exception.CustomExceptionWebSocketHandlerDecorator;
+import com.engly.engly_server.exception.handler.CustomExceptionWebSocketHandlerDecorator;
 import com.engly.engly_server.security.websocket.AuthChannelInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

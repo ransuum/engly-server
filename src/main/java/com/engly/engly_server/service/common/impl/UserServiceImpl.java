@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
                     userRepo.delete(users);
                     return new ApiResponse("User deleted successfully");
                 })
-                .orElseThrow(() -> new NotFoundException("User not found"));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id)));
     }
 
     @Override
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = CacheName.USER_ID, key = "#id", sync = true)
     public UsersDto findById(String id) {
         return UserMapper.INSTANCE.toUsersDto(userRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found")));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id))));
     }
 
     @Override
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = CacheName.USER_BY_EMAIL_DTO, key = "#email", sync = true)
     public UsersDto findByEmailDto(String email) {
         return userRepo.findByEmail(email).map(UserMapper.INSTANCE::toUsersDto)
-                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Caching(evict = {
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public String getUsernameByEmail(String email) {
         return userRepo.findUsernameByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User not found: " + email));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override
@@ -123,14 +123,14 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public Users findUserEntityByEmail(String email) {
         return userRepo.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override
     @Cacheable(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public String getUserIdByEmail(String email) {
         return userRepo.findByEmail(email).map(Users::getId)
-                .orElseThrow(() -> new NotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override

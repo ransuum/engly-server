@@ -1,4 +1,4 @@
-package com.engly.engly_server.exception;
+package com.engly.engly_server.exception.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

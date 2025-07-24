@@ -1,4 +1,4 @@
-package com.engly.engly_server.exception;
+package com.engly.engly_server.exception.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;

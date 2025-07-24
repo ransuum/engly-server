@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.jwt.filter;
 
-import com.engly.engly_server.exception.ExceptionResponse;
+import com.engly.engly_server.exception.handler.ExceptionResponse;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;

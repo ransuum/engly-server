@@ -17,7 +17,6 @@ import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -39,7 +38,6 @@ public class MessageServiceImpl implements MessageService {
     private final ApplicationEventPublisher publisher;
     private final ChatParticipantsService chatParticipantsService;
     private final GoogleDriveService driveService;
-    private final CacheManager cacheManager;
 
     @Override
     @Transactional

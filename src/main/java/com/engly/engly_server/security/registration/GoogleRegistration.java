@@ -28,7 +28,7 @@ public final class GoogleRegistration implements RegistrationChooser {
     @Override
     public Users registration(SignUpRequestDto signUpRequestDto) {
         log.info("Registering Google user with email: {}", signUpRequestDto.email());
-        userRepo.findByEmail(signUpRequestDto.email()).ifPresent(users -> {
+        userRepo.findByEmail(signUpRequestDto.email()).ifPresent(_ -> {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this Google email already exists");
         });
 
