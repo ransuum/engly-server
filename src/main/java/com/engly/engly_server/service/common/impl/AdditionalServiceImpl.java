@@ -17,6 +17,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
 
@@ -30,29 +31,27 @@ public class AdditionalServiceImpl implements AdditionalService {
     @Value("#{'${sysadmin.email}'.split(',\\s*')}")
     private Set<String> sysadminEmails;
 
+    private static final String ROLE_SYSADMIN = "ROLE_SYSADMIN";
+    private static final String ROLE_USER = "ROLE_USER";
+
     @Override
+    @Transactional
     public AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto,
                                                   HttpServletResponse httpServletResponse) {
         final var email = securityService.getCurrentUserEmail();
         return userRepo.findByEmail(email)
                 .map(user -> {
-                    user.setRoles(sysadminEmails.contains(user.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
-
-                    final var additionalInfo = AdditionalInfo.builder()
+                    user.setRoles(sysadminEmails.contains(user.getEmail()) ? ROLE_SYSADMIN : ROLE_USER);
+                    user.setAdditionalInfo(AdditionalInfo.builder()
                             .user(user)
                             .goal(additionalRequestForGoogleUserDto.goals())
                             .nativeLanguage(additionalRequestForGoogleUserDto.nativeLanguage())
                             .englishLevel(additionalRequestForGoogleUserDto.englishLevel())
-                            .build();
-
-                    user.setAdditionalInfo(additionalInfo);
+                            .build());
                     final var savedUser = userRepo.save(user);
 
-                    final Authentication newAuth = new UsernamePasswordAuthenticationToken(savedUser.getEmail(), null,
-                            new UserDetailsImpl(savedUser).getAuthorities());
-                    SecurityContextHolder.getContext().setAuthentication(newAuth);
-
-                    final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, newAuth, httpServletResponse);
+                    final var authentication = jwtAuthenticationService.newAuthentication(savedUser);
+                    final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, httpServletResponse);
 
                     return new AuthResponseDto(jwtHolder.accessToken(), 300, TokenType.Bearer, savedUser.getUsername());
                 })

@@ -19,7 +19,7 @@ public class ChatParticipantsController {
         chatParticipantsService.removeParticipant(participantId);
     }
 
-    @PutMapping("/update-role/{participantId}")
+    @PatchMapping("/update-role/{participantId}")
     @PreAuthorize("hasAuthority('SCOPE_UPDATE_GLOBAL')")
     public void updateParticipantRole(@PathVariable String participantId, @RequestParam RoomRoles role) {
         chatParticipantsService.updateRoleOfParticipant(participantId, role);

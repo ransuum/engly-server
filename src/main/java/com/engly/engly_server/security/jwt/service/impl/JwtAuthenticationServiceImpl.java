@@ -81,4 +81,12 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         return processTokens(user, authentication, response);
     }
+
+    @Override
+    public Authentication newAuthentication(Users users) {
+        final Authentication newAuth = new UsernamePasswordAuthenticationToken(users.getEmail(), null,
+                new UserDetailsImpl(users).getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(newAuth);
+        return newAuth;
+    }
 }

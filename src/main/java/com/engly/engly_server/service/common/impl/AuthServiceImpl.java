@@ -2,6 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.dto.LoginGoogleResult;
 import com.engly.engly_server.models.dto.create.SignInDto;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
@@ -95,5 +96,22 @@ public class AuthServiceImpl implements AuthService {
 
         log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
         return createAuthResponse.apply(user, jwtHolder);
+    }
+
+    @Override
+    public LoginGoogleResult processOAuth2PostLogin(String email, String name, String providerId, HttpServletResponse response) {
+        final var user = userRepo.findByEmail(email)
+                .map(existingUser -> {
+                    existingUser.setLastLogin(Instant.now());
+                    return existingUser;
+                })
+                .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
+                        .registration(new SignUpRequestDto(name, email, "Password123@",
+                                EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
+
+        final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
+
+        final var authResponse = createAuthResponse.apply(user, jwtHolder);
+        return new LoginGoogleResult(jwtHolder, authResponse);
     }
 }

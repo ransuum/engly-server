@@ -64,7 +64,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             NotFoundException.class,
-            GenerateTokenException.class
+            GenerateTokenException.class,
+            GoogleDriveException.class
     })
     public ResponseEntity<ExceptionResponse> handleInternalServerErrorExceptions(Exception ex) {
         HttpStatus status = ex instanceof NotFoundException ? HttpStatus.NOT_FOUND : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -116,6 +117,7 @@ public class GlobalExceptionHandler {
             case AuthenticationCredentialsNotFoundException _ -> "Authentication required";
             case WebSocketException _ -> "WebSocket connection error";
             case SignInException _ -> "Invalid credentials";
+            case GoogleDriveException _ -> "Google Drive Api";
             case PasswordGeneratorException _ -> "Password generation failed";
             case PropertyReferenceException _ -> "Invalid property reference";
             case NotFoundException _ -> "Resource not found";

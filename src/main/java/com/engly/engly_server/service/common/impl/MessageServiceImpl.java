@@ -5,7 +5,7 @@ import com.engly.engly_server.googleDrive.GoogleDriveService;
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.dto.create.MessageRequestDto;
+import com.engly.engly_server.models.dto.create.CreateMessageData;
 import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repo.MessageRepo;
@@ -46,26 +46,26 @@ public class MessageServiceImpl implements MessageService {
                     @CachePut(value = CacheName.MESSAGE_ID, key = "#result.id()")
             },
             evict = {
-                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, key = "#messageRequestDto.roomId()"),
+                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, key = "#createMessageData.roomId()"),
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#messageRequestDto.roomId()"),
-                    @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#messageRequestDto.roomId()"),
+                    @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#createMessageData.roomId()"),
+                    @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#createMessageData.roomId()"),
                     @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
                     @CacheEvict(value = CacheName.ROOM_BY_CATEGORY_AND_KEY, allEntries = true)
             }
     )
-    public MessagesDto sendMessage(MessageRequestDto messageRequestDto) {
+    public MessagesDto sendMessage(CreateMessageData createMessageData) {
         final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
-        final var room = roomService.findRoomEntityById(messageRequestDto.roomId());
+        final var room = roomService.findRoomEntityById(createMessageData.roomId());
 
         chatParticipantsService.addParticipant(room, user, RoomRoles.USER);
 
         final var savedMessage = messageRepo.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
-                .content(messageRequestDto.content())
-                .imageUrl(driveService.getImageWebViewLink(messageRequestDto.imageId()))
+                .content(createMessageData.content())
+                .imageUrl(driveService.getImageWebViewLink(createMessageData.imageId()))
                 .user(user)
                 .room(room)
                 .build());

@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.root;
 
-import com.engly.engly_server.models.dto.create.MessageRequestDto;
+import com.engly.engly_server.models.dto.create.CreateMessageData;
 import com.engly.engly_server.models.dto.create.TypingRequestDto;
 import com.engly.engly_server.models.enums.RoomAuthority;
 import com.engly.engly_server.service.permission.RoomAuthorizationService;
@@ -43,7 +43,7 @@ public class WebSocketRoomAuthorizationAspect {
 
     private String extractRoomIdFromPayload(Object payload) {
         return switch (payload) {
-            case MessageRequestDto dto -> dto.roomId();
+            case CreateMessageData dto -> dto.roomId();
             case TypingRequestDto dto -> dto.roomId();
             default -> null;
         };

@@ -3,7 +3,7 @@ package com.engly.engly_server.controller;
 import com.engly.engly_server.listeners.models.TypingEvent;
 import com.engly.engly_server.models.dto.create.TypingRequestDto;
 import com.engly.engly_server.models.enums.EventType;
-import com.engly.engly_server.models.dto.create.MessageRequestDto;
+import com.engly.engly_server.models.dto.create.CreateMessageData;
 import com.engly.engly_server.models.dto.update.EditMessageRequestDto;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.root.RequireRoomPermission;
@@ -32,8 +32,8 @@ public class ChatController {
 
     @MessageMapping("/chat/message.send")
     @RequireRoomPermission(permission = "ROOM_WRITE")
-    public void sendMessage(@Payload MessageRequestDto messageRequestDto) {
-        final var message = messageService.sendMessage(messageRequestDto);
+    public void sendMessage(@Payload CreateMessageData createMessageData) {
+        final var message = messageService.sendMessage(createMessageData);
         messagingTemplate.convertAndSend(
                 TOPIC_MESSAGES + message.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_SEND, message));

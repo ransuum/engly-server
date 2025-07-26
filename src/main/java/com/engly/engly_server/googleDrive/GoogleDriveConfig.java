@@ -1,5 +1,6 @@
 package com.engly.engly_server.googleDrive;
 
+import com.engly.engly_server.exception.GoogleDriveException;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
@@ -38,7 +39,12 @@ public class GoogleDriveConfig {
     }
 
     @Bean
-    public Drive createDriveService(UserCredentials userCredentials) throws Exception {
-        return new Drive.Builder(GoogleNetHttpTransport.newTrustedTransport(), JSON_FACTORY, new HttpCredentialsAdapter(userCredentials)).setApplicationName("eng-ly-chat").build();
+    public Drive createDriveService(UserCredentials userCredentials) {
+        try {
+            return new Drive.Builder(GoogleNetHttpTransport.newTrustedTransport(),
+                    JSON_FACTORY, new HttpCredentialsAdapter(userCredentials)).setApplicationName("eng-ly-chat").build();
+        } catch (Exception e) {
+            throw new GoogleDriveException(e.getMessage());
+        }
     }
 }
