@@ -8,53 +8,145 @@ management:
           - prometheus
           - metrics
           - caches
-          - threaddump
-          - heapdump
+          - loggers
           - configprops
           - env
+          - beans
+          - threaddump
+          - heapdump
       base-path: /actuator
 
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized
       show-components: always
       probes:
         enabled: true
+      group:
+        readiness:
+          include: readinessState,db,redis
+        liveness:
+            include: livenessState,ping
+
+
     metrics:
+      access: read_only
+    prometheus:
       access: read_only
     caches:
       access: read_only
     threaddump:
       access: read_only
+    heapdump:
+        access: read_only
+    env:
+      access: read_only
+      show-values: when_authorized
+    configprops:
+      access: read_only
+      show-values: when_authorized
 
   health:
     db:
       enabled: true
+    redis:
+      enabled: true
     diskspace:
       enabled: true
+      threshold: 100MB
     mail:
       enabled: true
     ping:
       enabled: true
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
 
   metrics:
     enable:
-      all: true
+      # JVM metrics
+      jvm: true
+      system: true
+      process: true
+      # Web metrics
+      http: true
+      tomcat: true
+      # Data source metrics
+      jdbc: true
+      hikaricp: true
+      # Cache metrics
+      cache: true
+      # Custom application metrics
+      application: true
+
     distribution:
       percentiles-histogram:
-        http.server.requests: true
+        "[http.server.requests]": true
+        "[spring.data.repository.invocations]": true
+        "[cache.gets]": true
       percentiles:
-        http.server.requests: 0.5, 0.95, 0.99
-    tags:
-      application: ${spring.application.name}
+        "[http.server.requests]": "0.5,0.75,0.95,0.99"
+        "[spring.data.repository.invocations]": "0.5,0.95,0.99"
+      minimum-expected-value:
+        "[http.server.requests]": "1ms"
+      maximum-expected-value:
+        "[http.server.requests]": "10s"
+
+      tags:
+        application: ${spring.application.name:engly-server}
+        environment: ${spring.profiles.active:default}
+        version: ${app.version:1.0.0}
+        region: ${app.region:local}
+
+      web:
+        server:
+          request:
+            autotime:
+              enabled: true
+              percentiles: "0.5,0.75,0.95,0.99"
+            metric-name: http_server_requests
+
   prometheus:
     metrics:
       export:
         enabled: true
-  simple:
-    metrics:
-      export:
+        step: 30s
+        descriptions: true
+        # Common labels for all metrics
+        common-tags:
+          application: ${spring.application.name}
+          instance: ${spring.application.name}-${random.uuid}
+
+    # Simple metrics export (for testing)
+    simple:
+      metrics:
+        export:
+          enabled: false  # Disable in production, only use prometheus
+
+    # Info endpoint configuration
+    info:
+      build:
         enabled: true
+      env:
+        enabled: true
+      git:
+        enabled: true
+        mode: full
+      java:
+        enabled: true
+      os:
+        enabled: true
+
+  # Application info
+  info:
+    app:
+      name: ${spring.application.name}
+      description: "Engly Server Application"
+      version: "@project.version@"
+      encoding: "@project.build.sourceEncoding@"
+      java:
+        version: "@java.version@"
 
 springdoc:
   swagger-ui:
@@ -76,10 +168,12 @@ logging:
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
     org.springframework.cache: DEBUG
     org.springframework.scheduling: INFO
+    io.micrometer: INFO
+    org.springframework.boot.actuate: INFO
 
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"
 
   file:
     name: logs/engly-server.log
@@ -87,3 +181,4 @@ logging:
     rollingpolicy:
       max-file-size: 100MB
       max-history: 30
+      total-size-cap: 3GB

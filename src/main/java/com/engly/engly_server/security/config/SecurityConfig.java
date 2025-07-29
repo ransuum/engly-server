@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -56,6 +58,8 @@ public class SecurityConfig {
     private final LogoutHandler logoutHandler;
     private final JwtAccessTokenGeneralFilter jwtAccessTokenFilter;
     private final JwtRefreshTokenGeneralFilter jwtRefreshTokenFilter;
+
+    private static final String GLOBAL_RIGHTS = "GLOBAL_READ";
 
     @Order(0)
     @Bean
@@ -202,17 +206,34 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/actuator/health", "/actuator/info", "/actuator/caches/**", "/actuator/metrics/**").permitAll()
-                        .requestMatchers("/actuator/prometheus").hasAuthority("FULL_ACCESS")
-                        .anyRequest().hasAuthority("FULL_ACCESS"))
+                        .requestMatchers("/actuator/health/**", "/actuator/info").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/actuator/metrics/**",
+                                "/actuator/caches/**",
+                                "/actuator/loggers/**").hasAnyAuthority("METRICS_READ", GLOBAL_RIGHTS)
+                        .requestMatchers("/actuator/prometheus").hasAnyAuthority("METRICS_READ", "MONITORING_SYSTEM", GLOBAL_RIGHTS)
+                        .requestMatchers("/actuator/configprops",
+                                "/actuator/env/**",
+                                "/actuator/beans").hasAuthority(GLOBAL_RIGHTS)
+                        .requestMatchers("/actuator/threaddump",
+                                "/actuator/heapdump").hasAuthority(GLOBAL_RIGHTS)
+                        .requestMatchers(HttpMethod.POST, "/actuator/loggers/**").hasAuthority(GLOBAL_RIGHTS)
+                        .anyRequest().hasAuthority(GLOBAL_RIGHTS))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .httpBasic(withDefaults())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(withDefaults()))
                 .addFilterBefore(jwtAccessTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
-                    log.error("[SecurityConfig:actuatorSecurityFilterChain] Exception due to :{}", ex);
-                    ex.authenticationEntryPoint((_, response, authException) ->
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage()));
+                    log.error("[SecurityConfig:actuatorSecurityFilterChain] Exception: {}", ex.toString());
+                    ex.authenticationEntryPoint((request, response, authException) -> {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        response.getWriter().write("{\"error\":\"Unauthorized access to actuator endpoint\"}");
+                    });
+                    ex.accessDeniedHandler((request, response, accessDeniedException) -> {
+                        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        response.getWriter().write("{\"error\":\"Access denied to actuator endpoint\"}");
+                    });
                 })
                 .build();
     }

@@ -131,7 +131,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_NATIVE,
             key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
