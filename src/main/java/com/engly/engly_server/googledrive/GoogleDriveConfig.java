@@ -1,4 +1,4 @@
-package com.engly.engly_server.googleDrive;
+package com.engly.engly_server.googledrive;
 
 import com.engly.engly_server.exception.GoogleDriveException;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -25,17 +25,21 @@ public class GoogleDriveConfig {
      * Authorizes the installed application to access user's protected data.
      */
     @Bean
-    public UserCredentials userCredentials() throws Exception {
-        // Build credentials directly with refresh token
-        UserCredentials credentials = UserCredentials.newBuilder()
-                .setClientId(clientId)
-                .setClientSecret(clientSecret)
-                .setRefreshToken(refreshToken)
-                .build();
+    public UserCredentials userCredentials() {
+        try {
+            // Build credentials directly with refresh token
+            UserCredentials credentials = UserCredentials.newBuilder()
+                    .setClientId(clientId)
+                    .setClientSecret(clientSecret)
+                    .setRefreshToken(refreshToken)
+                    .build();
 
-        // Refresh the access token
-        credentials.refresh();
-        return credentials;
+            // Refresh the access token
+            credentials.refresh();
+            return credentials;
+        } catch (Exception e) {
+            throw new GoogleDriveException(e.getMessage());
+        }
     }
 
     @Bean

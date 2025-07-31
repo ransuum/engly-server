@@ -1,10 +1,10 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.listeners.models.TypingEvent;
-import com.engly.engly_server.models.dto.create.TypingRequestDto;
+import com.engly.engly_server.models.dto.create.TypingRequest;
 import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.models.dto.create.CreateMessageData;
-import com.engly.engly_server.models.dto.update.EditMessageRequestDto;
+import com.engly.engly_server.models.dto.update.EditMessageRequest;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.root.RequireRoomPermission;
 import com.engly.engly_server.service.common.MessageService;
@@ -42,7 +42,7 @@ public class ChatController {
     @MessageMapping("/chat/message.edit")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     @RequireRoomPermission(permission = "ROOM_WRITE")
-    public void editMessage(@Payload EditMessageRequestDto request) {
+    public void editMessage(@Payload EditMessageRequest request) {
         final var message = messageService.editMessage(request.id(), request.content());
         messagingTemplate.convertAndSend(
                 TOPIC_MESSAGES + request.roomId(),
@@ -61,17 +61,17 @@ public class ChatController {
 
     @MessageMapping("/chat/user.typing")
     @RequireRoomPermission(permission = "ROOM_WRITE")
-    public void userTyping(@Payload TypingRequestDto typingRequestDto) {
+    public void userTyping(@Payload TypingRequest typingRequest) {
         final var username = userService.getUsernameByEmail(securityService.getCurrentUserEmail());
         final var typingEvent = new TypingEvent(
-                typingRequestDto.roomId(),
+                typingRequest.roomId(),
                 username,
-                typingRequestDto.isTyping(),
+                typingRequest.isTyping(),
                 Instant.now()
         );
 
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + typingRequestDto.roomId(),
+                TOPIC_MESSAGES + typingRequest.roomId(),
                 new WebSocketEvent<>(EventType.USER_TYPING, typingEvent)
         );
     }

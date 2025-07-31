@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.CategoriesDto;
-import com.engly.engly_server.models.dto.create.CategoryRequestDto;
+import com.engly.engly_server.models.dto.create.CategoryRequest;
 import com.engly.engly_server.service.common.CategoriesService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,8 +41,8 @@ public class CategoryController {
     @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
     @PostMapping
     @RateLimiter(name = "CategoryController")
-    public ResponseEntity<CategoriesDto> createCategory(@RequestBody CategoryRequestDto categoryRequestDto) {
-        return ResponseEntity.status(201).body(categoriesService.addCategory(categoryRequestDto));
+    public ResponseEntity<CategoriesDto> createCategory(@RequestBody CategoryRequest categoryRequest) {
+        return ResponseEntity.status(201).body(categoriesService.addCategory(categoryRequest));
     }
 
     @Operation(summary = "Get a category by its ID")
@@ -79,9 +79,9 @@ public class CategoryController {
     public ResponseEntity<CategoriesDto> updateCategory(
             @Parameter(description = "The ID of the category to update.")
             @PathVariable String id,
-            @RequestBody CategoryRequestDto categoryRequestDto) {
+            @RequestBody CategoryRequest categoryRequest) {
 
-        return ResponseEntity.ok(categoriesService.updateCategory(id, categoryRequestDto));
+        return ResponseEntity.ok(categoriesService.updateCategory(id, categoryRequest));
     }
 
     @Operation(summary = "Delete a category by its ID")

@@ -35,17 +35,18 @@ public class MessageReadCacheImpl implements MessageReadCache {
             return;
         }
 
-        log.debug("Batch saving {} message reads", messageReads.size());
+        final int size = messageReads.size();
+        log.debug("Batch saving {} message reads", size);
 
         final int batchSize = 100;
-        for (int i = 0; i < messageReads.size(); i += batchSize) {
-            final int end = Math.min(i + batchSize, messageReads.size());
+        for (int i = 0; i < size; i += batchSize) {
+            final int end = Math.min(i + batchSize, size);
             List<MessageRead> batch = messageReads.subList(i, end);
 
             try {
                 messageReadRepo.saveAll(batch);
                 log.debug("Saved batch of {} message reads (batch {}/{})",
-                        batch.size(), (i / batchSize) + 1, (messageReads.size() + batchSize - 1) / batchSize);
+                        batch.size(), (i / batchSize) + 1, (size + batchSize - 1) / batchSize);
             } catch (Exception e) {
                 log.error("Failed to save batch of message reads: {}", e.getMessage(), e);
                 throw e;

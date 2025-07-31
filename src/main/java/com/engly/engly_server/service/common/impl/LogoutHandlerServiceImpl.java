@@ -4,7 +4,6 @@ import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.security.cookiemanagement.CookieUtils;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 @Service

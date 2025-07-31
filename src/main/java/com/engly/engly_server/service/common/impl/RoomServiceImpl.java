@@ -4,11 +4,10 @@ import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.RoomsDto;
-import com.engly.engly_server.models.dto.create.RoomRequestDto;
+import com.engly.engly_server.models.dto.create.RoomRequest;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repo.RoomRepo;
 import com.engly.engly_server.security.config.SecurityService;
@@ -51,7 +50,7 @@ public class RoomServiceImpl implements RoomService {
                     @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
             }
     )
-    public RoomsDto createRoom(CategoryType name, RoomRequestDto roomRequestDto) {
+    public RoomsDto createRoom(CategoryType name, RoomRequest roomRequestDto) {
         if (roomRepo.existsByName(roomRequestDto.name()))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 

@@ -5,6 +5,6 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record CategoryRequestDto(@NotNull(message = "Name is required") @Nullable CategoryType name,
-                                 @NotBlank(message = "Description is blank") @Nullable String description) {
+public record CategoryRequest(@NotNull(message = "Name is required") @Nullable CategoryType name,
+                              @NotBlank(message = "Description is blank") @Nullable String description) {
 }

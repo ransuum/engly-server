@@ -1,4 +1,4 @@
-package com.engly.engly_server.googleDrive;
+package com.engly.engly_server.googledrive;
 
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.InputStreamContent;

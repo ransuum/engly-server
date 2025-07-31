@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.dto.create.CategoryRequestDto;
+import com.engly.engly_server.models.dto.create.CategoryRequest;
 import com.engly.engly_server.repo.CategoriesRepo;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
@@ -41,11 +41,11 @@ public class CategoryServiceImpl implements CategoriesService {
                     @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
             }
     )
-    public CategoriesDto addCategory(CategoryRequestDto categoryRequestDto) {
+    public CategoriesDto addCategory(CategoryRequest categoryRequest) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepo.save(Categories.builder()
-                        .description(categoryRequestDto.description())
-                        .name(categoryRequestDto.name())
+                        .description(categoryRequest.description())
+                        .name(categoryRequest.name())
                         .build())
         );
     }
@@ -60,11 +60,11 @@ public class CategoryServiceImpl implements CategoriesService {
                     @CacheEvict(value = CacheName.CATEGORY_ENTITY_ID, key = "#id")
             }
     )
-    public CategoriesDto updateCategory(String id, CategoryRequestDto categoryRequestDto) {
+    public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
         return categoriesRepo.findById(id)
                 .map(category -> {
-                    if (FieldUtil.isValid(categoryRequestDto.name())) category.setName(categoryRequestDto.name());
-                    if (FieldUtil.isValid(categoryRequestDto.description())) category.setDescription(categoryRequestDto.description());
+                    if (FieldUtil.isValid(categoryRequest.name())) category.setName(categoryRequest.name());
+                    if (FieldUtil.isValid(categoryRequest.description())) category.setDescription(categoryRequest.description());
 
                     return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepo.save(category));
                 })

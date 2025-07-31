@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record RoomRequestDto(
+public record RoomRequest(
         @Valid
         @NotBlank(message = "Name of room is blank")
         @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters.")

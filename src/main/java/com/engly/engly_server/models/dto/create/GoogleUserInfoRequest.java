@@ -5,12 +5,12 @@ import com.engly.engly_server.models.enums.Goals;
 import com.engly.engly_server.models.enums.NativeLanguage;
 import jakarta.validation.constraints.NotNull;
 
-public record AdditionalRequestForGoogleUserDto(@NotNull(message = "English level is required")
+public record GoogleUserInfoRequest(@NotNull(message = "English level is required")
                                                 EnglishLevels englishLevel,
 
-                                                @NotNull(message = "Native language is required")
+                                    @NotNull(message = "Native language is required")
                                                 NativeLanguage nativeLanguage,
 
-                                                @NotNull(message = "Goals are required")
+                                    @NotNull(message = "Goals are required")
                                                 Goals goals) {
 }

@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.googleDrive.GoogleDriveService;
+import com.engly.engly_server.googledrive.GoogleDriveService;
 import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
