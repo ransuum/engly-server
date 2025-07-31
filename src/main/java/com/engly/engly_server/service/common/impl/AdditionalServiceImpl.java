@@ -2,20 +2,16 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
+import com.engly.engly_server.models.dto.create.GoogleUserInfoRequest;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.models.dto.create.AdditionalRequestForGoogleUserDto;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
-import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import com.engly.engly_server.service.common.AdditionalService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +32,7 @@ public class AdditionalServiceImpl implements AdditionalService {
 
     @Override
     @Transactional
-    public AuthResponseDto additionalRegistration(AdditionalRequestForGoogleUserDto additionalRequestForGoogleUserDto,
+    public AuthResponseDto additionalRegistration(GoogleUserInfoRequest additionalRequestForGoogleUserDto,
                                                   HttpServletResponse httpServletResponse) {
         final var email = securityService.getCurrentUserEmail();
         return userRepo.findByEmail(email)

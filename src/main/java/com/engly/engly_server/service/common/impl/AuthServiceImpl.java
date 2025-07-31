@@ -3,10 +3,10 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.LoginGoogleResult;
-import com.engly.engly_server.models.dto.create.SignInDto;
+import com.engly.engly_server.models.dto.create.SignInRequest;
+import com.engly.engly_server.models.dto.create.SignUpRequest;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
-import com.engly.engly_server.models.dto.create.SignUpRequestDto;
 import com.engly.engly_server.repo.RefreshTokenRepo;
 import com.engly.engly_server.repo.UserRepo;
 import com.engly.engly_server.security.jwt.JwtHolder;
@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDto getJwtTokensAfterAuthentication(SignInDto signInDto, HttpServletResponse response) {
+    public AuthResponseDto getJwtTokensAfterAuthentication(SignInRequest signInDto, HttpServletResponse response) {
         final var authentication = jwtAuthenticationService.authenticateCredentials(signInDto);
         return userRepo.findByEmail(signInDto.email())
                 .map(users -> {
@@ -90,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDto registerUser(SignUpRequestDto signUpRequestDto, HttpServletResponse httpServletResponse) {
+    public AuthResponseDto registerUser(SignUpRequest signUpRequestDto, HttpServletResponse httpServletResponse) {
         final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
         final var jwtHolder = jwtAuthenticationService.createAuthObject(user, httpServletResponse);
 
@@ -106,7 +106,7 @@ public class AuthServiceImpl implements AuthService {
                     return existingUser;
                 })
                 .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
-                        .registration(new SignUpRequestDto(name, email, "Password123@",
+                        .registration(new SignUpRequest(name, email, "Password123@",
                                 EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
 
         final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);

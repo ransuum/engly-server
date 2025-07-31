@@ -23,8 +23,6 @@ management:
       probes:
         enabled: true
       group:
-        readiness:
-          include: readinessState,db,redis
         liveness:
             include: livenessState,ping
 
@@ -48,8 +46,6 @@ management:
 
   health:
     db:
-      enabled: true
-    redis:
       enabled: true
     diskspace:
       enabled: true

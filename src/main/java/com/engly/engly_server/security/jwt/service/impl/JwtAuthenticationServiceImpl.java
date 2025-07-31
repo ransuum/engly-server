@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.jwt.service.impl;
 
-import com.engly.engly_server.models.dto.create.SignInDto;
+import com.engly.engly_server.models.dto.create.SignInRequest;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repo.RefreshTokenRepo;
@@ -65,7 +65,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
      * Authenticates the user with email/password credentials.
      */
     @Override
-    public Authentication authenticateCredentials(SignInDto sign) {
+    public Authentication authenticateCredentials(SignInRequest sign) {
         return authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(sign.email(), sign.password()));
     }

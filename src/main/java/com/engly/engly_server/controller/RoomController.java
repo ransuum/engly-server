@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.RoomsDto;
-import com.engly.engly_server.models.dto.create.RoomRequestDto;
+import com.engly.engly_server.models.dto.create.RoomRequest;
 import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.service.common.RoomService;
@@ -53,7 +53,7 @@ public class RoomController {
     public ResponseEntity<RoomsDto> createRoom(
             @Parameter(description = "The category to assign the new room to.", required = true)
             @RequestParam CategoryType name,
-            @Valid @RequestBody RoomRequestDto roomRequestDto) {
+            @Valid @RequestBody RoomRequest roomRequestDto) {
         return ResponseEntity.status(201).body(roomService.createRoom(name, roomRequestDto));
     }
 

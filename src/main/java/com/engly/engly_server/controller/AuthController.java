@@ -1,8 +1,8 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.dto.create.SignInDto;
-import com.engly.engly_server.models.dto.create.SignUpRequestDto;
+import com.engly.engly_server.models.dto.create.SignInRequest;
+import com.engly.engly_server.models.dto.create.SignUpRequest;
 import com.engly.engly_server.service.common.AuthService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +56,7 @@ public class AuthController {
     })
     @PostMapping("/sign-in")
     @RateLimiter(name = "AuthController")
-    public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody SignInDto signInDto, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody SignInRequest signInDto, HttpServletResponse response) {
         return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(signInDto, response));
     }
 
@@ -90,7 +90,7 @@ public class AuthController {
     })
     @PostMapping("/sign-up")
     @RateLimiter(name = "AuthController")
-    public ResponseEntity<Object> signUpUser(@Valid @RequestBody SignUpRequestDto signUpRequestDto,
+    public ResponseEntity<Object> signUpUser(@Valid @RequestBody SignUpRequest signUpRequestDto,
                                              BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
         log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequestDto.username());
