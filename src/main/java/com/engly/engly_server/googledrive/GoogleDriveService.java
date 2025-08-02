@@ -68,13 +68,13 @@ public class GoogleDriveService {
         return false;
     }
 
-    public String getImageWebViewLink(String imageId) {
+    public String getImageThumbnailLink(String imageId) {
         if (imageId == null) {
             return null;
         }
         try {
-            File execute = drive.files().get(imageId).setFields("webViewLink").execute();
-            return execute.get("webViewLink").toString();
+            File execute = drive.files().get(imageId).setFields("thumbnailLink").execute();
+            return execute.get("thumbnailLink").toString();
         } catch (Exception e) {
             log.error("GoogleDriveService: error during file check if uploaded maybe file is not uploaded yet", e);
             return null;
