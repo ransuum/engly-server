@@ -19,9 +19,11 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class GoogleDriveService {
     private final Drive drive;
-    @Value("${google.drive.folderId}")
-    public String folderId;
 
+    @Value("${google.drive.folderId}")
+    private String folderId;
+
+    private static final String TYPE_LINK = "thumbnailLink";
 
     public FileUploadResponse uploadImageToDrive(MultipartFile multipartFile) {
         if (!ifFileIsImage(multipartFile)) {
@@ -40,7 +42,7 @@ public class GoogleDriveService {
             File uploadedFile = drive.files().create(fileMetaData, mediaContent)
                     .setFields("id,name,thumbnailLink") // Specify fields to retrieve in the response
                     .execute();
-            Object thumbnailLink = uploadedFile.get("thumbnailLink");
+            Object thumbnailLink = uploadedFile.get(TYPE_LINK);
             String fileId = uploadedFile.getId();
             setPermissions(fileId);
             return new FileUploadResponse(HttpStatusCodes.STATUS_CODE_ACCEPTED, fileId, "Image Successfully Uploaded To Drive", thumbnailLink.toString());
@@ -73,8 +75,8 @@ public class GoogleDriveService {
             return null;
         }
         try {
-            File execute = drive.files().get(imageId).setFields("thumbnailLink").execute();
-            return execute.get("thumbnailLink").toString();
+            File execute = drive.files().get(imageId).setFields(TYPE_LINK).execute();
+            return execute.get(TYPE_LINK).toString();
         } catch (Exception e) {
             log.error("GoogleDriveService: error during file check if uploaded maybe file is not uploaded yet", e);
             return null;

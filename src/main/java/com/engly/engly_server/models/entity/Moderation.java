@@ -1,6 +1,6 @@
 package com.engly.engly_server.models.entity;
 
-import com.engly.engly_server.models.enums.Action;
+import com.engly.engly_server.models.enums.ModAction;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,7 +41,7 @@ public class Moderation implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Action action;
+    private ModAction action;
 
     @Column(nullable = false)
     private String reason;
