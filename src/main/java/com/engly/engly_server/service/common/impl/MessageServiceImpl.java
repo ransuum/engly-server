@@ -65,7 +65,7 @@ public class MessageServiceImpl implements MessageService {
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
                 .content(createMessageData.content())
-                .imageUrl(driveService.getImageWebViewLink(createMessageData.imageId()))
+                .imageUrl(driveService.getImageThumbnailLink(createMessageData.imageId()))
                 .user(user)
                 .room(room)
                 .build());

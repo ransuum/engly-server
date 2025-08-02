@@ -38,12 +38,12 @@ public class GoogleDriveService {
             InputStreamContent mediaContent = new InputStreamContent(multipartFile.getContentType(), multipartFile.getInputStream());
 
             File uploadedFile = drive.files().create(fileMetaData, mediaContent)
-                    .setFields("id,name,webViewLink") // Specify fields to retrieve in the response
+                    .setFields("id,name,thumbnailLink") // Specify fields to retrieve in the response
                     .execute();
-            Object webViewLink = uploadedFile.get("webViewLink");
+            Object thumbnailLink = uploadedFile.get("thumbnailLink");
             String fileId = uploadedFile.getId();
             setPermissions(fileId);
-            return new FileUploadResponse(HttpStatusCodes.STATUS_CODE_ACCEPTED, fileId, "Image Successfully Uploaded To Drive", webViewLink.toString());
+            return new FileUploadResponse(HttpStatusCodes.STATUS_CODE_ACCEPTED, fileId, "Image Successfully Uploaded To Drive", thumbnailLink.toString());
         } catch (Exception e) {
             log.error("GoogleDriveService: error during file upload description", e);
             return new FileUploadResponse(HttpStatusCodes.STATUS_CODE_CONFLICT, "", "Error during multipartFile upload", "");
@@ -68,13 +68,13 @@ public class GoogleDriveService {
         return false;
     }
 
-    public String getImageWebViewLink(String imageId) {
+    public String getImageThumbnailLink(String imageId) {
         if (imageId == null) {
             return null;
         }
         try {
-            File execute = drive.files().get(imageId).setFields("webViewLink").execute();
-            return execute.get("webViewLink").toString();
+            File execute = drive.files().get(imageId).setFields("thumbnailLink").execute();
+            return execute.get("thumbnailLink").toString();
         } catch (Exception e) {
             log.error("GoogleDriveService: error during file check if uploaded maybe file is not uploaded yet", e);
             return null;
