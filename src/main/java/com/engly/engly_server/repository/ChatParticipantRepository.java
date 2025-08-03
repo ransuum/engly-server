@@ -1,4 +1,4 @@
-package com.engly.engly_server.repo;
+package com.engly.engly_server.repository;
 
 import com.engly.engly_server.models.entity.ChatParticipants;
 import org.springframework.data.domain.Page;
@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface ChatParticipantRepo extends JpaRepository<ChatParticipants, String> {
+public interface ChatParticipantRepository extends JpaRepository<ChatParticipants, String> {
 
     Page<ChatParticipants> findAllByRoomId(@Param("roomId") String roomId, Pageable pageable);
 

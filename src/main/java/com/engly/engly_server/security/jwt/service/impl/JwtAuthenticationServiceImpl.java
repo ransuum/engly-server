@@ -3,7 +3,7 @@ package com.engly.engly_server.security.jwt.service.impl;
 import com.engly.engly_server.models.dto.create.SignInRequest;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.jwt.JwtHolder;
 import com.engly.engly_server.security.jwt.JwtTokenGenerator;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
@@ -25,7 +25,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     private static final int REFRESH_TOKEN_VALIDITY_DAYS = 25;
 
     private final JwtTokenGenerator jwtTokenGenerator;
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManager authenticationManager;
 
     private JwtHolder processTokens(Users user, Authentication auth, HttpServletResponse response) {
@@ -33,7 +33,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         final String refreshToken = this.jwtTokenGenerator.generateRefreshToken(auth);
 
         jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
-        refreshTokenRepo.save(RefreshToken.builder()
+        refreshTokenRepository.save(RefreshToken.builder()
                 .user(user)
                 .token(refreshToken)
                 .createdAt(Instant.now())

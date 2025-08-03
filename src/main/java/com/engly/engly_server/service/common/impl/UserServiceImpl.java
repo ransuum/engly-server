@@ -5,7 +5,7 @@ import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.ApiResponse;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
@@ -36,10 +36,10 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
     })
     public ApiResponse delete(String id) {
-        return userRepo.findById(id)
+        return userRepository.findById(id)
                 .map(users -> {
                     this.clearUserSpecificCaches(users.getEmail(), users.getUsername());
-                    userRepo.delete(users);
+                    userRepository.delete(users);
                     return new ApiResponse("User deleted successfully");
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id)));
@@ -49,20 +49,20 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.USER_ID, key = "#id", sync = true)
     public UsersDto findById(String id) {
-        return UserMapper.INSTANCE.toUsersDto(userRepo.findById(id)
+        return UserMapper.INSTANCE.toUsersDto(userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id))));
     }
 
     @Override
     @Cacheable(value = CacheName.USER_ENTITY_BY_EMAIL, key = "#email", sync = true)
     public Optional<Users> findByEmail(String email) {
-        return userRepo.findByEmail(email);
+        return userRepository.findByEmail(email);
     }
 
     @Override
     @Cacheable(value = CacheName.USER_BY_EMAIL_DTO, key = "#email", sync = true)
     public UsersDto findByEmailDto(String email) {
-        return userRepo.findByEmail(email).map(UserMapper.INSTANCE::toUsersDto)
+        return userRepository.findByEmail(email).map(UserMapper.INSTANCE::toUsersDto)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
@@ -89,14 +89,14 @@ public class UserServiceImpl implements UserService {
             condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20"
     )
     public Page<UsersDto> allUsers(Pageable pageable) {
-        return userRepo.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
+        return userRepository.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public String getUsernameByEmail(String email) {
-        return userRepo.findUsernameByEmail(email)
+        return userRepository.findUsernameByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
@@ -115,32 +115,32 @@ public class UserServiceImpl implements UserService {
     })
     public Integer deleteSomeUsers(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;
-        return userRepo.deleteAllByIdIn(ids);
+        return userRepository.deleteAllByIdIn(ids);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public Users findUserEntityByEmail(String email) {
-        return userRepo.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override
     @Cacheable(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public String getUserIdByEmail(String email) {
-        return userRepo.findByEmail(email).map(Users::getId)
+        return userRepository.findByEmail(email).map(Users::getId)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override
     public List<Users> findAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore) {
-        return userRepo.findAllByRolesAndCreatedAtBefore(roles, expireBefore);
+        return userRepository.findAllByRolesAndCreatedAtBefore(roles, expireBefore);
     }
 
     @Override
     @Transactional
     public void deleteAll(List<Users> users) {
-        if (users != null) userRepo.deleteAll(users);
+        if (users != null) userRepository.deleteAll(users);
     }
 }

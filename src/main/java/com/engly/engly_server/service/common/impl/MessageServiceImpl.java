@@ -8,7 +8,7 @@ import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.CreateMessageData;
 import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.enums.RoomRoles;
-import com.engly.engly_server.repo.MessageRepo;
+import com.engly.engly_server.repository.MessageRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.MessageService;
@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class MessageServiceImpl implements MessageService {
-    private final MessageRepo messageRepo;
+    private final MessageRepository messageRepository;
     private final RoomService roomService;
     private final UserService userService;
     private final SecurityService service;
@@ -61,7 +61,7 @@ public class MessageServiceImpl implements MessageService {
 
         chatParticipantsService.addParticipant(room, user, RoomRoles.USER);
 
-        final var savedMessage = messageRepo.save(Message.builder()
+        final var savedMessage = messageRepository.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
                 .content(createMessageData.content())
@@ -84,7 +84,7 @@ public class MessageServiceImpl implements MessageService {
             }
     )
     public void deleteMessage(String id) {
-        messageRepo.findById(id).ifPresentOrElse(_ -> messageRepo.deleteById(id),
+        messageRepository.findById(id).ifPresentOrElse(_ -> messageRepository.deleteById(id),
                 () -> {
                     throw new NotFoundException(NOT_FOUND_MESSAGE);
                 });
@@ -94,7 +94,7 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.MESSAGE_ID, key = "#id")
     public MessagesDto findById(String id) {
-        return messageRepo.findById(id)
+        return messageRepository.findById(id)
                 .map(MessageMapper.INSTANCE::toMessageDto)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
     }
@@ -108,11 +108,11 @@ public class MessageServiceImpl implements MessageService {
             }
     )
     public MessagesDto editMessage(String id, String content) {
-        return messageRepo.findById(id)
+        return messageRepository.findById(id)
                 .map(message -> {
                     message.setContent(content);
                     message.setIsEdited(Boolean.TRUE);
-                    return MessageMapper.INSTANCE.toMessageDto(messageRepo.save(message));
+                    return MessageMapper.INSTANCE.toMessageDto(messageRepository.save(message));
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
     }
@@ -126,7 +126,7 @@ public class MessageServiceImpl implements MessageService {
             unless = "#result.content.isEmpty()"
     )
     public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
-        return messageRepo.search(roomId, keyString, pageable)
+        return messageRepository.search(roomId, keyString, pageable)
                 .map(MessageMapper.INSTANCE::toMessageDto);
     }
 
@@ -139,7 +139,7 @@ public class MessageServiceImpl implements MessageService {
             unless = "#result.content.isEmpty()"
     )
     public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {
-        final var messages = messageRepo.findActive(roomId, pageable);
+        final var messages = messageRepository.findActive(roomId, pageable);
         final var id = userService.getUserIdByEmail(service.getCurrentUserEmail());
 
         publisher.publishEvent(new MessagesViewedEvent(messages.getContent(), id));

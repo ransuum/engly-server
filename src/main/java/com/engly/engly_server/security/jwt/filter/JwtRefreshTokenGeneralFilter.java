@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.jwt.filter;
 
-import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.cookiemanagement.CookieUtils;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.engly.engly_server.security.rsa.RSAKeyRecord;
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class JwtRefreshTokenGeneralFilter extends JwtGeneralFilter {
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public JwtRefreshTokenGeneralFilter(RSAKeyRecord rsaKeyRecord,
                                         JwtTokenUtils jwtTokenUtils,
-                                        RefreshTokenRepo refreshTokenRepo) {
+                                        RefreshTokenRepository refreshTokenRepository) {
         super(rsaKeyRecord, jwtTokenUtils);
-        this.refreshTokenRepo = refreshTokenRepo;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class JwtRefreshTokenGeneralFilter extends JwtGeneralFilter {
 
     @Override
     protected boolean isTokenValidInContext(Jwt jwt) {
-        return refreshTokenRepo.findByTokenAndRevokedIsFalse(jwt.getTokenValue())
+        return refreshTokenRepository.findByTokenAndRevokedIsFalse(jwt.getTokenValue())
                 .isPresent();
     }
 }

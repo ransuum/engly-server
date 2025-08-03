@@ -7,7 +7,7 @@ import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
 import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.entity.MessageRead;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.repo.MessageReadRepo;
+import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.service.common.MessageReadService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +25,10 @@ import java.util.List;
 @Slf4j
 public class MessageReadServiceImpl implements MessageReadService {
 
-    private final MessageReadRepo messageReadRepository;
+    private final MessageReadRepository messageReadRepository;
     private final MessageReadCache messageReadCache;
 
-    public MessageReadServiceImpl(MessageReadRepo messageReadRepository, CachingService messageReadCache) {
+    public MessageReadServiceImpl(MessageReadRepository messageReadRepository, CachingService messageReadCache) {
         this.messageReadRepository = messageReadRepository;
         this.messageReadCache = messageReadCache.getMessageReadCache();
     }

@@ -2,7 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.models.dto.AvailabilityResponseDto;
 import com.engly.engly_server.models.dto.GoogleAvailabilityDto;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.UserValidationService;
 import com.engly.engly_server.utils.cache.CacheName;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class UserValidationServiceImpl implements UserValidationService {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final SecurityService securityService;
 
     @Override
@@ -31,7 +31,7 @@ public class UserValidationServiceImpl implements UserValidationService {
             condition = "#username != null && #username.length() > 2"
     )
     public AvailabilityResponseDto isUsernameAvailable(String username) {
-        final boolean isAvailable = !userRepo.existsByUsername(username);
+        final boolean isAvailable = !userRepository.existsByUsername(username);
         return new AvailabilityResponseDto(isAvailable) ;
     }
 
@@ -43,7 +43,7 @@ public class UserValidationServiceImpl implements UserValidationService {
             condition = "#email != null && #email.contains('@')"
     )
     public AvailabilityResponseDto isEmailAvailable(String email) {
-        final boolean isAvailable = !userRepo.existsByEmail(email);
+        final boolean isAvailable = !userRepository.existsByEmail(email);
         return new AvailabilityResponseDto(isAvailable);
     }
 }

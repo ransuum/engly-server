@@ -14,5 +14,6 @@ public record UsersDto(String id,
                        Instant updatedAt,
                        Instant lastLogin,
                        Provider provider,
-                       AdditionalInfoDto additionalInfo) {
+                       AdditionalInfoDto additionalInfo,
+                       UserSettingsDto userSettings) {
 }

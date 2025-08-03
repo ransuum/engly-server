@@ -57,7 +57,4 @@ public class Rooms implements Serializable {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Moderation> moderation;
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Statistics> statistics;
 }

@@ -7,8 +7,8 @@ import com.engly.engly_server.models.dto.create.SignInRequest;
 import com.engly.engly_server.models.dto.create.SignUpRequest;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
-import com.engly.engly_server.repo.RefreshTokenRepo;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.jwt.JwtHolder;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.AuthService;
@@ -29,9 +29,9 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AuthServiceImpl implements AuthService {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final JwtAuthenticationService jwtAuthenticationService;
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final Map<Provider, RegistrationChooser> chooserMap;
 
     @Value("${app.jwt.token.expiry:30}")
@@ -45,11 +45,11 @@ public class AuthServiceImpl implements AuthService {
                     .tokenType(TokenType.Bearer)
                     .build();
 
-    public AuthServiceImpl(UserRepo userRepo, JwtAuthenticationService jwtAuthenticationService,
-                           RefreshTokenRepo refreshTokenRepo, List<RegistrationChooser> choosers) {
-        this.userRepo = userRepo;
+    public AuthServiceImpl(UserRepository userRepository, JwtAuthenticationService jwtAuthenticationService,
+                           RefreshTokenRepository refreshTokenRepository, List<RegistrationChooser> choosers) {
+        this.userRepository = userRepository;
         this.jwtAuthenticationService = jwtAuthenticationService;
-        this.refreshTokenRepo = refreshTokenRepo;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.chooserMap = choosers.stream()
                 .collect(Collectors.toMap(RegistrationChooser::getProvider, o -> o));
     }
@@ -57,11 +57,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto getJwtTokensAfterAuthentication(SignInRequest signInDto, HttpServletResponse response) {
         final var authentication = jwtAuthenticationService.authenticateCredentials(signInDto);
-        return userRepo.findByEmail(signInDto.email())
+        return userRepository.findByEmail(signInDto.email())
                 .map(users -> {
                     users.setLastLogin(Instant.now());
 
-                    final var savedUser = userRepo.save(users);
+                    final var savedUser = userRepository.save(users);
                     final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
 
                     log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
@@ -79,10 +79,10 @@ public class AuthServiceImpl implements AuthService {
         if (refreshToken == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
 
-        final var refreshTokenEntity = refreshTokenRepo.findByTokenAndRevokedIsFalse(refreshToken)
+        final var refreshTokenEntity = refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
         refreshTokenEntity.setRevoked(true);
-        final var users = refreshTokenRepo.save(refreshTokenEntity).getUser();
+        final var users = refreshTokenRepository.save(refreshTokenEntity).getUser();
 
         final var jwtHolder = jwtAuthenticationService.createAuthObject(users, response);
 
@@ -100,7 +100,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginGoogleResult processOAuth2PostLogin(String email, String name, String providerId, HttpServletResponse response) {
-        final var user = userRepo.findByEmail(email)
+        final var user = userRepository.findByEmail(email)
                 .map(existingUser -> {
                     existingUser.setLastLogin(Instant.now());
                     return existingUser;

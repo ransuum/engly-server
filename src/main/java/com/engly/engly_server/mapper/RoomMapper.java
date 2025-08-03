@@ -11,7 +11,6 @@ import org.mapstruct.factory.Mappers;
         UserMapper.class,
         ChatParticipantMapper.class,
         ModerationMapper.class,
-        StatisticMapper.class,
         MessageMapper.class })
 public interface RoomMapper {
     RoomMapper INSTANCE = Mappers.getMapper(RoomMapper.class);

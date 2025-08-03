@@ -1,8 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.repo.RefreshTokenRepo;
+import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.cookiemanagement.CookieUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,7 +18,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class LogoutHandlerServiceImpl implements LogoutHandler {
-    private final RefreshTokenRepo refreshTokenRepo;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Value("${app.backend-cookie.url}")
     private String url;
@@ -32,11 +31,9 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
 
         final var refreshToken = Objects.requireNonNull(authCookie).substring(7);
 
-        RefreshToken refreshToken1 = refreshTokenRepo.findByTokenAndRevokedIsFalse(refreshToken).orElse(null);
-
-        if (refreshToken1 != null) {
-            refreshToken1.setRevoked(true);
-            refreshTokenRepo.save(refreshToken1);
-        }
+        refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken).ifPresent(token -> {
+            token.setRevoked(true);
+            refreshTokenRepository.save(token);
+        });
     }
 }

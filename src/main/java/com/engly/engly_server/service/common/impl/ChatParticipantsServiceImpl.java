@@ -8,9 +8,8 @@ import com.engly.engly_server.models.dto.ChatParticipantsDto;
 import com.engly.engly_server.models.entity.ChatParticipants;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.models.enums.RoomRoles;
-import com.engly.engly_server.repo.ChatParticipantRepo;
+import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ChatParticipantsServiceImpl implements ChatParticipantsService {
 
-    private final ChatParticipantRepo chatParticipantRepo;
+    private final ChatParticipantRepository chatParticipantRepository;
     private final ChatParticipantCache chatParticipantCache;
 
-    public ChatParticipantsServiceImpl(ChatParticipantRepo chatParticipantRepo, CachingService chatParticipantCache) {
-        this.chatParticipantRepo = chatParticipantRepo;
+    public ChatParticipantsServiceImpl(ChatParticipantRepository chatParticipantRepository, CachingService chatParticipantCache) {
+        this.chatParticipantRepository = chatParticipantRepository;
         this.chatParticipantCache = chatParticipantCache.getChatParticipantCache();
     }
 
@@ -48,7 +47,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
                     .role(role)
                     .build();
             log.info("User adds to room with email {}", chatParticipant.getUser().getEmail());
-            chatParticipantRepo.save(chatParticipant);
+            chatParticipantRepository.save(chatParticipant);
         }
     }
 
@@ -59,9 +58,9 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
     })
     public void removeParticipant(String participantId) {
-        chatParticipantRepo.findById(participantId)
+        chatParticipantRepository.findById(participantId)
                 .ifPresentOrElse(chatParticipants -> {
-                    chatParticipantRepo.deleteById(chatParticipants.getId());
+                    chatParticipantRepository.deleteById(chatParticipants.getId());
                     log.info("User with email {} removed from room", chatParticipants.getUser().getEmail());
                 }, () -> {
                     throw new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId));
@@ -71,10 +70,10 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Override
     @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true)
     public void updateRoleOfParticipant(String participantId, RoomRoles role) {
-        chatParticipantRepo.findById(participantId)
+        chatParticipantRepository.findById(participantId)
                 .ifPresentOrElse(chatParticipants -> {
                     chatParticipants.setRole(role);
-                    chatParticipantRepo.save(chatParticipants);
+                    chatParticipantRepository.save(chatParticipants);
                 }, () -> {
                     throw new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId));
                 });
@@ -90,7 +89,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             unless = "#result.content.isEmpty()"
     )
     public Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable) {
-        return chatParticipantRepo.findAllByRoomId(roomId, pageable)
+        return chatParticipantRepository.findAllByRoomId(roomId, pageable)
                 .map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
     }
 }

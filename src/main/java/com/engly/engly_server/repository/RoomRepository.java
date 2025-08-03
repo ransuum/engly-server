@@ -1,4 +1,4 @@
-package com.engly.engly_server.repo;
+package com.engly.engly_server.repository;
 
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface RoomRepo extends JpaRepository<Rooms, String> {
+public interface RoomRepository extends JpaRepository<Rooms, String> {
     Page<Rooms> findByCategoryName(CategoryType categoryName, Pageable pageable);
 
     @Query("SELECT r FROM Rooms r WHERE r.category.name = :categoryName AND " +

@@ -2,7 +2,7 @@ package com.engly.engly_server.cache.components.impl;
 
 import com.engly.engly_server.cache.components.MessageReadCache;
 import com.engly.engly_server.models.entity.MessageRead;
-import com.engly.engly_server.repo.MessageReadRepo;
+import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class MessageReadCacheImpl implements MessageReadCache {
-    private final MessageReadRepo messageReadRepo;
+    private final MessageReadRepository messageReadRepository;
 
     @Override
     @Cacheable(
@@ -24,7 +24,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
             key = "#messageId + '_' + #userId"
     )
     public boolean hasUserReadMessage(String messageId, String userId) {
-        return messageReadRepo.existsByMessageIdAndUserId(messageId, userId);
+        return messageReadRepository.existsByMessageIdAndUserId(messageId, userId);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
             List<MessageRead> batch = messageReads.subList(i, end);
 
             try {
-                messageReadRepo.saveAll(batch);
+                messageReadRepository.saveAll(batch);
                 log.debug("Saved batch of {} message reads (batch {}/{})",
                         batch.size(), (i / batchSize) + 1, (size + batchSize - 1) / batchSize);
             } catch (Exception e) {

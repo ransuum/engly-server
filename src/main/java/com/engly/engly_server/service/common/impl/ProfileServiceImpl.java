@@ -3,7 +3,7 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.UsersDto;
 import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
@@ -21,7 +21,7 @@ import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final SecurityService securityService;
 
     @Override
@@ -29,7 +29,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Cacheable(value = CacheName.USER_PROFILES, key = "@securityService.getCurrentUserEmail()")
     public UsersDto getProfile() {
         final var email = securityService.getCurrentUserEmail();
-        final var user = userRepo.findByEmail(email)
+        final var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
         return UserMapper.INSTANCE.toUsersDto(user);
     }
@@ -50,7 +50,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Transactional
     public UsersDto updateProfile(ProfileUpdateRequest profileUpdateData) {
         final var email = securityService.getCurrentUserEmail();
-        return userRepo.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .map(user -> {
                     if (isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
                     if (isValid(profileUpdateData.goal())) user.getAdditionalInfo().setGoal(profileUpdateData.goal());
@@ -59,7 +59,7 @@ public class ProfileServiceImpl implements ProfileService {
                     if (isValid(profileUpdateData.nativeLanguage()))
                         user.getAdditionalInfo().setNativeLanguage(profileUpdateData.nativeLanguage());
 
-                    final var savedUser = userRepo.save(user);
+                    final var savedUser = userRepository.save(user);
                     return UserMapper.INSTANCE.toUsersDto(savedUser);
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));

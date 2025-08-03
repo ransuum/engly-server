@@ -50,7 +50,7 @@ public class CacheConfig {
             case CacheName.USER_ID, CacheName.USER_BY_EMAIL, CacheName.USER_ID_BY_EMAIL, CacheName.USERNAME_BY_EMAIL,
                  CacheName.USER_BY_EMAIL_DTO -> new CacheSpec(50, Duration.ofMinutes(10), Duration.ofMinutes(3));
             case CacheName.USER_PROFILES -> new CacheSpec(25, Duration.ofMinutes(5), Duration.ofMinutes(2));
-            case CacheName.ALL_USER -> new CacheSpec(1, Duration.ofMinutes(1), Duration.ofSeconds(30));
+            case CacheName.ALL_USER, CacheName.USER_SETTINGS-> new CacheSpec(1, Duration.ofMinutes(1), Duration.ofSeconds(30));
             case CacheName.USERNAME_AVAILABILITY, CacheName.EMAIL_AVAILABILITY ->
                     new CacheSpec(25, Duration.ofMinutes(1), Duration.ofSeconds(30));
             case CacheName.ROOM_ID, CacheName.ROOM_DTO_ID, CacheName.ROOM_ENTITY_ID ->

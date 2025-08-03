@@ -5,7 +5,7 @@ import com.engly.engly_server.models.dto.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.dto.create.CategoryRequest;
-import com.engly.engly_server.repo.CategoriesRepo;
+import com.engly.engly_server.repository.CategoriesRepository;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
 import com.engly.engly_server.utils.cache.CacheName;
@@ -27,7 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoriesService {
 
-    private final CategoriesRepo categoriesRepo;
+    private final CategoriesRepository categoriesRepository;
 
     @Override
     @Transactional
@@ -43,7 +43,7 @@ public class CategoryServiceImpl implements CategoriesService {
     )
     public CategoriesDto addCategory(CategoryRequest categoryRequest) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
-                categoriesRepo.save(Categories.builder()
+                categoriesRepository.save(Categories.builder()
                         .description(categoryRequest.description())
                         .name(categoryRequest.name())
                         .build())
@@ -61,12 +61,12 @@ public class CategoryServiceImpl implements CategoriesService {
             }
     )
     public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
-        return categoriesRepo.findById(id)
+        return categoriesRepository.findById(id)
                 .map(category -> {
                     if (FieldUtil.isValid(categoryRequest.name())) category.setName(categoryRequest.name());
                     if (FieldUtil.isValid(categoryRequest.description())) category.setDescription(categoryRequest.description());
 
-                    return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepo.save(category));
+                    return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepository.save(category));
                 })
                 .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(id)));
     }
@@ -80,7 +80,7 @@ public class CategoryServiceImpl implements CategoriesService {
             unless = "#result.content.isEmpty()"
     )
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {
-        return categoriesRepo.findAll(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
+        return categoriesRepository.findAll(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Cacheable(value = CacheName.CATEGORY_ID, key = "#categoryId", sync = true)
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
-                categoriesRepo.findById(categoryId).orElseThrow(()
+                categoriesRepository.findById(categoryId).orElseThrow(()
                         -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(categoryId)))
         );
     }
@@ -100,14 +100,14 @@ public class CategoryServiceImpl implements CategoriesService {
             @CacheEvict(value = CacheName.CATEGORY_NAME, allEntries = true)
     })
     public void deleteCategory(String categoryId) {
-        categoriesRepo.deleteById(categoryId);
+        categoriesRepository.deleteById(categoryId);
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()", sync = true)
     public Categories findByName(CategoryType name) {
-        return categoriesRepo.findByName(name).orElseThrow(()
+        return categoriesRepository.findByName(name).orElseThrow(()
                         -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
     }
 
@@ -115,7 +115,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.CATEGORY_ENTITY_ID, key = "#id", sync = true)
     public Categories findCategoryEntityById(String id) {
-        return categoriesRepo.findById(id).orElseThrow(()
+        return categoriesRepository.findById(id).orElseThrow(()
                 -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(id)));
     }
 }

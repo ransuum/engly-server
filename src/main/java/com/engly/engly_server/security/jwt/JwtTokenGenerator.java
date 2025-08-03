@@ -2,7 +2,7 @@ package com.engly.engly_server.security.jwt;
 
 import com.engly.engly_server.models.entity.ChatParticipants;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.repo.ChatParticipantRepo;
+import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class JwtTokenGenerator {
     private final JwtEncoder jwtEncoder;
     private final SecurityService securityService;
-    private final ChatParticipantRepo chatParticipantsRepository;
+    private final ChatParticipantRepository chatParticipantsRepository;
 
     @Value("${app.backend-cookie.url}")
     private String url;

@@ -2,7 +2,7 @@ package com.engly.engly_server.security.admindata;
 
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${admin.password}")
@@ -20,7 +20,7 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (!userRepo.existsByEmail("admin@admin.com")) {
+        if (!userRepository.existsByEmail("admin@admin.com")) {
             final var adminUser = Users.builder()
                     .username("admin")
                     .email("admin@admin.com")
@@ -30,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
                     .provider(Provider.LOCAL)
                     .build();
 
-            userRepo.save(adminUser);
+            userRepository.save(adminUser);
         }
     }
 }

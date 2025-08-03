@@ -2,7 +2,7 @@ package com.engly.engly_server.service.permission;
 
 import com.engly.engly_server.models.enums.RoomAuthority;
 import com.engly.engly_server.models.enums.RoomRoles;
-import com.engly.engly_server.repo.ChatParticipantRepo;
+import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.Map;
 @Slf4j
 public class RoomAuthorizationService {
 
-    private final ChatParticipantRepo chatParticipantsRepository;
+    private final ChatParticipantRepository chatParticipantsRepository;
     private final SecurityService securityService;
 
     public boolean hasRoomPermission(String roomId, RoomAuthority authority) {

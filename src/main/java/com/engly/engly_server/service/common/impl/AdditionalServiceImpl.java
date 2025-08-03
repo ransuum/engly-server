@@ -5,7 +5,7 @@ import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.models.dto.create.GoogleUserInfoRequest;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.enums.TokenType;
-import com.engly.engly_server.repo.UserRepo;
+import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.AdditionalService;
@@ -20,7 +20,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AdditionalServiceImpl implements AdditionalService {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final SecurityService securityService;
     private final JwtAuthenticationService jwtAuthenticationService;
 
@@ -35,7 +35,7 @@ public class AdditionalServiceImpl implements AdditionalService {
     public AuthResponseDto additionalRegistration(GoogleUserInfoRequest additionalRequestForGoogleUserDto,
                                                   HttpServletResponse httpServletResponse) {
         final var email = securityService.getCurrentUserEmail();
-        return userRepo.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .map(user -> {
                     user.setRoles(sysadminEmails.contains(user.getEmail()) ? ROLE_SYSADMIN : ROLE_USER);
                     user.setAdditionalInfo(AdditionalInfo.builder()
@@ -44,7 +44,7 @@ public class AdditionalServiceImpl implements AdditionalService {
                             .nativeLanguage(additionalRequestForGoogleUserDto.nativeLanguage())
                             .englishLevel(additionalRequestForGoogleUserDto.englishLevel())
                             .build());
-                    final var savedUser = userRepo.save(user);
+                    final var savedUser = userRepository.save(user);
 
                     final var authentication = jwtAuthenticationService.newAuthentication(savedUser);
                     final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, httpServletResponse);
