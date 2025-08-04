@@ -15,15 +15,6 @@ import org.springframework.web.bind.annotation.*;
 public class UserSettingController {
     private final UserSettingService userSettingService;
 
-    @PostMapping
-    @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
-    public ResponseEntity<Void> create(@RequestParam(required = false) Boolean notifications,
-                                       @RequestParam(required = false) Theme theme) {
-        userSettingService.create(notifications, theme);
-        return ResponseEntity.ok().build();
-    }
-
-
     @PatchMapping
     @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
     public ResponseEntity<Void> update(@RequestParam(required = false) Boolean notifications,

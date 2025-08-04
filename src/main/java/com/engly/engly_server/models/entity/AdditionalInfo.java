@@ -21,9 +21,12 @@ public class AdditionalInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
     private String id;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name = "id")
+    private Users user;
 
     @Enumerated(EnumType.STRING)
     private EnglishLevels englishLevel;
@@ -33,7 +36,4 @@ public class AdditionalInfo implements Serializable {
 
     @Enumerated(EnumType.STRING)
     private Goals goal;
-
-    @OneToOne(mappedBy = "additionalInfo")
-    private Users user;
 }

@@ -58,9 +58,11 @@ public class Users implements Serializable {
     @Column(name = "provider_id")
     private String providerId;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "additional_info_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private AdditionalInfo additionalInfo;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserSettings userSettings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<RefreshToken> refreshTokens;
@@ -73,9 +75,6 @@ public class Users implements Serializable {
 
     @OneToMany(mappedBy = "moder", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Moderation> moderations;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private UserSettings userSettings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Notifications> notifications;
