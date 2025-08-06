@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 public interface JwtAuthenticationService {
     JwtHolder createAuthObject(Users users, HttpServletResponse response);
 
+    void createAuthObjectForGoogle(Users user, HttpServletResponse response);
+
     JwtHolder authenticateData(Users users, Authentication authentication, HttpServletResponse response);
 
     Authentication authenticateCredentials(SignInRequest sign);

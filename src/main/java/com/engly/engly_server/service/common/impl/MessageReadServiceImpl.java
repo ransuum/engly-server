@@ -4,13 +4,12 @@ import com.engly.engly_server.cache.CachingService;
 import com.engly.engly_server.cache.components.MessageReadCache;
 import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
-import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.entity.MessageRead;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.service.common.MessageReadService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -19,7 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.AbstractMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
 @Service
 @Slf4j
@@ -27,10 +30,14 @@ public class MessageReadServiceImpl implements MessageReadService {
 
     private final MessageReadRepository messageReadRepository;
     private final MessageReadCache messageReadCache;
+    private final Executor virtualThreadExecutor;
 
-    public MessageReadServiceImpl(MessageReadRepository messageReadRepository, CachingService messageReadCache) {
+    public MessageReadServiceImpl(MessageReadRepository messageReadRepository,
+                                  CachingService messageReadCache,
+                                  @Qualifier("virtualThreadExecutor") Executor virtualThreadExecutor) {
         this.messageReadRepository = messageReadRepository;
         this.messageReadCache = messageReadCache.getMessageReadCache();
+        this.virtualThreadExecutor = virtualThreadExecutor;
     }
 
     @Override
@@ -42,17 +49,25 @@ public class MessageReadServiceImpl implements MessageReadService {
     public void markMessageAsRead(List<String> messageIds, String userId) {
         if (messageIds == null || messageIds.isEmpty()) return;
 
-        final var unreadMessageIds = messageIds.parallelStream()
-                .filter(messageId -> !messageReadCache.hasUserReadMessage(messageId, userId))
+        final var futures = messageIds.stream()
+                .map(messageId -> CompletableFuture.supplyAsync(() ->
+                                new AbstractMap.SimpleEntry<>(messageId,
+                                        messageReadCache.hasUserReadMessage(messageId, userId)),
+                        virtualThreadExecutor))
                 .toList();
+
+        final var unreadMessageIds = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(entry -> !entry.getValue())
+                .map(Map.Entry::getKey)
+                .toList();
+
         if (unreadMessageIds.isEmpty()) return;
 
         final var newReads = unreadMessageIds.stream()
                 .map(messageId -> MessageRead.builder()
                         .messageId(messageId)
                         .userId(userId)
-                        .message(Message.builder().id(messageId).build())
-                        .user(Users.builder().id(userId).build())
                         .build())
                 .toList();
 
@@ -60,6 +75,7 @@ public class MessageReadServiceImpl implements MessageReadService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.USERS_WHO_READ_MESSAGE,
             key = "#messageId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",

@@ -2,7 +2,6 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.dto.LoginGoogleResult;
 import com.engly.engly_server.models.dto.create.SignInRequest;
 import com.engly.engly_server.models.dto.create.SignUpRequest;
 import com.engly.engly_server.models.entity.Users;
@@ -23,7 +22,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,14 +34,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Value("${app.jwt.token.expiry:30}")
     private int tokenExpiryMinutes;
-
-    private final BiFunction<Users, JwtHolder, AuthResponseDto> createAuthResponse = (user, jwtHolder) ->
-            AuthResponseDto.builder()
-                    .accessToken(jwtHolder.accessToken())
-                    .accessTokenExpiry(tokenExpiryMinutes * 60)
-                    .username(user.getUsername())
-                    .tokenType(TokenType.Bearer)
-                    .build();
 
     public AuthServiceImpl(UserRepository userRepository, JwtAuthenticationService jwtAuthenticationService,
                            RefreshTokenRepository refreshTokenRepository, List<RegistrationChooser> choosers) {
@@ -65,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
                     final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
 
                     log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
-                    return createAuthResponse.apply(savedUser, jwtHolder);
+                    return createAuthResponse(savedUser, jwtHolder);
                 })
                 .orElseThrow(() -> {
                     log.error("[AuthService:userSignInAuth] User :{} not found", signInDto.email());
@@ -86,7 +76,7 @@ public class AuthServiceImpl implements AuthService {
 
         final var jwtHolder = jwtAuthenticationService.createAuthObject(users, response);
 
-        return createAuthResponse.apply(users, jwtHolder);
+        return createAuthResponse(users, jwtHolder);
     }
 
     @Override
@@ -95,11 +85,11 @@ public class AuthServiceImpl implements AuthService {
         final var jwtHolder = jwtAuthenticationService.createAuthObject(user, httpServletResponse);
 
         log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
-        return createAuthResponse.apply(user, jwtHolder);
+        return createAuthResponse(user, jwtHolder);
     }
 
     @Override
-    public LoginGoogleResult processOAuth2PostLogin(String email, String name, String providerId, HttpServletResponse response) {
+    public void processOAuth2PostLogin(String email, String name, String providerId, HttpServletResponse response) {
         final var user = userRepository.findByEmail(email)
                 .map(existingUser -> {
                     existingUser.setLastLogin(Instant.now());
@@ -109,9 +99,15 @@ public class AuthServiceImpl implements AuthService {
                         .registration(new SignUpRequest(name, email, "Password123@",
                                 EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
 
-        final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
+        jwtAuthenticationService.createAuthObjectForGoogle(user, response);
+    }
 
-        final var authResponse = createAuthResponse.apply(user, jwtHolder);
-        return new LoginGoogleResult(jwtHolder, authResponse);
+    private AuthResponseDto createAuthResponse(Users user, JwtHolder jwtHolder) {
+        return AuthResponseDto.builder()
+                .accessToken(jwtHolder.accessToken())
+                .accessTokenExpiry(tokenExpiryMinutes * 60)
+                .username(user.getUsername())
+                .tokenType(TokenType.Bearer)
+                .build();
     }
 }

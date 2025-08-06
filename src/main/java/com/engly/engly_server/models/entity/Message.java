@@ -8,16 +8,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-@Builder
 @Entity
 @Table(name = "messages")
 @ToString(exclude = {"room", "user", "messageReads"})
+@Builder
 public class Message implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
@@ -36,8 +35,7 @@ public class Message implements Serializable {
     private Users user;
 
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<MessageRead> messageReads = new ArrayList<>();
+    private List<MessageRead> messageReads;
 
     @Column(name = "content")
     private String content;

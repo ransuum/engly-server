@@ -23,7 +23,7 @@ public class MessageEventListener {
     private final MessageReadService messageReadService;
     private final MeterRegistry meterRegistry;
 
-    @Async("messageReadExecutor")
+    @Async("virtualThreadExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Retryable(retryFor = Exception.class, backoff = @Backoff(delay = 1000))
     public void handleMessagesViewed(MessagesViewedEvent event) {

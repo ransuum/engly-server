@@ -1,7 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.models.dto.AuthResponseDto;
 import com.engly.engly_server.service.common.AuthService;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,20 +38,11 @@ public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHand
         final String providerId = oauth2User.getAttribute("sub");
         FieldUtil.isValid(email, name, providerId);
 
-        final var result = authService.processOAuth2PostLogin(email, name, providerId, response);
-        log.info("[AuthService:onAuthenticationSuccess] User:{} successfully authenticated with Google", result.authResponseDto().username());
+        authService.processOAuth2PostLogin(email, name, providerId, response);
 
-        final var builderUrl = buildRedirectUrl(result.authResponseDto());
-        response.sendRedirect(builderUrl);
-    }
-
-    private String buildRedirectUrl(AuthResponseDto authResponse) {
-        return UriComponentsBuilder.fromUriString(frontendUrl)
+        final var builderUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                 .path("/google-auth/callback")
-                .queryParam("access_token", authResponse.accessToken())
-                .queryParam("username", authResponse.username())
-                .queryParam("expires_in", authResponse.accessTokenExpiry())
-                .queryParam("token_type", "Bearer")
                 .build().toUriString();
+        response.sendRedirect(builderUrl);
     }
 }

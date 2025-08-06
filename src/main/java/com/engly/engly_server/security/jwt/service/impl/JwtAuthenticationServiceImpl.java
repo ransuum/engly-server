@@ -28,11 +28,51 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManager authenticationManager;
 
-    private JwtHolder processTokens(Users user, Authentication auth, HttpServletResponse response) {
-        final String accessToken = this.jwtTokenGenerator.generateAccessToken(auth);
-        final String refreshToken = this.jwtTokenGenerator.generateRefreshToken(auth);
+    @Override
+    public JwtHolder createAuthObject(Users user, HttpServletResponse response) {
+        Authentication auth = createAuthentication(user);
+        return generateAndSaveTokens(user, auth, response, true);
+    }
+
+    @Override
+    public void createAuthObjectForGoogle(Users user, HttpServletResponse response) {
+        Authentication auth = createAuthentication(user);
+        generateAndSaveTokens(user, auth, response, false);
+    }
+
+    @Override
+    public JwtHolder authenticateData(Users user, Authentication authentication, HttpServletResponse response) {
+        return generateAndSaveTokens(user, authentication, response, true);
+    }
+
+    @Override
+    public Authentication authenticateCredentials(SignInRequest sign) {
+        return authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(sign.email(), sign.password()));
+    }
+
+    @Override
+    public JwtHolder createAuthObjectForVerification(Users user, HttpServletResponse response) {
+        Authentication auth = createAndSetAuthentication(user, user.getPassword());
+        return generateAndSaveTokens(user, auth, response, true);
+    }
+
+    @Override
+    public Authentication newAuthentication(Users user) {
+        return createAndSetAuthentication(user, null);
+    }
+
+    private JwtHolder generateAndSaveTokens(Users user, Authentication auth, HttpServletResponse response, boolean includeAccessToken) {
+        String refreshToken = jwtTokenGenerator.generateRefreshToken(auth);
+        String accessToken = includeAccessToken ? jwtTokenGenerator.generateAccessToken(auth) : null;
 
         jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
+        saveRefreshToken(user, refreshToken);
+
+        return includeAccessToken ? new JwtHolder(refreshToken, accessToken) : null;
+    }
+
+    private void saveRefreshToken(Users user, String refreshToken) {
         refreshTokenRepository.save(RefreshToken.builder()
                 .user(user)
                 .token(refreshToken)
@@ -40,53 +80,17 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
                 .expiresAt(Instant.now().plus(REFRESH_TOKEN_VALIDITY_DAYS, ChronoUnit.DAYS))
                 .revoked(false)
                 .build());
-
-        return new JwtHolder(refreshToken, accessToken);
     }
 
-    /**
-     * Creates access and refresh tokens and sends refresh token in cookie.
-     */
-    @Override
-    public JwtHolder createAuthObject(Users user, HttpServletResponse response) {
-        final var authentication = jwtTokenGenerator.createAuthenticationObject(user);
-        return processTokens(user, authentication, response);
+    private Authentication createAuthentication(Users user) {
+        return jwtTokenGenerator.createAuthenticationObject(user);
     }
 
-    /**
-     * Creates and stores tokens given a valid authentication.
-     */
-    @Override
-    public JwtHolder authenticateData(Users user, Authentication authentication, HttpServletResponse response) {
-        return processTokens(user, authentication, response);
-    }
-
-    /**
-     * Authenticates the user with email/password credentials.
-     */
-    @Override
-    public Authentication authenticateCredentials(SignInRequest sign) {
-        return authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(sign.email(), sign.password()));
-    }
-
-    /**
-     * Used post-verification to create new tokens and set SecurityContext.
-     */
-    @Override
-    public JwtHolder createAuthObjectForVerification(Users user, HttpServletResponse response) {
+    private Authentication createAndSetAuthentication(Users user, String password) {
         SecurityContextHolder.clearContext();
-        final Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), user.getPassword(), new UserDetailsImpl(user).getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return processTokens(user, authentication, response);
-    }
-
-    @Override
-    public Authentication newAuthentication(Users users) {
-        final Authentication newAuth = new UsernamePasswordAuthenticationToken(users.getEmail(), null,
-                new UserDetailsImpl(users).getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(newAuth);
-        return newAuth;
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                user.getEmail(), password, new UserDetailsImpl(user).getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        return auth;
     }
 }
