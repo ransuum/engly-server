@@ -96,8 +96,11 @@ public class AuthServiceImpl implements AuthService {
                     return existingUser;
                 })
                 .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
-                        .registration(new SignUpRequest(name, email, "Password123@",
-                                EnglishLevels.A1, NativeLanguage.ENGLISH, Goals.DEFAULT, providerId)));
+                        .registration(SignUpRequest.builder()
+                                .username(name)
+                                .email(email)
+                                .providerId(providerId)
+                                .build()));
 
         jwtAuthenticationService.createAuthObjectForGoogle(user, response);
     }

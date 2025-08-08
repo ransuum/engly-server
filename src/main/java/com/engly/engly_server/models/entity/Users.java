@@ -39,6 +39,9 @@ public class Users implements Serializable {
     @Column(nullable = false, name = "ROLES")
     private String roles;
 
+    @Column(name = "img_url")
+    private String imgUrl;
+
     @Column(nullable = false)
     private Boolean emailVerified;
 

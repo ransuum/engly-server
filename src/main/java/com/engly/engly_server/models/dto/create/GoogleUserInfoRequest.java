@@ -12,5 +12,6 @@ public record GoogleUserInfoRequest(@NotNull(message = "English level is require
                                                 NativeLanguage nativeLanguage,
 
                                     @NotNull(message = "Goals are required")
-                                                Goals goals) {
+                                                Goals goals,
+                                    String imgUrl) {
 }

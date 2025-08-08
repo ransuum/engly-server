@@ -32,17 +32,18 @@ public class AdditionalServiceImpl implements AdditionalService {
 
     @Override
     @Transactional
-    public AuthResponseDto additionalRegistration(GoogleUserInfoRequest additionalRequestForGoogleUserDto,
+    public AuthResponseDto additionalRegistration(GoogleUserInfoRequest additionalRequest,
                                                   HttpServletResponse httpServletResponse) {
         final var email = securityService.getCurrentUserEmail();
         return userRepository.findByEmail(email)
                 .map(user -> {
                     user.setRoles(sysadminEmails.contains(user.getEmail()) ? ROLE_SYSADMIN : ROLE_USER);
+                    user.setImgUrl(additionalRequest.imgUrl());
                     user.setAdditionalInfo(AdditionalInfo.builder()
                             .user(user)
-                            .goal(additionalRequestForGoogleUserDto.goals())
-                            .nativeLanguage(additionalRequestForGoogleUserDto.nativeLanguage())
-                            .englishLevel(additionalRequestForGoogleUserDto.englishLevel())
+                            .goal(additionalRequest.goals())
+                            .nativeLanguage(additionalRequest.nativeLanguage())
+                            .englishLevel(additionalRequest.englishLevel())
                             .build());
                     final var savedUser = userRepository.save(user);
 

@@ -40,6 +40,7 @@ public final class EmailRegistration implements RegistrationChooser {
             final var users = Users.builder()
                     .roles(signUpRequestDto.email().equals(devEmail) ? "ROLE_ADMIN" : "ROLE_NOT_VERIFIED")
                     .email(signUpRequestDto.email())
+                    .imgUrl(signUpRequestDto.imgUrl())
                     .emailVerified(Boolean.FALSE)
                     .username(signUpRequestDto.username())
                     .password(passwordEncoder.encode(signUpRequestDto.password()))
