@@ -31,7 +31,6 @@ public class ChatController {
     private static final String TOPIC_MESSAGES = "/topic/messages/";
 
     @MessageMapping("/chat/message.send")
-    @RequireRoomPermission(permission = "ROOM_WRITE")
     public void sendMessage(@Payload CreateMessageData createMessageData) {
         final var message = messageService.sendMessage(createMessageData);
         messagingTemplate.convertAndSend(
@@ -40,7 +39,6 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/message.edit")
-    @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     @RequireRoomPermission(permission = "ROOM_WRITE")
     public void editMessage(@Payload EditMessageRequest request) {
         final var message = messageService.editMessage(request.id(), request.content());
@@ -60,7 +58,6 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/user.typing")
-    @RequireRoomPermission(permission = "ROOM_WRITE")
     public void userTyping(@Payload TypingRequest typingRequest) {
         final var username = userService.getUsernameByEmail(securityService.getCurrentUserEmail());
         final var typingEvent = new TypingEvent(

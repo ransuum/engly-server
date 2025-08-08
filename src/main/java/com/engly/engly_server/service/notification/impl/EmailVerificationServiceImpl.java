@@ -65,24 +65,26 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     public AuthResponseDto checkToken(String token, HttpServletResponse response) {
         final var email = service.getCurrentUserEmail();
         return tokenRepo.findByTokenAndEmail(token, email).map(verifyToken -> {
-            if (!verifyToken.getTokenType().equals(TokenType.EMAIL_VERIFICATION))
-                throw new TokenNotFoundException("Invalid token for email verification");
+                    if (!verifyToken.getTokenType().equals(TokenType.EMAIL_VERIFICATION))
+                        throw new TokenNotFoundException("Invalid token for email verification");
 
-            return userRepository.findByEmail(email).map(user -> {
-                user.setEmailVerified(true);
-                user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
+                    return userRepository.findByEmail(email).map(user -> {
+                                user.setEmailVerified(true);
+                                user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
 
-                tokenRepo.delete(verifyToken);
+                                tokenRepo.delete(verifyToken);
 
-                final var userSaved = userRepository.save(user);
-                final var jwtHolder = jwtAuthenticationService.createAuthObjectForVerification(userSaved, response);
-                log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
+                                final var userSaved = userRepository.save(user);
+                                final var jwtHolder = jwtAuthenticationService.createAuthObjectForVerification(userSaved, response);
+                                log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
 
-                return new AuthResponseDto(jwtHolder.accessToken(),
-                        12,
-                        TokenType.Bearer,
-                        userSaved.getUsername());
-            }).orElseThrow(() -> new NotFoundException("Invalid User"));
-        }).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
+                                return new AuthResponseDto(jwtHolder.accessToken(),
+                                        12,
+                                        TokenType.Bearer,
+                                        userSaved.getUsername());
+                            })
+                            .orElseThrow(() -> new NotFoundException("Invalid User"));
+                })
+                .orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
     }
 }

@@ -53,7 +53,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
 
     @Override
     public JwtHolder createAuthObjectForVerification(Users user, HttpServletResponse response) {
-        Authentication auth = createAndSetAuthentication(user, user.getPassword());
+        final var auth = createAndSetAuthentication(user, user.getPassword());
         return generateAndSaveTokens(user, auth, response, true);
     }
 
@@ -63,8 +63,8 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     private JwtHolder generateAndSaveTokens(Users user, Authentication auth, HttpServletResponse response, boolean includeAccessToken) {
-        String refreshToken = jwtTokenGenerator.generateRefreshToken(auth);
-        String accessToken = includeAccessToken ? jwtTokenGenerator.generateAccessToken(auth) : null;
+        final var refreshToken = jwtTokenGenerator.generateRefreshToken(auth);
+        final var accessToken = includeAccessToken ? jwtTokenGenerator.generateAccessToken(auth) : null;
 
         jwtTokenGenerator.createRefreshTokenCookie(response, refreshToken);
         saveRefreshToken(user, refreshToken);
@@ -87,7 +87,6 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     private Authentication createAndSetAuthentication(Users user, String password) {
-        SecurityContextHolder.clearContext();
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 user.getEmail(), password, new UserDetailsImpl(user).getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
