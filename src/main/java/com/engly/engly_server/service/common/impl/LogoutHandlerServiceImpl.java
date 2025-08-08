@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
@@ -20,12 +19,10 @@ import java.util.Objects;
 public class LogoutHandlerServiceImpl implements LogoutHandler {
     private final RefreshTokenRepository refreshTokenRepository;
 
-    @Value("${app.backend-cookie.url}")
-    private String url;
-
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-        final var authCookie = new CookieUtils(request.getCookies()).getRefreshTokenCookie();
+        final var cookieUtil = new CookieUtils(request.getCookies());
+        final var authCookie = cookieUtil.getRefreshTokenCookie();
 
         if (authCookie != null && !authCookie.startsWith(TokenType.Bearer.name())) return;
 
@@ -35,5 +32,7 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
             token.setRevoked(true);
             refreshTokenRepository.save(token);
         });
+
+        cookieUtil.clearCookies(response);
     }
 }

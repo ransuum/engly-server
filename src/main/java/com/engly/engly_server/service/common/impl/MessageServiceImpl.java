@@ -2,7 +2,6 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.googledrive.GoogleDriveService;
-import com.engly.engly_server.listeners.models.MessagesViewedEvent;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.MessagesDto;
 import com.engly.engly_server.models.dto.create.CreateMessageData;
@@ -131,7 +130,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_NATIVE,
             key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
@@ -139,11 +138,6 @@ public class MessageServiceImpl implements MessageService {
             unless = "#result.content.isEmpty()"
     )
     public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {
-        final var messages = messageRepository.findActive(roomId, pageable);
-        final var id = userService.getUserIdByEmail(service.getCurrentUserEmail());
-
-        publisher.publishEvent(new MessagesViewedEvent(messages.getContent(), id));
-
-        return messages.map(MessageMapper.INSTANCE::toMessageDto);
+        return messageRepository.findActive(roomId, pageable).map(MessageMapper.INSTANCE::toMessageDto);
     }
 }

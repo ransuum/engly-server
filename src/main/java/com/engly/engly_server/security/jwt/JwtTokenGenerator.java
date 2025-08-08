@@ -7,7 +7,6 @@ import com.engly.engly_server.security.config.SecurityService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +18,10 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,9 +31,6 @@ public class JwtTokenGenerator {
     private final JwtEncoder jwtEncoder;
     private final SecurityService securityService;
     private final ChatParticipantRepository chatParticipantsRepository;
-
-    @Value("${app.backend-cookie.url}")
-    private String url;
 
     public Authentication createAuthenticationObject(Users users) {
         final var roles = users.getRoles();
@@ -68,13 +67,16 @@ public class JwtTokenGenerator {
     public void createRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         final int REFRESH_TOKEN_EXPIRE_SECONDS = 25 * 24 * 60 * 60;
 
-        response.setHeader("Set-Cookie",
-                String.format(
-                        "refreshToken=%s; Max-Age=%d; Path=/; Secure; HttpOnly; SameSite=None; Domain=%s",
-                        refreshToken, REFRESH_TOKEN_EXPIRE_SECONDS, url)
-        );
-    }
+        final var cookieBuilder = "refreshToken=" + refreshToken +
+                "; Max-Age=" + REFRESH_TOKEN_EXPIRE_SECONDS +
+                "; Path=/" +
+                "; HttpOnly" +
+                "; Secure" +
+                "; SameSite=None";
 
+        response.setHeader("Set-Cookie", cookieBuilder);
+
+    }
 
     public String generateRefreshToken(Authentication authentication) {
         final var jti = UUID.randomUUID().toString();

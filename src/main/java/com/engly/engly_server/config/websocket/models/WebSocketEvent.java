@@ -1,4 +1,4 @@
-package com.engly.engly_server.config.websocket;
+package com.engly.engly_server.config.websocket.models;
 
 import com.engly.engly_server.models.enums.EventType;
 

@@ -2,6 +2,7 @@ package com.engly.engly_server.security.cookiemanagement;
 
 import com.engly.engly_server.exception.TokenNotFoundException;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 
 import java.util.Arrays;
@@ -17,6 +18,17 @@ public record CookieUtils(Cookie[] cookies) {
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElseThrow(() -> new TokenNotFoundException("Refresh token is not found in cookies"));
+    }
+
+    public void clearCookies(HttpServletResponse response) {
+        final var clearCookie = "refreshToken=deleted" +
+                "; Max-Age=0" +
+                "; Path=/" +
+                "; HttpOnly" +
+                "; Secure" +
+                "; SameSite=None";
+
+        response.setHeader("Set-Cookie", clearCookie);
     }
 
     @Override

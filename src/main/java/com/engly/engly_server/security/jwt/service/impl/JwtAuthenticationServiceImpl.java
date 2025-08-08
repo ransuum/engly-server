@@ -30,13 +30,13 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
 
     @Override
     public JwtHolder createAuthObject(Users user, HttpServletResponse response) {
-        Authentication auth = createAuthentication(user);
+        final var auth = createAuthentication(user);
         return generateAndSaveTokens(user, auth, response, true);
     }
 
     @Override
     public void createAuthObjectForGoogle(Users user, HttpServletResponse response) {
-        Authentication auth = createAuthentication(user);
+        final var auth = createAuthentication(user);
         generateAndSaveTokens(user, auth, response, false);
     }
 
@@ -54,6 +54,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     @Override
     public JwtHolder createAuthObjectForVerification(Users user, HttpServletResponse response) {
         final var auth = createAndSetAuthentication(user, user.getPassword());
+        SecurityContextHolder.getContext().setAuthentication(auth);
         return generateAndSaveTokens(user, auth, response, true);
     }
 

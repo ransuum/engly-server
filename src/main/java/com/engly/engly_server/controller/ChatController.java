@@ -1,16 +1,21 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.config.websocket.models.MessageReadEvent;
+import com.engly.engly_server.config.websocket.models.MessageReadersRequest;
+import com.engly.engly_server.config.websocket.models.WebSocketEvent;
 import com.engly.engly_server.listeners.models.TypingEvent;
-import com.engly.engly_server.models.dto.create.TypingRequest;
-import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.models.dto.create.CreateMessageData;
+import com.engly.engly_server.models.dto.create.MarkAsReadRequest;
+import com.engly.engly_server.models.dto.create.TypingRequest;
 import com.engly.engly_server.models.dto.update.EditMessageRequest;
+import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.root.RequireRoomPermission;
+import com.engly.engly_server.service.common.MessageReadService;
 import com.engly.engly_server.service.common.MessageService;
-import com.engly.engly_server.config.websocket.WebSocketEvent;
 import com.engly.engly_server.service.common.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,6 +29,7 @@ import java.time.Instant;
 @PreAuthorize("hasAuthority('SCOPE_WRITE')")
 public class ChatController {
     private final MessageService messageService;
+    private final MessageReadService messageReadService;
     private final UserService userService;
     private final SecurityService securityService;
     private final SimpMessagingTemplate messagingTemplate;
@@ -36,6 +42,31 @@ public class ChatController {
         messagingTemplate.convertAndSend(
                 TOPIC_MESSAGES + message.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_SEND, message));
+    }
+
+    @MessageMapping("/chat/message.markAsRead")
+    public void markMessagesAsRead(@Payload MarkAsReadRequest request) {
+        final var userId = userService.getUserIdByEmail(securityService.getCurrentUserEmail());
+        messageReadService.markMessageAsRead(request.messageId(), userId);
+
+        messagingTemplate.convertAndSend(
+                TOPIC_MESSAGES + request.roomId(),
+                new WebSocketEvent<>(EventType.MESSAGE_READ,
+                        new MessageReadEvent(request.messageId(), userId, Instant.now()))
+        );
+    }
+
+    @MessageMapping("/chat/message.readers")
+    @RequireRoomPermission(permission = "ROOM_READ")
+    public void getReaders(@Payload MessageReadersRequest messageReadersRequest) {
+        final var pageable = messageReadersRequest.pageable() != null
+                ? messageReadersRequest.pageable()
+                : PageRequest.of(0, 8);
+
+        final var message = messageReadService.getUsersWhoReadMessage(messageReadersRequest.messageId(), pageable);
+        messagingTemplate.convertAndSend(
+                TOPIC_MESSAGES + messageReadersRequest.roomId(),
+                new WebSocketEvent<>(EventType.MESSAGE_READERS, message));
     }
 
     @MessageMapping("/chat/message.edit")

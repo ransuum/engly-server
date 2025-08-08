@@ -12,11 +12,14 @@ import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import com.engly.engly_server.service.notification.EmailVerificationService;
+import com.engly.engly_server.utils.cache.CacheName;
 import com.engly.engly_server.utils.emailsenderconfig.EmailSenderUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +65,12 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.USER_PROFILES, key = "@securityService.getCurrentUserEmail()"),
+            @CacheEvict(value = CacheName.USER_ID, allEntries = true),
+            @CacheEvict(value = CacheName.USER_BY_EMAIL_DTO, key = "@securityService.getCurrentUserEmail()"),
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
+    })
     public AuthResponseDto checkToken(String token, HttpServletResponse response) {
         final var email = service.getCurrentUserEmail();
         return tokenRepo.findByTokenAndEmail(token, email).map(verifyToken -> {
