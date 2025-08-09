@@ -15,7 +15,6 @@ import org.mapstruct.factory.Mappers;
 public interface RoomMapper {
     RoomMapper INSTANCE = Mappers.getMapper(RoomMapper.class);
 
-    @Mapping(target = "creator", source = "creator")
     @Mapping(
             target = "lastMessage",
             expression = "java(MessageMapper.INSTANCE.getLastMessage(rooms))"
