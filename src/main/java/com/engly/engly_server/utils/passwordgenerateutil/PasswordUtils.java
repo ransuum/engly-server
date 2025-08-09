@@ -1,6 +1,7 @@
 package com.engly.engly_server.utils.passwordgenerateutil;
 
 import java.security.SecureRandom;
+import java.util.stream.IntStream;
 
 public final class PasswordUtils {
 
@@ -31,16 +32,18 @@ public final class PasswordUtils {
         password.append(digits.charAt(RANDOM.nextInt(digits.length())));
         password.append(symbols.charAt(RANDOM.nextInt(symbols.length())));
 
-        for (int i = 4; i < length; i++)
-            password.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
+        IntStream.range(4, length).forEach(_
+                -> password.append(CHARS.charAt(RANDOM.nextInt(CHARS.length()))));
 
         char[] chars = password.toString().toCharArray();
-        for (int i = 0; i < chars.length; i++) {
-            final int randomIndex = RANDOM.nextInt(chars.length);
+        final int charLength = chars.length;
+
+        IntStream.range(0, charLength).forEach(i -> {
+            final int randomIndex = RANDOM.nextInt(charLength);
             final char temp = chars[i];
             chars[i] = chars[randomIndex];
             chars[randomIndex] = temp;
-        }
+        });
 
         return new String(chars);
     }

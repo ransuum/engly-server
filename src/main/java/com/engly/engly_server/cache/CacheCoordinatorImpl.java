@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public final class CachingServiceImpl implements CachingService {
+public final class CacheCoordinatorImpl implements CacheCoordinator {
 
     private final ChatParticipantCache chatParticipantCache;
     private final MessageReadCache messageReadCache;

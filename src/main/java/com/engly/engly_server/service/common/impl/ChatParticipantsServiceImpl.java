@@ -1,6 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.cache.CachingService;
+import com.engly.engly_server.cache.CacheCoordinator;
 import com.engly.engly_server.cache.components.ChatParticipantCache;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.ChatParticipantMapper;
@@ -27,7 +27,8 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatParticipantCache chatParticipantCache;
 
-    public ChatParticipantsServiceImpl(ChatParticipantRepository chatParticipantRepository, CachingService chatParticipantCache) {
+    public ChatParticipantsServiceImpl(ChatParticipantRepository chatParticipantRepository,
+                                       CacheCoordinator chatParticipantCache) {
         this.chatParticipantRepository = chatParticipantRepository;
         this.chatParticipantCache = chatParticipantCache.getChatParticipantCache();
     }

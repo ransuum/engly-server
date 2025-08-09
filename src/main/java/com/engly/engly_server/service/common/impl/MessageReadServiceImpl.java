@@ -1,6 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.cache.CachingService;
+import com.engly.engly_server.cache.CacheCoordinator;
 import com.engly.engly_server.cache.components.MessageReadCache;
 import com.engly.engly_server.mapper.UserMapper;
 import com.engly.engly_server.models.dto.response.UserWhoReadsMessageDto;
@@ -33,7 +33,7 @@ public class MessageReadServiceImpl implements MessageReadService {
     private final Executor virtualThreadExecutor;
 
     public MessageReadServiceImpl(MessageReadRepository messageReadRepository,
-                                  CachingService messageReadCache,
+                                  CacheCoordinator messageReadCache,
                                   @Qualifier("virtualThreadExecutor") Executor virtualThreadExecutor) {
         this.messageReadRepository = messageReadRepository;
         this.messageReadCache = messageReadCache.getMessageReadCache();
