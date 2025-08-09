@@ -2,8 +2,8 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.UserMapper;
-import com.engly.engly_server.models.dto.ApiResponse;
-import com.engly.engly_server.models.dto.UsersDto;
+import com.engly.engly_server.models.dto.response.ApiResponse;
+import com.engly.engly_server.models.dto.response.UsersDto;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.service.common.UserService;

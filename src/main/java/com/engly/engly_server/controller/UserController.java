@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.ApiResponse;
-import com.engly.engly_server.models.dto.UsersDto;
+import com.engly.engly_server.models.dto.response.ApiResponse;
+import com.engly.engly_server.models.dto.response.UsersDto;
 import com.engly.engly_server.service.common.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

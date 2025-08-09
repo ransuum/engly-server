@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.jwt.service.impl;
 
-import com.engly.engly_server.models.dto.create.SignInRequest;
+import com.engly.engly_server.models.dto.request.SignInRequest;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.repository.RefreshTokenRepository;

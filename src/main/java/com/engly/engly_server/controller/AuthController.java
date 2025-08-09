@@ -1,8 +1,8 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.dto.create.SignInRequest;
-import com.engly.engly_server.models.dto.create.SignUpRequest;
+import com.engly.engly_server.models.dto.response.AuthResponseDto;
+import com.engly.engly_server.models.dto.request.SignInRequest;
+import com.engly.engly_server.models.dto.request.SignUpRequest;
 import com.engly.engly_server.service.common.AuthService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;

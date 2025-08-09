@@ -1,6 +1,6 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.CategoriesDto;
+import com.engly.engly_server.models.dto.response.CategoriesDto;
 import com.engly.engly_server.service.common.CategoriesService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

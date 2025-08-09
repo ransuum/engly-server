@@ -1,10 +1,10 @@
 package com.engly.engly_server.service.common;
 
-import com.engly.engly_server.models.dto.RoomsDto;
-import com.engly.engly_server.models.dto.create.RoomRequest;
+import com.engly.engly_server.models.dto.response.RoomsDto;
+import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
+import com.engly.engly_server.models.dto.request.RoomUpdateRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

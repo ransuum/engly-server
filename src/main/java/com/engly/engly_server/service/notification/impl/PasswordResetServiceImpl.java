@@ -2,9 +2,9 @@ package com.engly.engly_server.service.notification.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.exception.TokenNotFoundException;
-import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.dto.EmailSendInfo;
-import com.engly.engly_server.models.dto.update.PasswordResetRequest;
+import com.engly.engly_server.models.dto.response.AuthResponseDto;
+import com.engly.engly_server.models.dto.response.EmailSendInfo;
+import com.engly.engly_server.models.dto.request.PasswordResetRequest;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.repository.VerifyTokenRepository;

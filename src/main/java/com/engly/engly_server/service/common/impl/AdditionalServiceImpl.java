@@ -1,8 +1,8 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.dto.create.GoogleUserInfoRequest;
+import com.engly.engly_server.models.dto.response.AuthResponseDto;
+import com.engly.engly_server.models.dto.request.GoogleUserInfoRequest;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.UserRepository;

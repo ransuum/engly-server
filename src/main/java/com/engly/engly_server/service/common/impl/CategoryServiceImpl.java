@@ -1,10 +1,10 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.models.dto.CategoriesDto;
+import com.engly.engly_server.models.dto.response.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.dto.create.CategoryRequest;
+import com.engly.engly_server.models.dto.request.CategoryRequest;
 import com.engly.engly_server.repository.CategoriesRepository;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;

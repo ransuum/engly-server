@@ -2,7 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.UserSettingsMapper;
-import com.engly.engly_server.models.dto.UserSettingsDto;
+import com.engly.engly_server.models.dto.response.UserSettingsDto;
 import com.engly.engly_server.models.enums.Theme;
 import com.engly.engly_server.repository.UserSettingsRepository;
 import com.engly.engly_server.security.config.SecurityService;

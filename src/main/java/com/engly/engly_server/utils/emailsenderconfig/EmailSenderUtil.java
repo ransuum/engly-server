@@ -1,7 +1,7 @@
 package com.engly.engly_server.utils.emailsenderconfig;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.models.dto.EmailSendInfo;
+import com.engly.engly_server.models.dto.response.EmailSendInfo;
 import com.engly.engly_server.models.entity.VerifyToken;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.VerifyTokenRepository;

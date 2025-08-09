@@ -3,7 +3,7 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.cache.CachingService;
 import com.engly.engly_server.cache.components.MessageReadCache;
 import com.engly.engly_server.mapper.UserMapper;
-import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
+import com.engly.engly_server.models.dto.response.UserWhoReadsMessageDto;
 import com.engly.engly_server.models.entity.MessageRead;
 import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.service.common.MessageReadService;

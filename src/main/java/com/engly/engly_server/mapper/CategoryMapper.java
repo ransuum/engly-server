@@ -1,6 +1,6 @@
 package com.engly.engly_server.mapper;
 
-import com.engly.engly_server.models.dto.CategoriesDto;
+import com.engly.engly_server.models.dto.response.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

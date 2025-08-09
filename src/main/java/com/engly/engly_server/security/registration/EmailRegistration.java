@@ -1,7 +1,7 @@
 package com.engly.engly_server.security.registration;
 
 import com.engly.engly_server.exception.FieldValidationException;
-import com.engly.engly_server.models.dto.create.SignUpRequest;
+import com.engly.engly_server.models.dto.request.SignUpRequest;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.UserSettings;
 import com.engly.engly_server.models.entity.Users;

@@ -1,9 +1,9 @@
 package com.engly.engly_server.service.common;
 
-import com.engly.engly_server.models.dto.CategoriesDto;
+import com.engly.engly_server.models.dto.response.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.models.dto.create.CategoryRequest;
+import com.engly.engly_server.models.dto.request.CategoryRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

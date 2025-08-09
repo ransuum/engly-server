@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common;
 
-import com.engly.engly_server.models.dto.UsersDto;
-import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
+import com.engly.engly_server.models.dto.response.UsersDto;
+import com.engly.engly_server.models.dto.request.ProfileUpdateRequest;
 
 public interface ProfileService {
 

@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.models.dto.AvailabilityResponseDto;
-import com.engly.engly_server.models.dto.GoogleAvailabilityDto;
+import com.engly.engly_server.models.dto.response.AvailabilityResponseDto;
+import com.engly.engly_server.models.dto.response.GoogleAvailabilityDto;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.UserValidationService;

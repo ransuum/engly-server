@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.dto.UserWhoReadsMessageDto;
+import com.engly.engly_server.models.dto.response.MessagesDto;
+import com.engly.engly_server.models.dto.response.UserWhoReadsMessageDto;
 import com.engly.engly_server.service.common.MessageReadService;
 import com.engly.engly_server.service.common.MessageService;
 import io.swagger.v3.oas.annotations.Operation;

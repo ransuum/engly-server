@@ -1,8 +1,8 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.RoomsDto;
-import com.engly.engly_server.models.dto.create.RoomRequest;
-import com.engly.engly_server.models.dto.update.RoomUpdateRequest;
+import com.engly.engly_server.models.dto.response.RoomsDto;
+import com.engly.engly_server.models.dto.request.RoomRequest;
+import com.engly.engly_server.models.dto.request.RoomUpdateRequest;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.service.common.RoomService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;

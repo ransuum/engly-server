@@ -1,13 +1,10 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.config.websocket.models.MessageReadEvent;
-import com.engly.engly_server.config.websocket.models.MessageReadersRequest;
-import com.engly.engly_server.config.websocket.models.WebSocketEvent;
-import com.engly.engly_server.listeners.models.TypingEvent;
-import com.engly.engly_server.models.dto.create.CreateMessageData;
-import com.engly.engly_server.models.dto.create.MarkAsReadRequest;
-import com.engly.engly_server.models.dto.create.TypingRequest;
-import com.engly.engly_server.models.dto.update.EditMessageRequest;
+import com.engly.engly_server.models.events.MessageReadEvent;
+import com.engly.engly_server.models.events.MessageReadersRequest;
+import com.engly.engly_server.models.events.WebSocketEvent;
+import com.engly.engly_server.models.events.TypingEvent;
+import com.engly.engly_server.models.dto.request.*;
 import com.engly.engly_server.models.enums.EventType;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.root.RequireRoomPermission;
@@ -80,12 +77,12 @@ public class ChatController {
 
     @MessageMapping("/chat/message.delete")
     @RequireRoomPermission(permission = "ROOM_WRITE")
-    public void deleteMessage(@Payload String id) {
-        messageService.deleteMessage(id);
+    public void deleteMessage(@Payload DeleteMessageRequest deleteMessageRequest) {
+        messageService.deleteMessage(deleteMessageRequest.messageId());
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + id,
+                TOPIC_MESSAGES + deleteMessageRequest.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_DELETE,
-                        "Message with ID " + id + " has been deleted"));
+                        "Message with ID " + deleteMessageRequest.messageId() + " has been deleted"));
     }
 
     @MessageMapping("/chat/user.typing")

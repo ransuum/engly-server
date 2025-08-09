@@ -1,8 +1,11 @@
 package com.engly.engly_server.security.root;
 
-import com.engly.engly_server.models.dto.create.CreateMessageData;
-import com.engly.engly_server.models.dto.create.TypingRequest;
+import com.engly.engly_server.models.dto.request.CreateMessageData;
+import com.engly.engly_server.models.dto.request.DeleteMessageRequest;
+import com.engly.engly_server.models.dto.request.EditMessageRequest;
+import com.engly.engly_server.models.dto.request.TypingRequest;
 import com.engly.engly_server.models.enums.RoomAuthority;
+import com.engly.engly_server.models.events.MessageReadersRequest;
 import com.engly.engly_server.service.permission.RoomAuthorizationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,9 @@ public class WebSocketRoomAuthorizationAspect {
         return switch (payload) {
             case CreateMessageData dto -> dto.roomId();
             case TypingRequest dto -> dto.roomId();
+            case DeleteMessageRequest dto -> dto.roomId();
+            case MessageReadersRequest dto -> dto.roomId();
+            case EditMessageRequest dto -> dto.roomId();
             default -> null;
         };
     }

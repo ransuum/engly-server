@@ -15,7 +15,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class RoomAuthorizationService {
-
     private final ChatParticipantRepository chatParticipantsRepository;
     private final SecurityService securityService;
 

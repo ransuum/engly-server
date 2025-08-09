@@ -1,8 +1,8 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.dto.EmailSendInfo;
-import com.engly.engly_server.models.dto.update.PasswordResetRequest;
+import com.engly.engly_server.models.dto.response.AuthResponseDto;
+import com.engly.engly_server.models.dto.response.EmailSendInfo;
+import com.engly.engly_server.models.dto.request.PasswordResetRequest;
 import com.engly.engly_server.service.notification.PasswordResetService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;

@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.UsersDto;
-import com.engly.engly_server.models.dto.update.ProfileUpdateRequest;
+import com.engly.engly_server.models.dto.response.UsersDto;
+import com.engly.engly_server.models.dto.request.ProfileUpdateRequest;
 import com.engly.engly_server.service.common.ProfileService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;

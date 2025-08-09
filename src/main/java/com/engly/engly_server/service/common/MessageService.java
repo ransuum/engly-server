@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common;
 
-import com.engly.engly_server.models.dto.MessagesDto;
-import com.engly.engly_server.models.dto.create.CreateMessageData;
+import com.engly.engly_server.models.dto.response.MessagesDto;
+import com.engly.engly_server.models.dto.request.CreateMessageData;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

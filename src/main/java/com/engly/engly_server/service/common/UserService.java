@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common;
 
-import com.engly.engly_server.models.dto.ApiResponse;
-import com.engly.engly_server.models.dto.UsersDto;
+import com.engly.engly_server.models.dto.response.ApiResponse;
+import com.engly.engly_server.models.dto.response.UsersDto;
 import com.engly.engly_server.models.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

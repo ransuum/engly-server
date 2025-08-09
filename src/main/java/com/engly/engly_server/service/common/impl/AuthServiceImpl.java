@@ -1,9 +1,9 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.models.dto.AuthResponseDto;
-import com.engly.engly_server.models.dto.create.SignInRequest;
-import com.engly.engly_server.models.dto.create.SignUpRequest;
+import com.engly.engly_server.models.dto.response.AuthResponseDto;
+import com.engly.engly_server.models.dto.request.SignInRequest;
+import com.engly.engly_server.models.dto.request.SignUpRequest;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.*;
 import com.engly.engly_server.repository.RefreshTokenRepository;

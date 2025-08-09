@@ -4,7 +4,7 @@ import com.engly.engly_server.cache.CachingService;
 import com.engly.engly_server.cache.components.ChatParticipantCache;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.ChatParticipantMapper;
-import com.engly.engly_server.models.dto.ChatParticipantsDto;
+import com.engly.engly_server.models.dto.response.ChatParticipantsDto;
 import com.engly.engly_server.models.entity.ChatParticipants;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.entity.Users;
@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class ChatParticipantsServiceImpl implements ChatParticipantsService {
-
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatParticipantCache chatParticipantCache;
 

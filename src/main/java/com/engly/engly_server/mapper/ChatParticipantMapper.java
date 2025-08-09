@@ -1,6 +1,6 @@
 package com.engly.engly_server.mapper;
 
-import com.engly.engly_server.models.dto.ChatParticipantsDto;
+import com.engly.engly_server.models.dto.response.ChatParticipantsDto;
 import com.engly.engly_server.models.entity.ChatParticipants;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
