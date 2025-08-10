@@ -53,8 +53,8 @@ public class ProfileController {
     })
     @GetMapping("/check")
     @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
-    public ResponseEntity<Object> getProfile() {
-        return ResponseEntity.ok(profileService.getProfile());
+    public UsersDto getProfile() {
+        return profileService.getProfile();
     }
 
     @Operation(

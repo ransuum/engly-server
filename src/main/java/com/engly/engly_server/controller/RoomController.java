@@ -94,12 +94,12 @@ public class RoomController {
                     \s"""
     )
     @RateLimiter(name = "RoomController")
-    public ResponseEntity<Page<RoomsDto>> findRoomsByCategoryAndKeyString(
+    public Page<RoomsDto> findRoomsByCategoryAndKeyString(
             @PathVariable(value = "category") CategoryType category,
             @RequestParam(value = "keyString") String keyString,
             @ParameterObject @PageableDefault(page = 0, size = 8,
                     sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
-        return ResponseEntity.ok(roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString, pageable));
+        return roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString, pageable);
     }
 
     @Operation(summary = "Delete a room by its ID")
@@ -132,9 +132,8 @@ public class RoomController {
     @Operation(summary = "Update room details", description = "Partially updates room information")
     @PreAuthorize("hasAuthority('SCOPE_UPDATE_GLOBAL')")
     @RateLimiter(name = "RoomController")
-    public ResponseEntity<RoomsDto> updateRoom(
-            @PathVariable String id,
-            @Valid @RequestBody RoomUpdateRequest request) {
-        return ResponseEntity.ok(roomService.updateRoom(id, request));
+    public RoomsDto updateRoom(@PathVariable String id,
+                               @Valid @RequestBody RoomUpdateRequest request) {
+        return roomService.updateRoom(id, request);
     }
 }

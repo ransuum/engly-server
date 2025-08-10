@@ -56,11 +56,11 @@ public class CategoryController {
     })
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     @GetMapping("/{id}")
-    public ResponseEntity<CategoriesDto> getCategoryById(
+    public CategoriesDto getCategoryById(
             @Parameter(description = "The unique identifier of the category.", example = "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d")
             @PathVariable String id) {
 
-        return ResponseEntity.ok(categoriesService.getCategoryById(id));
+        return categoriesService.getCategoryById(id);
     }
 
     @Operation(summary = "Update an existing category")

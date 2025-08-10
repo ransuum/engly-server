@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,11 +51,11 @@ public class MessageController {
     })
     @GetMapping("/current-room/{roomId}/by-keyString")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<Page<MessagesDto>> findAllMessageInCurrentRoom(@PathVariable String roomId,
+    public Page<MessagesDto> findAllMessageInCurrentRoom(@PathVariable String roomId,
                                                                          @ParameterObject @PageableDefault(page = 0, size = 8,
                                                                                  sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
                                                                          @RequestParam String keyString) {
-        return ResponseEntity.ok(messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable));
+        return messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);
     }
 
     @Operation(
@@ -69,11 +68,11 @@ public class MessageController {
     )
     @GetMapping("/{messageId}/readers")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<Page<UserWhoReadsMessageDto>> findAllUsersWhoReadMessage(
+    public Page<UserWhoReadsMessageDto> findAllUsersWhoReadMessage(
             @PathVariable String messageId,
             @ParameterObject @PageableDefault(page = 0, size = 8,
                     sort = {"readAt"}, direction = Sort.Direction.ASC) Pageable pageable) {
-        return ResponseEntity.ok(messageReadService.getUsersWhoReadMessage(messageId, pageable));
+        return messageReadService.getUsersWhoReadMessage(messageId, pageable);
     }
 
     @Operation(
@@ -93,10 +92,10 @@ public class MessageController {
     })
     @GetMapping("/current-room/native/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<Page<MessagesDto>> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
+    public Page<MessagesDto> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
                                                                               @ParameterObject @PageableDefault(page = 0, size = 8,
                                                                                       sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(messageService.findAllMessageInCurrentRoomNative(roomId, pageable));
+        return messageService.findAllMessageInCurrentRoomNative(roomId, pageable);
     }
 
     @Operation(summary = "Get messages by criteria")

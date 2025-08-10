@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,13 +29,13 @@ public class PublicController {
     @Operation(
             summary = "Get all available categories (paginated)",
             description = """
-                          Retrieves a paginated list of all publicly available room categories.
-                          
-                          The response is structured according to the Spring HATEOAS `PagedModel` format, which includes:
-                          - `_embedded.categories`: An array of category objects.
-                          - `_links`: Navigation links for `first`, `prev`, `self`, `next`, and `last` pages.
-                          - `page`: Metadata about the current page, including size, total elements, total pages, and number.
-                          """
+                    Retrieves a paginated list of all publicly available room categories.
+                    
+                    The response is structured according to the Spring HATEOAS `PagedModel` format, which includes:
+                    - `_embedded.categories`: An array of category objects.
+                    - `_links`: Navigation links for `first`, `prev`, `self`, `next`, and `last` pages.
+                    - `page`: Metadata about the current page, including size, total elements, total pages, and number.
+                    """
     )
     @ApiResponses({
             @ApiResponse(
@@ -51,10 +50,9 @@ public class PublicController {
             )
     })
     @GetMapping("/get-all-categories")
-    public ResponseEntity<Page<CategoriesDto>> getAll(
-            @ParameterObject
-            @PageableDefault(size = 8, sort = {"createdAt"}, direction = Sort.Direction.ASC)
-            Pageable pageable) {
-        return ResponseEntity.ok(categoriesService.getAllCategories(pageable));
+    public Page<CategoriesDto> getAll(@ParameterObject
+                                      @PageableDefault(size = 8, sort = {"createdAt"}, direction = Sort.Direction.ASC)
+                                      Pageable pageable) {
+        return categoriesService.getAllCategories(pageable);
     }
 }

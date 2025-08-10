@@ -39,8 +39,8 @@ public class UserController {
     })
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<UsersDto> getUser(@PathVariable String id) {
-        return ResponseEntity.ok(userService.findById(id));
+    public UsersDto getUser(@PathVariable String id) {
+        return userService.findById(id);
     }
 
     @Operation(summary = "Get a paginated list of all users")
@@ -52,10 +52,9 @@ public class UserController {
     })
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<PagedModel<EntityModel<UsersDto>>> getUsers(
-            @ParameterObject @PageableDefault(sort = "username,asc") Pageable pageable,
-            PagedResourcesAssembler<UsersDto> assembler
-    ) {
+    public ResponseEntity<PagedModel<EntityModel<UsersDto>>> getUsers(@ParameterObject
+                                                                      @PageableDefault(sort = "username,asc") Pageable pageable,
+                                                                      PagedResourcesAssembler<UsersDto> assembler) {
         final var users = userService.allUsers(pageable);
         return ResponseEntity.ok(assembler.toModel(users));
     }

@@ -16,7 +16,6 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,8 +46,8 @@ public class UserValidationController {
     })
     @GetMapping("/first-login")
     @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
-    public ResponseEntity<GoogleAvailabilityDto> firstLogin() {
-        return ResponseEntity.ok(userValidationService.firstLogin());
+    public GoogleAvailabilityDto firstLogin() {
+        return userValidationService.firstLogin();
     }
 
     @Operation(
@@ -58,7 +57,7 @@ public class UserValidationController {
                     """
     )
     @GetMapping("/check-username")
-    public ResponseEntity<AvailabilityResponseDto> checkUsernameAvailability(
+    public AvailabilityResponseDto checkUsernameAvailability(
             @NotBlank(message = "Username is blank")
             @Size(min = 2, max = 50, message = "Username must be between 2 and 50 characters.")
             @Pattern(
@@ -67,7 +66,7 @@ public class UserValidationController {
             )
             @RequestParam
             String username) {
-        return ResponseEntity.ok(userValidationService.isUsernameAvailable(username));
+        return userValidationService.isUsernameAvailable(username);
     }
 
     @Operation(
@@ -92,12 +91,12 @@ public class UserValidationController {
             )
     })
     @GetMapping("/check-email")
-    public ResponseEntity<AvailabilityResponseDto> checkEmailAvailability(
+    public AvailabilityResponseDto checkEmailAvailability(
             @RequestParam
             @Email(message = "Isn't email")
             @NotBlank(message = "Email is blank")
             @Size(max = 50, message = "Email cannot exceed 50 characters. Please shorten your input.")
             String email) {
-        return ResponseEntity.ok(userValidationService.isEmailAvailable(email));
+        return userValidationService.isEmailAvailable(email);
     }
 }
