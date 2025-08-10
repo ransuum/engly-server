@@ -25,6 +25,7 @@ public class CacheName {
     public static final String ROOM_DTO_ID = "room-dto-by-id";
     public static final String ROOMS_BY_CATEGORY = "rooms-by-category";
     public static final String ROOM_BY_CATEGORY_AND_KEY = "room-search-results";
+    public static final String ROOMS_BY_CRITERIA = "rooms-by-criteria";
     public static final String ROOM_ENTITY_ID = "room-entity-by-id";
 
     public static final String CATEGORY_ID = "category-by-id";
@@ -48,7 +49,7 @@ public class CacheName {
     public static final List<String> CACHES = Arrays.asList(
             USER_ID, ALL_USER, USER_BY_EMAIL, USER_PROFILES, USER_ID_BY_EMAIL, USERNAME_BY_EMAIL,
             USERNAME_AVAILABILITY, EMAIL_AVAILABILITY, USER_FIRST_LOGIN, ROOM_ID, ROOM_DTO_ID, USER_SETTINGS,
-            USER_ENTITY_BY_EMAIL, ROOMS_BY_CATEGORY, ROOM_BY_CATEGORY_AND_KEY, ROOM_ENTITY_ID,
+            USER_ENTITY_BY_EMAIL, ROOMS_BY_CATEGORY, ROOM_BY_CATEGORY_AND_KEY, ROOM_ENTITY_ID, ROOMS_BY_CRITERIA,
             CATEGORY_ID, CATEGORY_ENTITY_ID, CATEGORY_NAME, ALL_CATEGORIES, MESSAGE_ID, USER_BY_EMAIL_DTO,
             MESSAGES_BY_ROOM, MESSAGES_BY_ROOM_NATIVE, MESSAGE_COUNT_BY_ROOM, MESSAGES_BY_ROOM_CURSOR,
             PARTICIPANTS_BY_ROOM, PARTICIPANT_EXISTS, MESSAGE_READ_STATUS, USERS_WHO_READ_MESSAGE

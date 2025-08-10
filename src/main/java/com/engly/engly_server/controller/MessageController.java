@@ -1,5 +1,6 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.request.MessageSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.MessagesDto;
 import com.engly.engly_server.models.dto.response.UserWhoReadsMessageDto;
 import com.engly.engly_server.service.common.MessageReadService;
@@ -27,7 +28,7 @@ public class MessageController {
     private final MessageService messageService;
     private final MessageReadService messageReadService;
 
-    public MessageController(MessageService messageService, MessageReadService messageReadService){
+    public MessageController(MessageService messageService, MessageReadService messageReadService) {
         this.messageService = messageService;
         this.messageReadService = messageReadService;
     }
@@ -53,7 +54,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<Page<MessagesDto>> findAllMessageInCurrentRoom(@PathVariable String roomId,
                                                                          @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                                    sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
+                                                                                 sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
                                                                          @RequestParam String keyString) {
         return ResponseEntity.ok(messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable));
     }
@@ -93,8 +94,21 @@ public class MessageController {
     @GetMapping("/current-room/native/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<Page<MessagesDto>> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
-                                                                                @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                        sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
+                                                                              @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                                                      sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(messageService.findAllMessageInCurrentRoomNative(roomId, pageable));
+    }
+
+    @Operation(summary = "Get messages by criteria")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Page with messages displays successfully.", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
+    })
+    @GetMapping("/by-criteria")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public Page<MessagesDto> findRoomsByCriteria(@ModelAttribute MessageSearchCriteriaRequest request,
+                                                 @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                         sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        return messageService.findMessagesByCriteria(request, pageable);
     }
 }

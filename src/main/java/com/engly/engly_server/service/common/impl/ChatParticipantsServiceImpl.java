@@ -84,7 +84,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.PARTICIPANTS_BY_ROOM,
-            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
             condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
             unless = "#result.content.isEmpty()"
     )

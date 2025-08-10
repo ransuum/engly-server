@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.common;
 
+import com.engly.engly_server.models.dto.request.MessageSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.MessagesDto;
 import com.engly.engly_server.models.dto.request.CreateMessageData;
 import org.springframework.data.domain.Page;
@@ -20,4 +21,6 @@ public interface MessageService {
     Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable);
 
     Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable);
+
+    Page<MessagesDto> findMessagesByCriteria(MessageSearchCriteriaRequest request, Pageable pageable);
 }

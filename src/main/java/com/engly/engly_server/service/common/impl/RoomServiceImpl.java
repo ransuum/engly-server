@@ -3,6 +3,7 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
+import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomUpdateRequest;
@@ -67,6 +68,19 @@ public class RoomServiceImpl implements RoomService {
 
         chatParticipantsService.addParticipant(room, creator, RoomRoles.ADMIN);
         return RoomMapper.INSTANCE.roomToDto(room);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ROOMS_BY_CRITERIA,
+            key = "#request.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
+            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            unless = "#result.content.isEmpty()"
+    )
+    public Page<RoomsDto> findAllWithCriteria(RoomSearchCriteriaRequest request, Pageable pageable) {
+        final var spec = request.buildSpecification();
+        return roomRepository.findAll(spec, pageable).map(RoomMapper.INSTANCE::roomToDto);
     }
 
     @Override

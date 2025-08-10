@@ -1,5 +1,6 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomUpdateRequest;
@@ -61,11 +62,11 @@ public class RoomController {
     @Operation(
             summary = "Get a paginated list of rooms",
             description = """
-                          Retrieves a paginated list of rooms.
-                          This endpoint supports optional filtering by category and searching by a query string.
-                          
-                          - To filter by category, use the `category` parameter (e.g., `?category=NEWS`).
-                          """
+                    Retrieves a paginated list of rooms.
+                    This endpoint supports optional filtering by category and searching by a query string.
+                    
+                    - To filter by category, use the `category` parameter (e.g., `?category=NEWS`).
+                    """
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "List of rooms retrieved successfully.", content = @Content),
@@ -112,6 +113,19 @@ public class RoomController {
     public ResponseEntity<Void> deleteRoom(@PathVariable String id) {
         roomService.deleteRoomById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Get rooms by criteria")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Page with rooms displays successfully.", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
+    })
+    @GetMapping("/by-criteria")
+    @PreAuthorize("hasAuthority('SCOPE_READ')")
+    public Page<RoomsDto> findRoomsByCriteria(@ModelAttribute RoomSearchCriteriaRequest request,
+                                              @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                      sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        return roomService.findAllWithCriteria(request, pageable);
     }
 
     @PutMapping("/{id}")

@@ -3,8 +3,9 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.googledrive.GoogleDriveService;
 import com.engly.engly_server.mapper.MessageMapper;
-import com.engly.engly_server.models.dto.response.MessagesDto;
 import com.engly.engly_server.models.dto.request.CreateMessageData;
+import com.engly.engly_server.models.dto.request.MessageSearchCriteriaRequest;
+import com.engly.engly_server.models.dto.response.MessagesDto;
 import com.engly.engly_server.models.entity.Message;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.MessageRepository;
@@ -20,7 +21,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,7 +34,6 @@ public class MessageServiceImpl implements MessageService {
     private final RoomService roomService;
     private final UserService userService;
     private final SecurityService service;
-    private final ApplicationEventPublisher publisher;
     private final ChatParticipantsService chatParticipantsService;
     private final GoogleDriveService driveService;
 
@@ -120,7 +119,7 @@ public class MessageServiceImpl implements MessageService {
     @Transactional(readOnly = true)
     @Cacheable(
             value = CacheName.MESSAGES_BY_ROOM_CURSOR,
-            key = "#roomId + ':cursor:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            key = "#roomId + ':cursor:' + #keyString + ':' + #pageable.pageNumber + ':' + #pageable.pageSize",
             condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
             unless = "#result.content.isEmpty()"
     )
@@ -139,5 +138,18 @@ public class MessageServiceImpl implements MessageService {
     )
     public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {
         return messageRepository.findActive(roomId, pageable).map(MessageMapper.INSTANCE::toMessageDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.MESSAGES_BY_ROOM_NATIVE,
+            key = "#request.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
+            condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
+            unless = "#result.content.isEmpty()"
+    )
+    public Page<MessagesDto> findMessagesByCriteria(MessageSearchCriteriaRequest request, Pageable pageable) {
+        final var spec = request.buildSpecification();
+        return messageRepository.findAll(spec, pageable).map(MessageMapper.INSTANCE::toMessageDto);
     }
 }

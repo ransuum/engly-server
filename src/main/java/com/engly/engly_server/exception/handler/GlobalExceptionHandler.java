@@ -33,7 +33,8 @@ public class GlobalExceptionHandler {
             PasswordGeneratorException.class,
             PropertyReferenceException.class,
             FieldValidationException.class,
-            MaxUploadSizeExceededException.class
+            MaxUploadSizeExceededException.class,
+            SpecificationException.class
     })
     public ResponseEntity<ExceptionResponse> handleBadRequestExceptions(Exception ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex);
