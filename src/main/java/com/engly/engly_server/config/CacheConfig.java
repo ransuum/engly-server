@@ -57,7 +57,7 @@ public class CacheConfig {
             case ROOM_ID, ROOM_DTO_ID, ROOM_ENTITY_ID -> new CacheSpec(40, Duration.ofMinutes(5), Duration.ofMinutes(2));
             case CATEGORY_ID, CATEGORY_ENTITY_ID, CATEGORY_NAME -> new CacheSpec(20, Duration.ofMinutes(15), Duration.ofMinutes(5));
             case MESSAGE_ID -> new CacheSpec(40, Duration.ofMinutes(3), Duration.ofMinutes(1));
-            case MESSAGES_BY_ROOM, MESSAGES_BY_ROOM_NATIVE, MESSAGES_BY_ROOM_CURSOR -> new CacheSpec(10, Duration.ofMinutes(2), Duration.ofSeconds(30));
+            case MESSAGES_BY_ROOM, MESSAGES_BY_ROOM_NATIVE -> new CacheSpec(10, Duration.ofMinutes(2), Duration.ofSeconds(30));
             default -> new CacheSpec(15, Duration.ofMinutes(3), Duration.ofMinutes(1));
         };
     }

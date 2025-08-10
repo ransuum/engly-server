@@ -18,8 +18,6 @@ public interface MessageService {
 
     MessagesDto editMessage(String id, String content);
 
-    Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable);
-
     Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable);
 
     Page<MessagesDto> findMessagesByCriteria(MessageSearchCriteriaRequest request, Pageable pageable);

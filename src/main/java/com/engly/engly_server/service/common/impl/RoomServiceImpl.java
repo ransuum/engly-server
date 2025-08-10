@@ -89,8 +89,7 @@ public class RoomServiceImpl implements RoomService {
             @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
             @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#id"),
             @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
-            @CacheEvict(value = CacheName.ROOM_BY_CATEGORY_AND_KEY, allEntries = true)
+            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
     })
     public void deleteRoomById(String id) {
         roomRepository.findById(id).ifPresentOrElse(room -> roomRepository.deleteById(room.getId()),
@@ -133,19 +132,6 @@ public class RoomServiceImpl implements RoomService {
     )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
         return roomRepository.findByCategoryName(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheName.ROOM_BY_CATEGORY_AND_KEY,
-            key = "#categoryType.name() + ':Key:' + #keyString + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
-            unless = "#result.content.isEmpty()"
-    )
-    public Page<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString, Pageable pageable) {
-        return roomRepository.searchRooms(categoryType, keyString, pageable)
-                .map(RoomMapper.INSTANCE::roomToDto);
     }
 
     @Override

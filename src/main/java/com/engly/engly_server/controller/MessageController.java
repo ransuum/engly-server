@@ -33,32 +33,6 @@ public class MessageController {
     }
 
     @Operation(
-            summary = "Search for messages in a room (paginated)",
-            description = """
-                    Retrieves a paginated list of messages within a specific room that contain a given search string.
-                    The search is typically case-insensitive.
-                    The response is also a `PagedModel`.
-                    """
-    )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "A paginated list of matching messages.",
-                    content = @Content
-            ),
-            @ApiResponse(responseCode = "400", description = "Bad Request. The 'search' query parameter is missing or empty.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content),
-    })
-    @GetMapping("/current-room/{roomId}/by-keyString")
-    @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public Page<MessagesDto> findAllMessageInCurrentRoom(@PathVariable String roomId,
-                                                                         @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                                                 sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable,
-                                                                         @RequestParam String keyString) {
-        return messageService.findAllMessagesContainingKeyString(roomId, keyString, pageable);
-    }
-
-    @Operation(
             summary = "Get all users who have read a specific message",
             description = "Retrieves a paginated list of users that have marked a specific message as read.",
             responses = {

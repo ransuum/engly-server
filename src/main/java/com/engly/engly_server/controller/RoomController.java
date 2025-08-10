@@ -82,26 +82,6 @@ public class RoomController {
         return ResponseEntity.ok(roomService.findAllRoomsByCategoryType(category, pageable));
     }
 
-    @GetMapping("/find/in/{category}/by-keyString/")
-    @PreAuthorize("hasAuthority('SCOPE_READ')")
-    @Operation(summary = "Find appropriate rooms by keyString and category",
-            description = """
-                    Retrieves paginated list of rooms filtered by category, name
-                    Searching is done ignore case of keyString and fields
-                    page starts from 0
-                    keyString is a string that needs to be found in name
-                    id can be replaced by different fields in RoomsDto
-                    \s"""
-    )
-    @RateLimiter(name = "RoomController")
-    public Page<RoomsDto> findRoomsByCategoryAndKeyString(
-            @PathVariable(value = "category") CategoryType category,
-            @RequestParam(value = "keyString") String keyString,
-            @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
-        return roomService.findAllRoomsByCategoryTypeContainingKeyString(category, keyString, pageable);
-    }
-
     @Operation(summary = "Delete a room by its ID")
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Room deleted successfully.", content = @Content),

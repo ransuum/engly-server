@@ -46,11 +46,9 @@ public class MessageServiceImpl implements MessageService {
             evict = {
                     @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, key = "#createMessageData.roomId()"),
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
                     @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#createMessageData.roomId()"),
                     @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#createMessageData.roomId()"),
                     @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOM_BY_CATEGORY_AND_KEY, allEntries = true)
             }
     )
     public MessagesDto sendMessage(CreateMessageData createMessageData) {
@@ -75,10 +73,8 @@ public class MessageServiceImpl implements MessageService {
             evict = {
                     @CacheEvict(value = CacheName.MESSAGE_ID, key = "#id"),
                     @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true),
                     @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true),
                     @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOM_BY_CATEGORY_AND_KEY, allEntries = true)
             }
     )
     public void deleteMessage(String id) {
@@ -101,8 +97,7 @@ public class MessageServiceImpl implements MessageService {
     @Caching(
             put = {@CachePut(value = CacheName.MESSAGE_ID, key = "#id")},
             evict = {
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_CURSOR, allEntries = true)
+                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true)
             }
     )
     public MessagesDto editMessage(String id, String content) {
@@ -113,19 +108,6 @@ public class MessageServiceImpl implements MessageService {
                     return MessageMapper.INSTANCE.toMessageDto(messageRepository.save(message));
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheName.MESSAGES_BY_ROOM_CURSOR,
-            key = "#roomId + ':cursor:' + #keyString + ':' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
-            unless = "#result.content.isEmpty()"
-    )
-    public Page<MessagesDto> findAllMessagesContainingKeyString(String roomId, String keyString, Pageable pageable) {
-        return messageRepository.search(roomId, keyString, pageable)
-                .map(MessageMapper.INSTANCE::toMessageDto);
     }
 
     @Override
@@ -143,7 +125,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(readOnly = true)
     @Cacheable(
-            value = CacheName.MESSAGES_BY_ROOM_NATIVE,
+            value = CacheName.MESSAGES_BY_CRITERIA,
             key = "#request.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
             condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
             unless = "#result.content.isEmpty()"

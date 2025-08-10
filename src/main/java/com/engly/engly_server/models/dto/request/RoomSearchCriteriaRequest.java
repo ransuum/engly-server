@@ -19,17 +19,15 @@ public record RoomSearchCriteriaRequest(
         String creatorId,
         String creatorName,
 
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate createdAfter,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAfter,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdBefore,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdStartDate,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdEndDate,
 
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate createdBefore,
-
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate createdStartDate,
-
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-        LocalDate createdEndDate,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedAfter,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedBefore,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedStartDate,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedEndDate,
 
         Integer minParticipants,
         Integer maxParticipants
@@ -46,17 +44,13 @@ public record RoomSearchCriteriaRequest(
                         RoomSpecification.createdAfter(this.createdAfter()),
                         RoomSpecification.createdBefore(this.createdBefore()),
                         RoomSpecification.createdBetween(this.createdStartDate(), this.createdEndDate()),
+                        RoomSpecification.updatedAfter(this.updatedAfter()),
+                        RoomSpecification.updatedBefore(this.updatedBefore()),
+                        RoomSpecification.updatedBetween(this.updatedStartDate(), this.updatedEndDate()),
                         RoomSpecification.hasMinimumParticipants(this.minParticipants()),
                         RoomSpecification.hasMaximumParticipants(this.maxParticipants())
                 )
                 .reduce(Specification::and)
                 .orElse(null);
-    }
-
-    public static RoomSearchCriteriaRequest empty() {
-        return new RoomSearchCriteriaRequest(
-                null, null, null, null, null, null,
-                null, null, null, null, null, null
-        );
     }
 }

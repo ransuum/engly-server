@@ -24,7 +24,5 @@ public interface RoomService {
 
     Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable);
 
-    Page<RoomsDto> findAllRoomsByCategoryTypeContainingKeyString(CategoryType categoryType, String keyString, Pageable pageable);
-
     Rooms findRoomEntityById(String id);
 }
