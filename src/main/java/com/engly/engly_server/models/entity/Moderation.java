@@ -31,7 +31,7 @@ public class Moderation implements Serializable {
     @JoinColumn(name = "room_id", referencedColumnName = "id")
     private Rooms room;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "moder_id", referencedColumnName = "id")
     private Users moder;
 

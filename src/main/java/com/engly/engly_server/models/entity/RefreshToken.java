@@ -28,7 +28,7 @@ public class RefreshToken implements Serializable {
     @Column(name = "revoked")
     private boolean revoked;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
 

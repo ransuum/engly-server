@@ -45,10 +45,9 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     @Caching(
-            put = @CachePut(value = CacheName.ROOM_DTO_ID, key = "#result.id()"),
             evict = {
-                    @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, key = "#result.id()"),
-                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
             }
     )
     public RoomsDto createRoom(CategoryType name, RoomRequest roomRequestDto) {
@@ -75,7 +74,7 @@ public class RoomServiceImpl implements RoomService {
     @Cacheable(
             value = CacheName.ROOMS_BY_CRITERIA,
             key = "#request.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
             unless = "#result.content.isEmpty()"
     )
     public Page<RoomsDto> findAllWithCriteria(RoomSearchCriteriaRequest request, Pageable pageable) {
@@ -86,10 +85,9 @@ public class RoomServiceImpl implements RoomService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.ROOM_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#id"),
             @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
+            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+            @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
     })
     public void deleteRoomById(String id) {
         roomRepository.findById(id).ifPresentOrElse(room -> roomRepository.deleteById(room.getId()),
@@ -102,8 +100,8 @@ public class RoomServiceImpl implements RoomService {
     @Caching(
             put = {@CachePut(value = CacheName.ROOM_DTO_ID, key = "#id")},
             evict = {
-                    @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
-                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true)
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
             }
     )
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
@@ -127,7 +125,7 @@ public class RoomServiceImpl implements RoomService {
     @Cacheable(
             value = CacheName.ROOMS_BY_CATEGORY,
             key = "#category.name() + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 10 && #pageable.pageSize <= 100",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
             unless = "#result.content.isEmpty()"
     )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {

@@ -42,9 +42,7 @@ public class ProfileServiceImpl implements ProfileService {
                     @CachePut(value = CacheName.USER_BY_EMAIL_DTO, key = "@securityService.getCurrentUserEmail()")
             },
             evict = {
-                    @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
-                    @CacheEvict(value = CacheName.USERNAME_AVAILABILITY,
-                            key = "#profileUpdateData.username().toLowerCase()", condition = "#profileUpdateData.username() != null")
+                    @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
             }
     )
     @Transactional

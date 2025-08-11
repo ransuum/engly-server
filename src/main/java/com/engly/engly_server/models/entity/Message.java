@@ -30,7 +30,7 @@ public class Message implements Serializable {
     @JoinColumn(name = "room_id", referencedColumnName = "id")
     private Rooms room;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private Users user;
 

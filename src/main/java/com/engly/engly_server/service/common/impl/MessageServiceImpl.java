@@ -18,7 +18,6 @@ import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
@@ -39,18 +38,6 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    @Caching(
-            put = {
-                    @CachePut(value = CacheName.MESSAGE_ID, key = "#result.id()")
-            },
-            evict = {
-                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, key = "#createMessageData.roomId()"),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOM_DTO_ID, key = "#createMessageData.roomId()"),
-                    @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#createMessageData.roomId()"),
-                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
-            }
-    )
     public MessagesDto sendMessage(CreateMessageData createMessageData) {
         final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
         final var room = roomService.findRoomEntityById(createMessageData.roomId());
@@ -69,12 +56,11 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    @Transactional
     @Caching(
             evict = {
                     @CacheEvict(value = CacheName.MESSAGE_ID, key = "#id"),
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true),
-                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true),
-                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true)
             }
     )
     public void deleteMessage(String id) {
@@ -94,12 +80,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    @Caching(
-            put = {@CachePut(value = CacheName.MESSAGE_ID, key = "#id")},
-            evict = {
-                    @CacheEvict(value = CacheName.MESSAGES_BY_ROOM_NATIVE, allEntries = true)
-            }
-    )
+    @Transactional
     public MessagesDto editMessage(String id, String content) {
         return messageRepository.findById(id)
                 .map(message -> {
@@ -112,24 +93,12 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheName.MESSAGES_BY_ROOM_NATIVE,
-            key = "#roomId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
-            unless = "#result.content.isEmpty()"
-    )
     public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {
         return messageRepository.findActive(roomId, pageable).map(MessageMapper.INSTANCE::toMessageDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(
-            value = CacheName.MESSAGES_BY_CRITERIA,
-            key = "#request.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
-            condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
-            unless = "#result.content.isEmpty()"
-    )
     public Page<MessagesDto> findMessagesByCriteria(MessageSearchCriteriaRequest request, Pageable pageable) {
         final var spec = request.buildSpecification();
         return messageRepository.findAll(spec, pageable).map(MessageMapper.INSTANCE::toMessageDto);

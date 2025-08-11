@@ -27,7 +27,6 @@ import java.util.concurrent.Executor;
 @Service
 @Slf4j
 public class MessageReadServiceImpl implements MessageReadService {
-
     private final MessageReadRepository messageReadRepository;
     private final MessageReadCache messageReadCache;
     private final Executor virtualThreadExecutor;
@@ -79,7 +78,7 @@ public class MessageReadServiceImpl implements MessageReadService {
     @Cacheable(
             value = CacheName.USERS_WHO_READ_MESSAGE,
             key = "#messageId + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 50",
+            condition = "#pageable.pageNumber < 5 && #pageable.pageSize <= 20",
             unless = "#result.content.isEmpty()"
     )
     public Page<UserWhoReadsMessageDto> getUsersWhoReadMessage(String messageId, Pageable pageable) {

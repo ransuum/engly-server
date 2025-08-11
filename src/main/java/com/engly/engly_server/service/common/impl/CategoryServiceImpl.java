@@ -31,16 +31,7 @@ public class CategoryServiceImpl implements CategoriesService {
 
     @Override
     @Transactional
-    @Caching(
-            put = {
-                    @CachePut(value = CacheName.CATEGORY_ID, key = "#result.id"),
-                    @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()"),
-                    @CachePut(value = CacheName.CATEGORY_ENTITY_ID, key = "#result.id")
-            },
-            evict = {
-                    @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
-            }
-    )
+    @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
     public CategoriesDto addCategory(CategoryRequest categoryRequest) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepository.save(Categories.builder()
@@ -53,12 +44,10 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = CacheName.CATEGORY_ID, key = "#id"),
+                    @CachePut(value = CacheName.CATEGORY_ENTITY_ID, key = "#id"),
                     @CachePut(value = CacheName.CATEGORY_NAME, key = "#result.name.toString()")
             },
-            evict = {
-                    @CacheEvict(value = CacheName.CATEGORY_ENTITY_ID, key = "#id")
-            }
+            evict = @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
     )
     public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
         return categoriesRepository.findById(id)
@@ -76,7 +65,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Cacheable(
             value = CacheName.ALL_CATEGORIES,
             key = "':all:' + #pageable.pageNumber + ':' + #pageable.pageSize",
-            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 50",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
             unless = "#result.content.isEmpty()"
     )
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {
@@ -85,7 +74,6 @@ public class CategoryServiceImpl implements CategoriesService {
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.CATEGORY_ID, key = "#categoryId", sync = true)
     public CategoriesDto getCategoryById(String categoryId) {
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepository.findById(categoryId).orElseThrow(()
@@ -95,9 +83,9 @@ public class CategoryServiceImpl implements CategoriesService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = CacheName.CATEGORY_ID, key = "#categoryId"),
             @CacheEvict(value = CacheName.CATEGORY_ENTITY_ID, key = "#categoryId"),
-            @CacheEvict(value = CacheName.CATEGORY_NAME, allEntries = true)
+            @CacheEvict(value = CacheName.CATEGORY_NAME, allEntries = true),
+            @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
     })
     public void deleteCategory(String categoryId) {
         categoriesRepository.deleteById(categoryId);

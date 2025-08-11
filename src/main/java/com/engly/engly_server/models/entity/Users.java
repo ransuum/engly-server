@@ -1,6 +1,7 @@
 package com.engly.engly_server.models.entity;
 
-import com.engly.engly_server.models.enums.*;
+import com.engly.engly_server.models.enums.Provider;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -89,5 +90,6 @@ public class Users implements Serializable {
     private List<Notifications> notifications;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Message> messages;
 }

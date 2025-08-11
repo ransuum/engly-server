@@ -57,9 +57,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
         registration.addDecoratorFactory(CustomExceptionWebSocketHandlerDecorator::new);
-        registration.setMessageSizeLimit(128 * 1024); // Increased for richer messages
-        registration.setSendBufferSizeLimit(1024 * 1024); // Increased buffer
-        registration.setSendTimeLimit(30000); // Longer timeout
+        registration.setMessageSizeLimit(128 * 1024);
+        registration.setSendBufferSizeLimit(1024 * 1024);
+        registration.setSendTimeLimit(30000);
     }
 
     @Bean("heartbeatTaskScheduler")

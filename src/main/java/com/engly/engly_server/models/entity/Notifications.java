@@ -26,7 +26,7 @@ public class Notifications implements Serializable {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(referencedColumnName = "id", name = "user_id")
     private Users user;
 

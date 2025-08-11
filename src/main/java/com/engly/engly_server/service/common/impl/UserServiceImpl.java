@@ -26,7 +26,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
     private final UserRepository userRepository;
 
     @Override
@@ -59,6 +58,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
+
     @Override
     @Cacheable(value = CacheName.USER_BY_EMAIL_DTO, key = "#email", sync = true)
     public UsersDto findByEmailDto(String email) {
@@ -72,10 +72,7 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = CacheName.USER_BY_EMAIL_DTO, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_ENTITY_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()"),
-            @CacheEvict(value = CacheName.USER_PROFILES, key = "#username"),
-            @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, key = "#username.toLowerCase()"),
-            @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, key = "#email.toLowerCase()"),
-            @CacheEvict(value = CacheName.USER_FIRST_LOGIN, allEntries = true)
+            @CacheEvict(value = CacheName.USER_PROFILES, key = "#username")
     })
     public void clearUserSpecificCaches(String email, String username) {
         log.debug("Cleared user-specific caches for email: {}, username: {}", email, username);
@@ -109,9 +106,7 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, allEntries = true),
             @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
-            @CacheEvict(value = CacheName.USERNAME_AVAILABILITY, allEntries = true),
             @CacheEvict(value = CacheName.USER_ENTITY_BY_EMAIL, allEntries = true),
-            @CacheEvict(value = CacheName.EMAIL_AVAILABILITY, allEntries = true)
     })
     public Integer deleteSomeUsers(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;
