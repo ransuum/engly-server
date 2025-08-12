@@ -156,10 +156,10 @@ springdoc:
 
 logging:
   level:
-    root: INFO
-    com.engly: INFO
-    org.springframework.security: WARN
-    org.springframework.web: WARN
+    root: DEBUG
+    com.engly: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web: DEBUG
     org.hibernate.SQL: WARN
     org.hibernate.type.descriptor.sql.BasicBinder: WARN
     org.springframework.cache: DEBUG

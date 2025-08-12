@@ -1,35 +1,37 @@
 package com.engly.engly_server.security.jwt.filter;
 
-import com.engly.engly_server.exception.handler.ExceptionResponse;
+import com.engly.engly_server.security.config.SecurityContextConfig;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
-import com.engly.engly_server.security.rsa.RSAKeyRecord;
+import com.engly.engly_server.security.jwt.validation.CompositeTokenValidator;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.time.Instant;
+import java.util.Map;
 
 @Slf4j
-@RequiredArgsConstructor
 public abstract class JwtGeneralFilter extends OncePerRequestFilter {
-    protected final RSAKeyRecord rsaKeyRecord;
+    protected final SecurityContextConfig securityContextConfig;
+    protected final CompositeTokenValidator compositeTokenValidator;
     protected final JwtTokenUtils jwtTokenUtils;
+
+    protected JwtGeneralFilter(SecurityContextConfig securityContextConfig,
+                               CompositeTokenValidator compositeTokenValidator,
+                               JwtTokenUtils jwtTokenUtils) {
+        this.securityContextConfig = securityContextConfig;
+        this.compositeTokenValidator = compositeTokenValidator;
+        this.jwtTokenUtils = jwtTokenUtils;
+    }
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -63,34 +65,32 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
     protected abstract boolean isTokenValidInContext(Jwt jwt);
 
     private void authenticateToken(String token, HttpServletRequest request) {
-        if (!jwtTokenUtils.isSecurityContextEmpty()) return;
+        if (!securityContextConfig.isSecurityContextEmpty()) return;
 
-        final JwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(rsaKeyRecord.rsaPublicKey()).build();
-        final var jwt = jwtDecoder.decode(token);
-        final var userName = jwtTokenUtils.getUsername(jwt);
+        final var jwt = jwtTokenUtils.decodeToken(token);
+        final var username = jwtTokenUtils.getUsername(jwt);
 
-        if (!userName.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-            var userDetails = jwtTokenUtils.userDetails(userName);
+        if (FieldUtil.isValid(username) && securityContextConfig.isAuthenticationEmpty()) {
+            var userDetails = jwtTokenUtils.loadUserDetails(username);
 
-            if (jwtTokenUtils.isTokenValid(jwt, userDetails) && isTokenValidInContext(jwt))
-                setSecurityContext(jwt, userDetails, request);
+            if (compositeTokenValidator.validateToken(jwt, userDetails) && isTokenValidInContext(jwt))
+                securityContextConfig.setSecurityContext(jwt, userDetails, request);
         }
     }
 
-    private void setSecurityContext(Jwt jwt, UserDetails userDetails, HttpServletRequest request) {
-        Collection<GrantedAuthority> authorities = new LinkedList<>(userDetails.getAuthorities());
-
-        final var scope = jwt.getClaimAsString("scope");
-        if (FieldUtil.isValid(scope))
-            authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope.toUpperCase()));
-
-        jwtTokenUtils.securityContextSetter(userDetails, authorities, request);
-    }
-
     private void handleException(HttpServletResponse response, Exception e) throws IOException {
-        new ExceptionResponse("Session Problem", HttpStatus.NOT_ACCEPTABLE.value(),
-                e.getMessage(), LocalDateTime.now())
-                .responseConfiguration(response)
-                .throwException(response.getOutputStream());
+        log.error("[{}:doFilterInternal] Authentication failed: {}",
+                getClass().getSimpleName(), e.getMessage(), e);
+
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        var errorResponse = Map.of(
+                "error", "Authentication failed",
+                "message", e.getMessage(),
+                "timestamp", Instant.now().toString()
+        );
+
+        new ObjectMapper().writeValue(response.getOutputStream(), errorResponse);
     }
 }

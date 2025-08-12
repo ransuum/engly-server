@@ -77,7 +77,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
                 tokenRepo.delete(verifyToken);
 
-                final var jwtHolder = jwtAuthenticationService.createAuthObject(user, response);
+                final var jwtHolder = jwtAuthenticationService.authentication(user, response);
                 log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted",
                         verifyToken.getToken(), verifyToken.getEmail());
 

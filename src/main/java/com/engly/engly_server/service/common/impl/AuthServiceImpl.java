@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
                     users.setLastLogin(Instant.now());
 
                     final var savedUser = userRepository.save(users);
-                    final var jwtHolder = jwtAuthenticationService.authenticateData(savedUser, authentication, response);
+                    final var jwtHolder = jwtAuthenticationService.authenticationWithParameters(savedUser, authentication, response);
 
                     log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
                     return createAuthResponse(savedUser, jwtHolder);
@@ -74,7 +74,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setRevoked(true);
         final var users = refreshTokenRepository.save(refreshTokenEntity).getUser();
 
-        final var jwtHolder = jwtAuthenticationService.createAuthObject(users, response);
+        final var jwtHolder = jwtAuthenticationService.authentication(users, response);
 
         return createAuthResponse(users, jwtHolder);
     }
@@ -82,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDto registerUser(SignUpRequest signUpRequestDto, HttpServletResponse httpServletResponse) {
         final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
-        final var jwtHolder = jwtAuthenticationService.createAuthObject(user, httpServletResponse);
+        final var jwtHolder = jwtAuthenticationService.authentication(user, httpServletResponse);
 
         log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
         return createAuthResponse(user, jwtHolder);
@@ -102,7 +102,7 @@ public class AuthServiceImpl implements AuthService {
                                 .providerId(providerId)
                                 .build()));
 
-        jwtAuthenticationService.createAuthObjectForGoogle(user, response);
+        jwtAuthenticationService.authenticationForGoogle(user, response);
     }
 
     private AuthResponseDto createAuthResponse(Users user, JwtHolder jwtHolder) {
