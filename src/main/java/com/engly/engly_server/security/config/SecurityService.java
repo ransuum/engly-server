@@ -1,16 +1,18 @@
 package com.engly.engly_server.security.config;
 
+import com.engly.engly_server.exception.AuthenticationObjectException;
 import com.engly.engly_server.models.enums.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,12 +22,6 @@ public class SecurityService {
 
     public String getCurrentUserEmail() {
         return getAuthenticationOrThrow().getName();
-    }
-
-    public boolean hasAnyRole(List<String> roles) {
-        return getCurrentUserRoles().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(roles::contains);
     }
 
     public boolean hasRole(String role) {
@@ -60,13 +56,13 @@ public class SecurityService {
                                 .filter(SimpleGrantedAuthority.class::isInstance)
                                 .map(SimpleGrantedAuthority.class::cast)
                                 .toList())
-                .orElseThrow(() -> new AuthenticationCredentialsNotFoundException("No authenticated user found"));
+                .orElseThrow(() -> new AuthenticationObjectException("No authenticated user found"));
     }
 
     public Authentication getAuthenticationOrThrow() {
-        final var authentication = SecurityContextHolder.getContext().getAuthentication();
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated())
-            throw new AuthenticationCredentialsNotFoundException("No authenticated user found in SecurityContext");
+            throw new AuthenticationObjectException("No authenticated user found in SecurityContext");
 
         return authentication;
     }

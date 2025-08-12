@@ -4,6 +4,8 @@ import com.engly.engly_server.exception.TokenNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 
 import java.util.Arrays;
 
@@ -21,14 +23,15 @@ public record CookieUtils(Cookie[] cookies) {
     }
 
     public void clearCookies(HttpServletResponse response) {
-        final var clearCookie = "refreshToken=deleted" +
-                "; Max-Age=0" +
-                "; Path=/" +
-                "; HttpOnly" +
-                "; Secure" +
-                "; SameSite=None";
+        final var cookie = ResponseCookie.from("refreshToken", "deleted")
+                .maxAge(0)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .build();
 
-        response.setHeader("Set-Cookie", clearCookie);
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     @Override

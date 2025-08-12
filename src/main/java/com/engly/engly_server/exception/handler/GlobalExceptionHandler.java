@@ -9,7 +9,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -43,8 +42,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             WebSocketException.class,
             SignInException.class,
-            AuthenticationCredentialsNotFoundException.class,
-            TokenNotFoundException.class
+            TokenNotFoundException.class,
+            InvalidTokenTypeException.class,
+            AuthenticationObjectException.class
     })
     public ResponseEntity<ExceptionResponse> handleUnauthorizedExceptions(Exception ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex);
@@ -115,7 +115,6 @@ public class GlobalExceptionHandler {
             case TypeMismatchException e -> "Invalid data type for field: " + e.getPropertyName();
             case EntityAlreadyExistsException _ -> "Entity already exists";
             case AccessDeniedException _ -> "Access denied";
-            case AuthenticationCredentialsNotFoundException _ -> "Authentication required";
             case WebSocketException _ -> "WebSocket connection error";
             case SignInException _ -> "Invalid credentials";
             case GoogleDriveException _ -> "Google Drive Api";

@@ -43,7 +43,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             if (authToken != null && authToken.startsWith(BEARER_PREFIX)) {
                 authToken = authToken.substring(BEARER_PREFIX.length());
                 try {
-                    final var authentication = jwtTokenUtils.getAuthenticationFromToken(authToken);
+                    final var authentication = jwtTokenUtils.createAuthentication(authToken);
 
                     accessor.setUser(authentication);
                     log.info("Authenticated user {} for WebSocket session.", authentication.getName());
