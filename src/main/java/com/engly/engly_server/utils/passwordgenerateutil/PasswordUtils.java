@@ -26,25 +26,26 @@ public final class PasswordUtils {
         final var digits = "0123456789";
         final var symbols = "!@#$%^&*";
 
-        StringBuilder password = new StringBuilder();
-        password.append(upper.charAt(RANDOM.nextInt(upper.length())));
-        password.append(lower.charAt(RANDOM.nextInt(lower.length())));
-        password.append(digits.charAt(RANDOM.nextInt(digits.length())));
-        password.append(symbols.charAt(RANDOM.nextInt(symbols.length())));
+        char[] password = new char[length];
 
-        IntStream.range(4, length).forEach(_
-                -> password.append(CHARS.charAt(RANDOM.nextInt(CHARS.length()))));
+        password[0] = upper.charAt(RANDOM.nextInt(upper.length()));
+        password[1] = lower.charAt(RANDOM.nextInt(lower.length()));
+        password[2] = digits.charAt(RANDOM.nextInt(digits.length()));
+        password[3] = symbols.charAt(RANDOM.nextInt(symbols.length()));
 
-        char[] chars = password.toString().toCharArray();
-        final int charLength = chars.length;
+        IntStream.range(4, length)
+                .parallel()
+                .forEach(i -> password[i] = CHARS.charAt(RANDOM.nextInt(CHARS.length())));
 
-        IntStream.range(0, charLength).forEach(i -> {
-            final int randomIndex = RANDOM.nextInt(charLength);
-            final char temp = chars[i];
-            chars[i] = chars[randomIndex];
-            chars[randomIndex] = temp;
-        });
+        int finalLength = length;
+        IntStream.range(0, length)
+                .forEach(i -> {
+                    int j = RANDOM.nextInt(finalLength);
+                    char temp = password[i];
+                    password[i] = password[j];
+                    password[j] = temp;
+                });
 
-        return new String(chars);
+        return new String(password);
     }
 }

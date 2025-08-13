@@ -18,12 +18,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 public abstract class JwtGeneralFilter extends OncePerRequestFilter {
-    protected final SecurityContextConfig securityContextConfig;
-    protected final CompositeTokenValidator compositeTokenValidator;
-    protected final JwtTokenUtils jwtTokenUtils;
+    private final SecurityContextConfig securityContextConfig;
+    private final CompositeTokenValidator compositeTokenValidator;
+    private final JwtTokenUtils jwtTokenUtils;
 
     protected JwtGeneralFilter(SecurityContextConfig securityContextConfig,
                                CompositeTokenValidator compositeTokenValidator,
@@ -44,7 +45,7 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
 
             final String token = extractToken(request);
 
-            if (token == null) {
+            if (FieldUtil.isValid(token)) {
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -65,17 +66,14 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
     protected abstract boolean isTokenValidInContext(Jwt jwt);
 
     private void authenticateToken(String token, HttpServletRequest request) {
-        if (!securityContextConfig.isSecurityContextEmpty()) return;
-
-        final var jwt = jwtTokenUtils.decodeToken(token);
-        final var username = jwtTokenUtils.getUsername(jwt);
-
-        if (FieldUtil.isValid(username) && securityContextConfig.isAuthenticationEmpty()) {
-            var userDetails = jwtTokenUtils.loadUserDetails(username);
-
-            if (compositeTokenValidator.validateToken(jwt, userDetails) && isTokenValidInContext(jwt))
-                securityContextConfig.setSecurityContext(jwt, userDetails, request);
-        }
+        Optional.of(token)
+                .filter(_ -> securityContextConfig.isSecurityContextEmpty())
+                .map(jwtTokenUtils::decodeToken)
+                .map(jwt -> Map.entry(jwt, jwtTokenUtils.getUsername(jwt)))
+                .filter(entry -> FieldUtil.isValid(entry.getValue()) && securityContextConfig.isAuthenticationEmpty())
+                .map(entry -> Map.entry(entry.getKey(), jwtTokenUtils.loadUserDetails(entry.getValue())))
+                .filter(entry -> compositeTokenValidator.validateToken(entry.getKey(), entry.getValue()) && isTokenValidInContext(entry.getKey()))
+                .ifPresent(entry -> securityContextConfig.setSecurityContext(entry.getKey(), entry.getValue(), request));
     }
 
     private void handleException(HttpServletResponse response, Exception e) throws IOException {

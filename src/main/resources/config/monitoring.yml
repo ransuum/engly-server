@@ -154,33 +154,33 @@ springdoc:
   api-docs:
     enabled: true
 
-logging:
-  level:
-    root: DEBUG
-    com.engly: DEBUG
-    org.springframework.security: DEBUG
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: WARN
-    org.hibernate.type.descriptor.sql.BasicBinder: WARN
-    org.springframework.cache: DEBUG
-    org.springframework.scheduling: INFO
-    io.micrometer: INFO
-    org.springframework.boot.actuate: INFO
-
-
-#FOR PRODUCTION
 #logging:
 #  level:
-#    root: INFO
-#    com.engly: INFO
-#    org.springframework.security: WARN
-#    org.springframework.web: WARN
+#    root: DEBUG
+#    com.engly: DEBUG
+#    org.springframework.security: DEBUG
+#    org.springframework.web: DEBUG
 #    org.hibernate.SQL: WARN
 #    org.hibernate.type.descriptor.sql.BasicBinder: WARN
 #    org.springframework.cache: DEBUG
 #    org.springframework.scheduling: INFO
 #    io.micrometer: INFO
 #    org.springframework.boot.actuate: INFO
+
+
+#FOR PRODUCTION
+logging:
+  level:
+    root: INFO
+    com.engly: INFO
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
+    org.springframework.cache: DEBUG
+    org.springframework.scheduling: INFO
+    io.micrometer: INFO
+    org.springframework.boot.actuate: INFO
 
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{traceId:-},%X{spanId:-}] %logger{36} - %msg%n"

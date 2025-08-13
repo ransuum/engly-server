@@ -22,7 +22,7 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler({Exception.class, RepositoryException.class})
     public ResponseEntity<ExceptionResponse> handleGeneralExceptions(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
