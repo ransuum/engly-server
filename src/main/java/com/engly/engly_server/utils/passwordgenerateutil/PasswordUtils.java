@@ -22,17 +22,12 @@ public final class PasswordUtils {
     public static final PasswordGenerator SECURE_PASSWORD_GENERATOR = length -> {
         if (length < 4) length = 12;
 
-        final var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        final var lower = "abcdefghijklmnopqrstuvwxyz";
-        final var digits = "0123456789";
-        final var symbols = "!@#$%^&*";
-
         char[] password = new char[length];
 
-        password[0] = upper.charAt(RANDOM.nextInt(upper.length()));
-        password[1] = lower.charAt(RANDOM.nextInt(lower.length()));
-        password[2] = digits.charAt(RANDOM.nextInt(digits.length()));
-        password[3] = symbols.charAt(RANDOM.nextInt(symbols.length()));
+        password[0] = PasswordGenerator.upper.charAt(RANDOM.nextInt(PasswordGenerator.upper.length()));
+        password[1] = PasswordGenerator.lower.charAt(RANDOM.nextInt(PasswordGenerator.lower.length()));
+        password[2] = PasswordGenerator.digits.charAt(RANDOM.nextInt(PasswordGenerator.digits.length()));
+        password[3] = PasswordGenerator.symbols.charAt(RANDOM.nextInt(PasswordGenerator.symbols.length()));
 
         IntStream.range(4, length)
                 .parallel()
