@@ -8,49 +8,38 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.util.stream.Stream;
 
 @Builder
 public record RoomSearchCriteriaRequest(
-        CategoryType categoryType,
         String keyword,
         String name,
         String description,
-        String creatorId,
-        String creatorName,
+        CategoryType categoryType,
+        String creatorUsername,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAfter,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdBefore,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdStartDate,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdEndDate,
 
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedAfter,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedBefore,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedStartDate,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedEndDate,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
 
         Integer minParticipants,
         Integer maxParticipants
 ) {
 
     public Specification<Rooms> buildSpecification() {
-        return Stream.of(
-                        RoomSpecification.hasCategory(this.categoryType()),
-                        RoomSpecification.hasKeywordInNameOrDescription(this.keyword()),
-                        RoomSpecification.hasNameContaining(this.name()),
-                        RoomSpecification.hasDescriptionContaining(this.description()),
-                        RoomSpecification.hasCreator(this.creatorId()),
-                        RoomSpecification.hasCreatorName(this.creatorName()),
-                        RoomSpecification.createdAfter(this.createdAfter()),
-                        RoomSpecification.createdBefore(this.createdBefore()),
-                        RoomSpecification.createdBetween(this.createdStartDate(), this.createdEndDate()),
-                        RoomSpecification.updatedAfter(this.updatedAfter()),
-                        RoomSpecification.updatedBefore(this.updatedBefore()),
-                        RoomSpecification.updatedBetween(this.updatedStartDate(), this.updatedEndDate()),
-                        RoomSpecification.hasMinimumParticipants(this.minParticipants()),
-                        RoomSpecification.hasMaximumParticipants(this.maxParticipants())
-                )
-                .reduce(Specification::and)
-                .orElse(null);
+        return Specification.anyOf(
+                RoomSpecification.search(keyword),
+                RoomSpecification.nameLike(name),
+                RoomSpecification.search(description),
+                RoomSpecification.categoryEquals(categoryType),
+                RoomSpecification.creatorUsernameLike(creatorUsername),
+                RoomSpecification.createdAfter(createdAfter),
+                RoomSpecification.createdBefore(createdBefore),
+                RoomSpecification.descriptionLike(description),
+                RoomSpecification.between(startDate, endDate),
+                RoomSpecification.participantsLessThan(minParticipants),
+                RoomSpecification.participantsGreaterThan(maxParticipants)
+        );
     }
 }

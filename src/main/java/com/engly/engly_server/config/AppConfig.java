@@ -29,7 +29,7 @@ public class AppConfig {
         mapper.registerModule(new JavaTimeModule());
         mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm"));
         mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
         return mapper;
     }

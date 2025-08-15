@@ -37,7 +37,7 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Caching(
             put = {
-                    @CachePut(value = CacheName.USER_PROFILES, key = "#result.username"),
+                    @CachePut(value = CacheName.USER_PROFILES, key = "#result.email()"),
                     @CachePut(value = CacheName.USER_ID, key = "#result.id"),
                     @CachePut(value = CacheName.USER_BY_EMAIL_DTO, key = "@securityService.getCurrentUserEmail()")
             },

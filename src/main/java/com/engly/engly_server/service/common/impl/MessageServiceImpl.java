@@ -100,7 +100,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(readOnly = true)
     public Page<MessagesDto> findMessagesByCriteria(MessageSearchCriteriaRequest request, Pageable pageable) {
-        final var spec = request.buildSpecification();
-        return messageRepository.findAll(spec, pageable).map(MessageMapper.INSTANCE::toMessageDto);
+        return messageRepository.findAll(request.buildSpecification(), pageable)
+                .map(MessageMapper.INSTANCE::toMessageDto);
     }
 }

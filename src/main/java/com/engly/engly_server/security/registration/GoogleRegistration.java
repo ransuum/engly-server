@@ -41,7 +41,7 @@ public final class GoogleRegistration implements RegistrationChooser {
                 .email(signUpRequestDto.email())
                 .emailVerified(Boolean.TRUE)
                 .username(signUpRequestDto.username())
-                .password(passwordEncoder.encode(PasswordUtils.generateSecure(16)))
+                .password(passwordEncoder.encode(PasswordUtils.SECURE_PASSWORD_GENERATOR.generate(16)))
                 .provider(Provider.GOOGLE)
                 .lastLogin(Instant.now())
                 .providerId(signUpRequestDto.providerId())

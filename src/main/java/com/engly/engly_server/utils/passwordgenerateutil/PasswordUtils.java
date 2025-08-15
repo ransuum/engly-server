@@ -8,17 +8,18 @@ public final class PasswordUtils {
     private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    private PasswordUtils() {}
-
-    public static String generate(int length) {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++)
-            sb.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
-
-        return sb.toString();
+    private PasswordUtils() {
     }
 
-    public static String generateSecure(int length) {
+    public static final PasswordGenerator DEFAULT_PASSWORD_GENERATOR = length -> {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            sb.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
+        }
+        return sb.toString();
+    };
+
+    public static final PasswordGenerator SECURE_PASSWORD_GENERATOR = length -> {
         if (length < 4) length = 12;
 
         final var upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -47,5 +48,5 @@ public final class PasswordUtils {
                 });
 
         return new String(password);
-    }
+    };
 }

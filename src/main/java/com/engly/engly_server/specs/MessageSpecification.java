@@ -1,340 +1,100 @@
 package com.engly.engly_server.specs;
 
 import com.engly.engly_server.models.entity.Message;
-import com.engly.engly_server.models.entity.MessageRead;
-import com.engly.engly_server.models.enums.CategoryType;
-import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
-import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Objects;
 
-public class MessageSpecification {
+import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 
+public final class MessageSpecification {
     private static final String CREATED_AT_FIELD = "createdAt";
     private static final String UPDATED_AT_FIELD = "updatedAt";
-    private static final String READ_AT_FIELD = "readAt";
-    private static final String MESSAGE_ID_FIELD = "messageId";
-    private static final String USER_ID_FIELD = "userId";
+    private static final String ROOM_FIELD = "room";
+    private static final String USER_FIELD = "user";
     private static final String ID_FIELD = "id";
     private static final String CONTENT_FIELD = "content";
     private static final String IMAGE_URL_FIELD = "imageUrl";
-    private static final String IS_EDITED_FIELD = "isEdited";
-    private static final String IS_DELETED_FIELD = "isDeleted";
-    private static final String MESSAGE_READS_FIELD = "messageReads";
     private static final String USERNAME_FIELD = "username";
 
-    private static final String ROOM_ID_PATH = "room.id";
-    private static final String ROOM_NAME_PATH = "room.name";
-    private static final String ROOM_CATEGORY_NAME_PATH = "room.category.name";
-    private static final String USER_ID_PATH = "user.id";
-    private static final String USER_USERNAME_PATH = "user.username";
-
-    private MessageSpecification() {}
-
-    public static Specification<Message> hasRoom(String roomId) {
-        return createEqualSpecification(ROOM_ID_PATH, roomId);
+    private MessageSpecification() {
+        throw new UnsupportedOperationException("Utility class");
     }
 
-    public static Specification<Message> hasRoomName(String roomName) {
-        return createLikeSpecification(ROOM_NAME_PATH, roomName);
-    }
-
-    public static Specification<Message> hasRoomCategory(CategoryType categoryType) {
-        return createEqualSpecification(ROOM_CATEGORY_NAME_PATH, categoryType);
-    }
-
-    public static Specification<Message> hasUser(String userId) {
-        return createEqualSpecification(USER_ID_PATH, userId);
-    }
-
-    public static Specification<Message> hasUsername(String username) {
-        return createLikeSpecification(USER_USERNAME_PATH, username);
-    }
-
-    public static Specification<Message> hasContentContaining(String content) {
-        return createLikeSpecification(CONTENT_FIELD, content);
-    }
-
-    public static Specification<Message> hasKeywordInContent(String keyword) {
-        return createLikeSpecification(CONTENT_FIELD, keyword);
-    }
-
-    public static Specification<Message> hasImageUrl() {
-        return (root, _, criteriaBuilder) ->
-                criteriaBuilder.isNotNull(root.get(IMAGE_URL_FIELD));
-    }
-
-    public static Specification<Message> hasNoImageUrl() {
-        return (root, _, criteriaBuilder) ->
-                criteriaBuilder.isNull(root.get(IMAGE_URL_FIELD));
-    }
-
-    public static Specification<Message> isEdited(Boolean isEdited) {
-        return createEqualSpecification(IS_EDITED_FIELD, isEdited);
-    }
-
-    public static Specification<Message> isDeleted(Boolean isDeleted) {
-        return createEqualSpecification(IS_DELETED_FIELD, isDeleted);
+    public static Specification<Message> search(String keyword) {
+        return (root, _, cb) -> {
+            if (!isValid(keyword)) return cb.conjunction();
+            final var pattern = "%" + keyword.toLowerCase() + "%";
+            return cb.or(
+                    cb.like(cb.lower(root.get(CONTENT_FIELD)), pattern),
+                    cb.like(cb.lower(root.join(USER_FIELD).get(USERNAME_FIELD)), pattern)
+            );
+        };
     }
 
     public static Specification<Message> createdAfter(LocalDate date) {
-        return createDateAfterSpecification(CREATED_AT_FIELD, date);
-    }
-
-    public static Specification<Message> createdBefore(LocalDate date) {
-        return createDateBeforeSpecification(CREATED_AT_FIELD, date);
-    }
-
-    public static Specification<Message> createdBetween(LocalDate startDate, LocalDate endDate) {
-        return createDateBetweenSpecification(CREATED_AT_FIELD, startDate, endDate);
+        return (root, _, cb) ->
+                isValid(date) ? cb.greaterThan(root.get(CREATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
     }
 
     public static Specification<Message> updatedAfter(LocalDate date) {
-        return createDateAfterSpecification(UPDATED_AT_FIELD, date);
+        return (root, _, cb) ->
+                isValid(date) ? cb.greaterThan(root.get(UPDATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
+    }
+
+    public static Specification<Message> createdBefore(LocalDate date) {
+        return (root, _, cb) ->
+                isValid(date) ? cb.lessThan(root.get(CREATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
     }
 
     public static Specification<Message> updatedBefore(LocalDate date) {
-        return createDateBeforeSpecification(UPDATED_AT_FIELD, date);
+        return (root, _, cb) ->
+                isValid(date) ? cb.lessThan(root.get(UPDATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
     }
 
-    public static Specification<Message> updatedBetween(LocalDate startDate, LocalDate endDate) {
-        return createDateBetweenSpecification(UPDATED_AT_FIELD, startDate, endDate);
+    public static Specification<Message> between(LocalDate min, LocalDate max) {
+        return (root, _, cb) ->
+                isValid(min) && isValid(max) ? cb.between(
+                        root.get(CREATED_AT_FIELD),
+                        min.atStartOfDay().toInstant(ZoneOffset.UTC),
+                        max.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
     }
 
-    public static Specification<Message> hasMinimumReads(Integer minReads) {
-        return createSizeComparisonSpecification(minReads, true);
+    public static Specification<Message> contentLike(String content) {
+        return (root, _, cb) ->
+                isValid(content) ? cb.like(cb.lower(root.get(CONTENT_FIELD)), "%" + content.toLowerCase() + "%") : cb.conjunction();
     }
 
-    public static Specification<Message> hasMaximumReads(Integer maxReads) {
-        return createSizeComparisonSpecification(maxReads, false);
+    public static Specification<Message> usernameLike(String username) {
+        return (root, _, cb) ->
+                isValid(username) ? cb.like(cb.lower(
+                        root.join(USER_FIELD).get(USERNAME_FIELD)), "%" + username.toLowerCase() + "%") : cb.conjunction();
     }
 
-    public static Specification<Message> isReadByUsernameExists(String username) {
-        return createUserReadStatusByUsernameSpecification(username, false);
+    public static Specification<Message> userIdEquals(String userId) {
+        return (root, _, cb) ->
+                isValid(userId) ? cb.equal(root.join(USER_FIELD).get(ID_FIELD), userId) : cb.conjunction();
     }
 
-    public static Specification<Message> isUnreadByUsernameExists(String username) {
-        return createUserReadStatusByUsernameSpecification(username, true);
+    public static Specification<Message> roomIdEquals(String roomId) {
+        return (root, _, cb) ->
+                isValid(roomId) ? cb.equal(root.join(ROOM_FIELD).get(ID_FIELD), roomId) : cb.conjunction();
     }
 
-    public static Specification<Message> isReadByUsernameAfter(String username, LocalDate readAfter) {
-        return createUserReadWithDateByUsernameSpecification(username, readAfter, true);
+    public static Specification<Message> roomNameLike(String roomName) {
+        return (root, _, cb) ->
+                isValid(roomName) ? cb.like(cb.lower(
+                        root.join(ROOM_FIELD).get("name")), "%" + roomName.toLowerCase() + "%") : cb.conjunction();
     }
 
-    public static Specification<Message> isReadByUsernameBefore(String username, LocalDate readBefore) {
-        return createUserReadWithDateByUsernameSpecification(username, readBefore, false);
-    }
-
-    public static Specification<Message> isReadByUserExists(String userId) {
-        return createUserReadStatusSpecification(userId, false);
-    }
-
-    public static Specification<Message> isUnreadByUserExists(String userId) {
-        return createUserReadStatusSpecification(userId, true);
-    }
-
-    public static Specification<Message> isReadByUserAfter(String userId, LocalDate readAfter) {
-        return createUserReadWithDateSpecification(userId, readAfter, true);
-    }
-
-    public static Specification<Message> isReadByUserBefore(String userId, LocalDate readBefore) {
-        return createUserReadWithDateSpecification(userId, readBefore, false);
-    }
-
-    private static Specification<Message> createUserReadStatusByUsernameSpecification(String username, boolean isUnread) {
-        return (root, query, criteriaBuilder) -> {
-            if (!FieldUtil.isValid(username)) return null;
-
-            return createExistsSubqueryByUsername(root, query, criteriaBuilder, username, isUnread);
-        };
-    }
-
-    private static Specification<Message> createUserReadWithDateByUsernameSpecification(String username, LocalDate date, boolean isAfter) {
-        return (root, query, criteriaBuilder) -> {
-            if (!FieldUtil.isValid(username) || date == null) return null;
-
-            Subquery<String> subquery = Objects.requireNonNull(query).subquery(String.class);
-            var messageReadRoot = subquery.from(MessageRead.class);
-            var userJoin = messageReadRoot.join("user");
-
-            var dateCondition = isAfter
-                    ? criteriaBuilder.greaterThanOrEqualTo(
-                    messageReadRoot.get(READ_AT_FIELD),
-                    toInstant(date)
-            )
-                    : criteriaBuilder.lessThan(
-                    messageReadRoot.get(READ_AT_FIELD),
-                    toInstant(date.plusDays(1))
-            );
-
-            subquery.select(messageReadRoot.get(MESSAGE_ID_FIELD))
-                    .where(criteriaBuilder.and(
-                            criteriaBuilder.equal(userJoin.get(USERNAME_FIELD), username),
-                            dateCondition
-                    ));
-
-            return root.get(ID_FIELD).in(subquery);
-        };
-    }
-
-    private static Predicate createExistsSubqueryByUsername(Root<Message> root, CriteriaQuery<?> query,
-                                                            CriteriaBuilder criteriaBuilder, String username, boolean isUnread) {
-        Subquery<Long> subquery = Objects.requireNonNull(query).subquery(Long.class);
-        var messageReadRoot = subquery.from(MessageRead.class);
-        var userJoin = messageReadRoot.join("user");
-
-        subquery.select(criteriaBuilder.literal(1L))
-                .where(criteriaBuilder.and(
-                        criteriaBuilder.equal(messageReadRoot.get(MESSAGE_ID_FIELD), root.get(ID_FIELD)),
-                        criteriaBuilder.equal(userJoin.get(USERNAME_FIELD), username)
-                ));
-
-        var existsPredicate = criteriaBuilder.exists(subquery);
-        return isUnread ? criteriaBuilder.not(existsPredicate) : existsPredicate;
-    }
-
-    private static <T> Specification<Message> createEqualSpecification(String fieldPath, T value) {
-        return (root, _, criteriaBuilder) -> {
-            if (value == null || (value instanceof String str && str.isBlank()))
-                return null;
-
-            return criteriaBuilder.equal(getNestedField(root, fieldPath), value);
-        };
-    }
-
-    private static Specification<Message> createLikeSpecification(String fieldPath, String value) {
-        return (root, _, criteriaBuilder) -> {
-            if (!FieldUtil.isValid(value)) return null;
-
-            final var lowerValue = "%" + value.toLowerCase() + "%";
-            return criteriaBuilder.like(
-                    criteriaBuilder.lower(getNestedField(root, fieldPath)),
-                    lowerValue
-            );
-        };
-    }
-
-    private static Specification<Message> createDateAfterSpecification(String dateField, LocalDate date) {
-        return (root, _, criteriaBuilder) -> {
-            if (date == null) return null;
-
-            return criteriaBuilder.greaterThanOrEqualTo(
-                    root.get(dateField),
-                    toInstant(date)
-            );
-        };
-    }
-
-    private static Specification<Message> createDateBeforeSpecification(String dateField, LocalDate date) {
-        return (root, _, criteriaBuilder) -> {
-            if (date == null) return null;
-
-            return criteriaBuilder.lessThan(
-                    root.get(dateField),
-                    toInstant(date.plusDays(1))
-            );
-        };
-    }
-
-    private static Specification<Message> createDateBetweenSpecification(String dateField, LocalDate startDate, LocalDate endDate) {
-        return (root, _, criteriaBuilder) -> {
-            if (startDate == null && endDate == null) return null;
-
-            var conditions = new ArrayList<Predicate>();
-
-            if (startDate != null)
-                conditions.add(criteriaBuilder.greaterThanOrEqualTo(
-                        root.get(dateField),
-                        toInstant(startDate)
-                ));
-
-            if (endDate != null)
-                conditions.add(criteriaBuilder.lessThan(
-                        root.get(dateField),
-                        toInstant(endDate.plusDays(1))
-                ));
-
-            return criteriaBuilder.and(conditions.toArray(new Predicate[0]));
-        };
-    }
-
-    private static Specification<Message> createSizeComparisonSpecification(Integer value, boolean isMinimum) {
-        return (root, _, criteriaBuilder) -> {
-            if (value == null) return null;
-
-            final var sizeExpression = criteriaBuilder.size(root.get(MESSAGE_READS_FIELD));
-            return isMinimum
-                    ? criteriaBuilder.greaterThanOrEqualTo(sizeExpression, value)
-                    : criteriaBuilder.lessThanOrEqualTo(sizeExpression, value);
-        };
-    }
-
-    private static Specification<Message> createUserReadStatusSpecification(String userId, boolean isUnread) {
-        return (root, query, criteriaBuilder) -> {
-            if (!FieldUtil.isValid(userId)) return null;
-
-            return createExistsSubquery(root, query, criteriaBuilder, userId, isUnread);
-        };
-    }
-
-    private static Specification<Message> createUserReadWithDateSpecification(String userId, LocalDate date, boolean isAfter) {
-        return (root, query, criteriaBuilder) -> {
-            if (!FieldUtil.isValid(userId) || date == null) return null;
-
-            Subquery<String> subquery = Objects.requireNonNull(query).subquery(String.class);
-            final var messageReadRoot = subquery.from(MessageRead.class);
-
-            final var dateCondition = isAfter
-                    ? criteriaBuilder.greaterThanOrEqualTo(
-                    messageReadRoot.get(READ_AT_FIELD),
-                    toInstant(date)
-            )
-                    : criteriaBuilder.lessThan(
-                    messageReadRoot.get(READ_AT_FIELD),
-                    toInstant(date.plusDays(1))
-            );
-
-            subquery.select(messageReadRoot.get(MESSAGE_ID_FIELD))
-                    .where(criteriaBuilder.and(
-                            criteriaBuilder.equal(messageReadRoot.get(USER_ID_FIELD), userId),
-                            dateCondition
-                    ));
-
-            return root.get(ID_FIELD).in(subquery);
-        };
-    }
-
-    private static Predicate createExistsSubquery(Root<Message> root, CriteriaQuery<?> query,
-                                                  CriteriaBuilder criteriaBuilder, String userId, boolean isUnread) {
-        Subquery<Long> subquery = Objects.requireNonNull(query).subquery(Long.class);
-        final var messageReadRoot = subquery.from(MessageRead.class);
-
-        subquery.select(criteriaBuilder.literal(1L))
-                .where(criteriaBuilder.and(
-                        criteriaBuilder.equal(messageReadRoot.get(MESSAGE_ID_FIELD), root.get(ID_FIELD)),
-                        criteriaBuilder.equal(messageReadRoot.get(USER_ID_FIELD), userId)
-                ));
-
-        final var existsPredicate = criteriaBuilder.exists(subquery);
-        return isUnread ? criteriaBuilder.not(existsPredicate) : existsPredicate;
-    }
-
-    private static Instant toInstant(LocalDate date) {
-        return date.atStartOfDay().toInstant(ZoneOffset.UTC);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> Path<T> getNestedField(Root<Message> root, String fieldPath) {
-        String[] parts = fieldPath.split("\\.");
-        jakarta.persistence.criteria.Path<?> path = root;
-
-        for (String part : parts) path = path.get(part);
-
-        return (jakarta.persistence.criteria.Path<T>) path;
+    public static Specification<Message> isEmpty() {
+        return (root, _, cb) -> cb.and(
+                cb.or(
+                        cb.isNull(root.get(CONTENT_FIELD)),
+                        cb.equal(root.get(CONTENT_FIELD), "")
+                ),
+                cb.isNull(root.get(IMAGE_URL_FIELD))
+        );
     }
 }

@@ -78,8 +78,7 @@ public class RoomServiceImpl implements RoomService {
             unless = "#result.content.isEmpty()"
     )
     public Page<RoomsDto> findAllWithCriteria(RoomSearchCriteriaRequest request, Pageable pageable) {
-        final var spec = request.buildSpecification();
-        return roomRepository.findAll(spec, pageable).map(RoomMapper.INSTANCE::roomToDto);
+        return roomRepository.findAll(request.buildSpecification(), pageable).map(RoomMapper.INSTANCE::roomToDto);
     }
 
     @Override
