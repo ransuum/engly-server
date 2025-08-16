@@ -4,8 +4,8 @@ import com.engly.engly_server.models.entity.Message;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 
+import static com.engly.engly_server.specs.DateSpecificationConverter.toInstantPlusOneDay;
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 
 public final class MessageSpecification {
@@ -34,58 +34,66 @@ public final class MessageSpecification {
     }
 
     public static Specification<Message> createdAfter(LocalDate date) {
-        return (root, _, cb) ->
-                isValid(date) ? cb.greaterThan(root.get(CREATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
+        return (root, _, cb) -> isValid(date)
+                ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
+                : cb.conjunction();
     }
 
     public static Specification<Message> updatedAfter(LocalDate date) {
-        return (root, _, cb) ->
-                isValid(date) ? cb.greaterThan(root.get(UPDATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
+        return (root, _, cb) -> isValid(date)
+                ? cb.greaterThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
+                : cb.conjunction();
     }
 
     public static Specification<Message> createdBefore(LocalDate date) {
-        return (root, _, cb) ->
-                isValid(date) ? cb.lessThan(root.get(CREATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
+        return (root, _, cb) -> isValid(date)
+                ? cb.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
+                : cb.conjunction();
     }
 
     public static Specification<Message> updatedBefore(LocalDate date) {
-        return (root, _, cb) ->
-                isValid(date) ? cb.lessThan(root.get(UPDATED_AT_FIELD), date.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
+        return (root, _, cb) -> isValid(date)
+                ? cb.lessThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
+                : cb.conjunction();
     }
 
     public static Specification<Message> between(LocalDate min, LocalDate max) {
-        return (root, _, cb) ->
-                isValid(min) && isValid(max) ? cb.between(
-                        root.get(CREATED_AT_FIELD),
-                        min.atStartOfDay().toInstant(ZoneOffset.UTC),
-                        max.atStartOfDay().toInstant(ZoneOffset.UTC)) : cb.conjunction();
+        return (root, _, cb) -> isValid(min) && isValid(max)
+                ? cb.between(
+                root.get(CREATED_AT_FIELD),
+                toInstantPlusOneDay(min),
+                toInstantPlusOneDay(max))
+                : cb.conjunction();
     }
 
     public static Specification<Message> contentLike(String content) {
-        return (root, _, cb) ->
-                isValid(content) ? cb.like(cb.lower(root.get(CONTENT_FIELD)), "%" + content.toLowerCase() + "%") : cb.conjunction();
+        return (root, _, cb) -> isValid(content)
+                ? cb.like(cb.lower(root.get(CONTENT_FIELD)), "%" + content.toLowerCase() + "%")
+                : cb.conjunction();
     }
 
     public static Specification<Message> usernameLike(String username) {
-        return (root, _, cb) ->
-                isValid(username) ? cb.like(cb.lower(
-                        root.join(USER_FIELD).get(USERNAME_FIELD)), "%" + username.toLowerCase() + "%") : cb.conjunction();
+        return (root, _, cb) -> isValid(username)
+                ? cb.like(cb.lower(root.join(USER_FIELD).get(USERNAME_FIELD)), "%" + username.toLowerCase() + "%")
+                : cb.conjunction();
     }
 
     public static Specification<Message> userIdEquals(String userId) {
-        return (root, _, cb) ->
-                isValid(userId) ? cb.equal(root.join(USER_FIELD).get(ID_FIELD), userId) : cb.conjunction();
+        return (root, _, cb) -> isValid(userId)
+                ? cb.equal(root.join(USER_FIELD).get(ID_FIELD), userId)
+                : cb.conjunction();
     }
 
     public static Specification<Message> roomIdEquals(String roomId) {
-        return (root, _, cb) ->
-                isValid(roomId) ? cb.equal(root.join(ROOM_FIELD).get(ID_FIELD), roomId) : cb.conjunction();
+        return (root, _, cb) -> isValid(roomId)
+                ? cb.equal(root.join(ROOM_FIELD).get(ID_FIELD), roomId)
+                : cb.conjunction();
     }
 
     public static Specification<Message> roomNameLike(String roomName) {
-        return (root, _, cb) ->
-                isValid(roomName) ? cb.like(cb.lower(
-                        root.join(ROOM_FIELD).get("name")), "%" + roomName.toLowerCase() + "%") : cb.conjunction();
+        return (root, _, cb) -> isValid(roomName)
+                ? cb.like(cb.lower(root.join(ROOM_FIELD).get("name")), "%" + roomName.toLowerCase() + "%")
+                : cb.conjunction();
     }
 
     public static Specification<Message> isEmpty() {

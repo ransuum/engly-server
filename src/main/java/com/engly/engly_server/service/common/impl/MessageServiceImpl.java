@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.googledrive.GoogleDriveService;
+//import com.engly.engly_server.googledrive.GoogleDriveService;
 import com.engly.engly_server.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.request.CreateMessageData;
 import com.engly.engly_server.models.dto.request.MessageSearchCriteriaRequest;
@@ -34,7 +34,7 @@ public class MessageServiceImpl implements MessageService {
     private final UserService userService;
     private final SecurityService service;
     private final ChatParticipantsService chatParticipantsService;
-    private final GoogleDriveService driveService;
+//    private final GoogleDriveService driveService;
 
     @Override
     @Transactional
@@ -48,7 +48,7 @@ public class MessageServiceImpl implements MessageService {
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
                 .content(createMessageData.content())
-                .imageUrl(driveService.getImageThumbnailLink(createMessageData.imageId()))
+//                .imageUrl(driveService.getImageThumbnailLink(createMessageData.imageId()))
                 .user(user)
                 .room(room)
                 .build());

@@ -27,7 +27,7 @@ public class ActivityLogs implements Serializable {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(referencedColumnName = "id", name = "user_id")
     private Users user;
 

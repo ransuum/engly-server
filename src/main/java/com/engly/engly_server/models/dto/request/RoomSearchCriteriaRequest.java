@@ -28,7 +28,7 @@ public record RoomSearchCriteriaRequest(
 ) {
 
     public Specification<Rooms> buildSpecification() {
-        return Specification.anyOf(
+        return Specification.allOf(
                 RoomSpecification.search(keyword),
                 RoomSpecification.nameLike(name),
                 RoomSpecification.search(description),

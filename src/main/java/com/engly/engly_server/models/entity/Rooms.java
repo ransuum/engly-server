@@ -45,7 +45,7 @@ public class Rooms implements Serializable {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(referencedColumnName = "id", name = "creator_id")
     private Users creator;
 

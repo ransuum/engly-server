@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class FieldUtil {
     public static boolean isValid(String val) {
-        return StringUtils.isNotBlank(val) && StringUtils.isNotEmpty(val.trim());
+        return StringUtils.isNotBlank(val);
     }
 
     public static boolean isValid(Integer val) {

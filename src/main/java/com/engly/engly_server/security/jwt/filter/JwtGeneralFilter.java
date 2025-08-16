@@ -18,7 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 public abstract class JwtGeneralFilter extends OncePerRequestFilter {
@@ -45,7 +44,9 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
 
             final String token = extractToken(request);
 
-            if (FieldUtil.isValid(token)) {
+            if (token == null) {
+                log.debug("[{}:doFilterInternal] No valid token found, skipping authentication",
+                        getClass().getSimpleName());
                 filterChain.doFilter(request, response);
                 return;
             }
@@ -66,14 +67,23 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
     protected abstract boolean isTokenValidInContext(Jwt jwt);
 
     private void authenticateToken(String token, HttpServletRequest request) {
-        Optional.of(token)
-                .filter(_ -> securityContextConfig.isSecurityContextEmpty())
-                .map(jwtTokenUtils::decodeToken)
-                .map(jwt -> Map.entry(jwt, jwtTokenUtils.getUsername(jwt)))
-                .filter(entry -> FieldUtil.isValid(entry.getValue()) && securityContextConfig.isAuthenticationEmpty())
-                .map(entry -> Map.entry(entry.getKey(), jwtTokenUtils.loadUserDetails(entry.getValue())))
-                .filter(entry -> compositeTokenValidator.validateToken(entry.getKey(), entry.getValue()) && isTokenValidInContext(entry.getKey()))
-                .ifPresent(entry -> securityContextConfig.setSecurityContext(entry.getKey(), entry.getValue(), request));
+        try {
+            final var jwt = jwtTokenUtils.decodeToken(token);
+            final var username = jwtTokenUtils.getUsername(jwt);
+
+            if (FieldUtil.isValid(username) && securityContextConfig.isAuthenticationEmpty()) {
+                var userDetails = jwtTokenUtils.loadUserDetails(username);
+
+                if (compositeTokenValidator.validateToken(jwt, userDetails) && isTokenValidInContext(jwt)) {
+                    securityContextConfig.setSecurityContext(jwt, userDetails, request);
+                    log.debug("Successfully authenticated user: {}", username);
+                } else {
+                    log.debug("Token validation failed for user: {}", username);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error during token authentication", e);
+        }
     }
 
     private void handleException(HttpServletResponse response, Exception e) throws IOException {
