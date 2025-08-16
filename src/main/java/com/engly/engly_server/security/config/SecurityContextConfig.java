@@ -49,11 +49,6 @@ public class SecurityContextConfig {
                 users.getPassword(), new UserDetailsImpl(users).getAuthorities());
     }
 
-
-    public boolean isSecurityContextEmpty() {
-        return SecurityContextHolder.getContext() == null;
-    }
-
     public boolean isAuthenticationEmpty() {
         return SecurityContextHolder.getContext().getAuthentication() == null;
     }

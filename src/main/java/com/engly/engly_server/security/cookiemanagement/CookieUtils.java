@@ -1,5 +1,6 @@
 package com.engly.engly_server.security.cookiemanagement;
 
+import com.engly.engly_server.exception.TokenNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
@@ -16,25 +17,11 @@ public record CookieUtils(Cookie[] cookies) {
     }
 
     public String getRefreshTokenCookie() {
-        if (cookies == null) {
-            log.debug("No cookies array provided");
-            return null;
-        }
-
-        log.debug("Searching for 'refreshToken' cookie among {} cookies", cookies.length);
-
-        for (Cookie cookie : cookies) {
-            log.debug("Checking cookie: name='{}', value present: {}",
-                    cookie.getName(), cookie.getValue() != null);
-            if ("refreshToken".equals(cookie.getName())) {
-                log.debug("Found refreshToken cookie with value: {}",
-                        cookie.getValue() != null ? "present" : "null");
-                return cookie.getValue();
-            }
-        }
-
-        log.debug("refreshToken cookie not found");
-        return null;
+        return cookies == null ? null : Arrays.stream(cookies)
+                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElseThrow(() -> new TokenNotFoundException("Refresh token is not found in cookies"));
     }
 
     public void clearCookies(HttpServletResponse response) {
