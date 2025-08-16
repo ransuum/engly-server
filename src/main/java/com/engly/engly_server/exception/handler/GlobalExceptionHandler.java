@@ -16,13 +16,16 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.AccessDeniedException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({Exception.class, RepositoryException.class})
+    @ExceptionHandler({
+            Exception.class,
+            RepositoryException.class,
+            TokenGenerationException.class
+    })
     public ResponseEntity<ExceptionResponse> handleGeneralExceptions(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
@@ -102,12 +105,12 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ExceptionResponse> buildResponse(HttpStatus status, Exception ex) {
         String message = getMessageForException(ex);
         return ResponseEntity.status(status)
-                .body(new ExceptionResponse(message, status.value(), ex.getMessage(), LocalDateTime.now()));
+                .body(ExceptionResponse.of(message, status.value(), ex.getMessage()));
     }
 
     private ResponseEntity<ExceptionResponse> buildValidationResponse(String message, List<String> errors) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionResponse(message, HttpStatus.BAD_REQUEST.value(), String.join(", ", errors), LocalDateTime.now()));
+                .body(ExceptionResponse.of(message, HttpStatus.BAD_REQUEST.value(), String.join(", ", errors)));
     }
 
     private String getMessageForException(Exception ex) {

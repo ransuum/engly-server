@@ -24,7 +24,7 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
         final var cookieUtil = new CookieUtils(request.getCookies());
         final var authCookie = cookieUtil.getRefreshTokenCookie();
 
-        if (authCookie != null && !authCookie.startsWith(TokenType.Bearer.name())) return;
+        if (authCookie != null && !authCookie.startsWith(TokenType.BEARER.name())) return;
 
         final var refreshToken = Objects.requireNonNull(authCookie).substring(7);
 

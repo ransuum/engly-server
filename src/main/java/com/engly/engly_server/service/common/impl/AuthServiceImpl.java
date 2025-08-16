@@ -113,7 +113,7 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(jwtHolder.accessToken())
                 .accessTokenExpiry(tokenExpiryMinutes * 60)
                 .username(user.getUsername())
-                .tokenType(TokenType.Bearer)
+                .tokenType(TokenType.BEARER)
                 .build();
     }
 }

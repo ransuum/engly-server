@@ -90,7 +90,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
                                 return new AuthResponseDto(jwtHolder.accessToken(),
                                         12,
-                                        TokenType.Bearer,
+                                        TokenType.BEARER,
                                         userSaved.getUsername());
                             })
                             .orElseThrow(() -> new NotFoundException("Invalid User"));

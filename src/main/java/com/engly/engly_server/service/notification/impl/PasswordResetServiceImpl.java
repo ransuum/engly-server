@@ -84,7 +84,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
                 return new AuthResponseDto(jwtHolder.accessToken(),
                         12,
-                        TokenType.Bearer,
+                        TokenType.BEARER,
                         user.getUsername());
             }).orElseThrow(() -> new NotFoundException("User not found"));
         }).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));

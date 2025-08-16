@@ -23,7 +23,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
     private final JwtTokenUtils jwtTokenUtils;
     private static final String AUTHORIZATION_HEADER = "Authorization";
-    private static final String BEARER_PREFIX = "Bearer ";
+    private static final String BEARER_PREFIX = "BEARER ";
 
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {

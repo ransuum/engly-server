@@ -22,7 +22,7 @@ public class JwtAccessTokenGeneralFilter extends JwtGeneralFilter {
     protected String extractToken(HttpServletRequest request) {
         final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (authHeader == null || !authHeader.startsWith(TokenType.Bearer.name())) return null;
+        if (authHeader == null || !authHeader.startsWith(TokenType.BEARER.name())) return null;
 
         return authHeader.substring(7);
     }
