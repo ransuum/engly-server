@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.common.impl;
 
+import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.response.CategoriesDto;
 import com.engly.engly_server.models.entity.Categories;
@@ -26,13 +27,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoriesService {
-
     private final CategoriesRepository categoriesRepository;
 
     @Override
     @Transactional
     @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
     public CategoriesDto addCategory(CategoryRequest categoryRequest) {
+        if (categoriesRepository.existsByName(categoryRequest.name()))
+            throw new EntityAlreadyExistsException("Category with name " + categoryRequest.name() + " already exists");
+
         return CategoryMapper.INSTANCE.toCategoriesDto(
                 categoriesRepository.save(Categories.builder()
                         .description(categoryRequest.description())

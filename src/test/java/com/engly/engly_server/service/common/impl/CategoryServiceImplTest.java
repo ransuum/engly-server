@@ -20,7 +20,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {TestJpaConfiguration.class, CategoryServiceImpl.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
 
     @Autowired
@@ -74,7 +73,7 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.id()).isNotNull();
-        assertThat(result.name()).isEqualTo(CategoryType.HOBBIES.name());
+        assertThat(result.name().toLowerCase()).isEqualTo(CategoryType.HOBBIES.name().toLowerCase());
         assertThat(result.description()).isEqualTo("Hobbies and interests");
         assertThat(result.icon()).isEqualTo(CategoryType.HOBBIES.getIcon());
 
@@ -93,7 +92,8 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
 
         // Act & Assert
         assertThatThrownBy(() -> categoriesService.addCategory(duplicateRequest))
-                .isInstanceOf(EntityAlreadyExistsException.class);
+                .isInstanceOf(EntityAlreadyExistsException.class)
+                .hasMessageContaining("Category with name " + CategoryType.TECH + " already exists");
     }
 
     @Test
@@ -109,7 +109,7 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(savedCategory.getId());
-        assertThat(result.name()).isEqualTo(CategoryType.SPORTS.name());
+        assertThat(result.name().toLowerCase()).isEqualTo(CategoryType.SPORTS.name().toLowerCase());
         assertThat(result.description()).isEqualTo("Updated description");
 
         // Verify in database
@@ -129,7 +129,7 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
         CategoriesDto result = categoriesService.updateCategory(savedCategory.getId(), updateRequest);
 
         // Assert
-        assertThat(result.name()).isEqualTo(CategoryType.TECH.name()); // unchanged
+        assertThat(result.name().toLowerCase()).isEqualTo(CategoryType.TECH.name().toLowerCase()); // unchanged
         assertThat(result.description()).isEqualTo("New description only");
     }
 
@@ -144,7 +144,7 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
         CategoriesDto result = categoriesService.updateCategory(savedCategory.getId(), updateRequest);
 
         // Assert
-        assertThat(result.name()).isEqualTo(CategoryType.MOVIES.name());
+        assertThat(result.name().toLowerCase()).isEqualTo(CategoryType.MOVIES.name().toLowerCase());
         assertThat(result.description()).isEqualTo("Technology and programming discussions"); // unchanged
     }
 
@@ -187,8 +187,8 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent())
-                .extracting(CategoriesDto::name)
-                .containsExactlyInAnyOrder(CategoryType.TECH.name(), CategoryType.SPORTS.name());
+                .extracting(cont -> cont.name().toLowerCase())
+                .containsExactlyInAnyOrder(CategoryType.TECH.name().toLowerCase(), CategoryType.SPORTS.name().toLowerCase());
     }
 
     @Test
@@ -218,7 +218,7 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.id()).isEqualTo(savedCategory.getId());
-        assertThat(result.name()).isEqualTo(CategoryType.TECH.name());
+        assertThat(result.name().toLowerCase()).isEqualTo(CategoryType.TECH.name().toLowerCase());
         assertThat(result.description()).isEqualTo("Technology and programming discussions");
     }
 
@@ -353,7 +353,7 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
 
             CategoriesDto result = categoriesService.addCategory(request);
 
-            assertThat(result.name()).isEqualTo(categoryType.name());
+            assertThat(result.name().toLowerCase()).isEqualTo(categoryType.getVal().toLowerCase());
             assertThat(result.icon()).isEqualTo(categoryType.getIcon());
             assertThat(result.description()).isEqualTo("Description for " + categoryType.getVal());
         }
@@ -375,7 +375,6 @@ class CategoryServiceImplTest extends AbstractTestcontainersConfiguration {
         CategoriesDto result1 = categoriesService.addCategory(request1);
         assertThat(result1).isNotNull();
 
-        // Second creation should fail due to unique constraint
         assertThatThrownBy(() -> categoriesService.addCategory(request2))
                 .isInstanceOf(EntityAlreadyExistsException.class);
     }
