@@ -1,47 +1,52 @@
 package com.engly.engly_server.utils.passwordgenerateutil;
 
 import java.security.SecureRandom;
-import java.util.stream.IntStream;
 
 public final class PasswordUtils {
 
-    private static final String CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
-    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final ThreadLocal<SecureRandom> RANDOM =
+            ThreadLocal.withInitial(SecureRandom::new);
 
     private PasswordUtils() {
+        throw new IllegalStateException("Utility class");
     }
 
-    public static final PasswordGenerator DEFAULT_PASSWORD_GENERATOR = length -> {
-        StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
-        }
-        return sb.toString();
-    };
+    public static final PasswordGenerator SIMPLE = length ->
+            generatePassword(length, PasswordGenerator.ALL_CHARS, false);
 
-    public static final PasswordGenerator SECURE_PASSWORD_GENERATOR = length -> {
-        if (length < 4) length = 12;
+    public static final PasswordGenerator SECURE = length ->
+            generatePassword(Math.max(length, 4), PasswordGenerator.ALL_CHARS, true);
 
+    public static final PasswordGenerator ALPHANUMERIC = length ->
+            generatePassword(length, PasswordGenerator.UPPER + PasswordGenerator.LOWER + PasswordGenerator.DIGITS, false);
+
+    private static String generatePassword(int length, String charset, boolean ensureComplexity) {
+        if (length <= 0) throw new IllegalArgumentException("Length must be positive");
+
+        final var random = RANDOM.get();
         char[] password = new char[length];
 
-        password[0] = PasswordGenerator.upper.charAt(RANDOM.nextInt(PasswordGenerator.upper.length()));
-        password[1] = PasswordGenerator.lower.charAt(RANDOM.nextInt(PasswordGenerator.lower.length()));
-        password[2] = PasswordGenerator.digits.charAt(RANDOM.nextInt(PasswordGenerator.digits.length()));
-        password[3] = PasswordGenerator.symbols.charAt(RANDOM.nextInt(PasswordGenerator.symbols.length()));
+        if (ensureComplexity && length >= 4) {
+            password[0] = PasswordGenerator.UPPER.charAt(random.nextInt(PasswordGenerator.UPPER.length()));
+            password[1] = PasswordGenerator.LOWER.charAt(random.nextInt(PasswordGenerator.LOWER.length()));
+            password[2] = PasswordGenerator.DIGITS.charAt(random.nextInt(PasswordGenerator.DIGITS.length()));
+            password[3] = PasswordGenerator.SYMBOLS.charAt(random.nextInt(PasswordGenerator.SYMBOLS.length()));
 
-        IntStream.range(4, length)
-                .parallel()
-                .forEach(i -> password[i] = CHARS.charAt(RANDOM.nextInt(CHARS.length())));
+            for (int i = 4; i < length; i++)
+                password[i] = charset.charAt(random.nextInt(charset.length()));
 
-        int finalLength = length;
-        IntStream.range(0, length)
-                .forEach(i -> {
-                    int j = RANDOM.nextInt(finalLength);
-                    char temp = password[i];
-                    password[i] = password[j];
-                    password[j] = temp;
-                });
+            for (int i = length - 1; i > 0; i--) {
+                final int j = random.nextInt(i + 1);
+                final char temp = password[i];
+                password[i] = password[j];
+                password[j] = temp;
+            }
+        } else
+            for (int i = 0; i < length; i++)
+                password[i] = charset.charAt(random.nextInt(charset.length()));
+
+        RANDOM.remove();
 
         return new String(password);
-    };
+    }
 }

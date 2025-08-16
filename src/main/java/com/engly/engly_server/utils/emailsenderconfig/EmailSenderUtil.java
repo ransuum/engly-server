@@ -17,7 +17,6 @@ import java.util.function.Predicate;
 
 @Slf4j
 public record EmailSenderUtil(
-        String email,
         VerifyTokenRepository tokenRepo,
         EmailMessageGenerator messageGenerator,
         EmailService emailService,
@@ -25,24 +24,25 @@ public record EmailSenderUtil(
         String urlTemplate,
         String logTag) {
 
-    public EmailSendInfo sendTokenEmail(Predicate<String> existsChecker, TokenType tokenType) {
+    // Remove email from record, pass it as parameter
+    public EmailSendInfo sendTokenEmail(String email, Predicate<String> existsChecker, TokenType tokenType) {
         if (!existsChecker.test(email))
             throw new NotFoundException("User not found exception email " + email);
 
-        final var token = RandomStringUtils.random(
-                32,
-                0, 0,
-                true, true,
-                null,
-                new SecureRandom());
+        final var token = generateSecureToken();
         tokenRepo.save(new VerifyToken(token, email, tokenType));
 
         final var message = messageGenerator.generate(
-                Map.of("[email]", email, "[link]", urlTemplate.formatted(token)), messageTemplate);
+                Map.of("[email]", email, "[link]", urlTemplate.formatted(token)),
+                messageTemplate);
 
         emailService.sendEmail(email, message);
         log.info("[{}] Message was sent for email:{} with token:{}", logTag, email, token);
 
         return new EmailSendInfo(email, "Email sent");
+    }
+
+    private static String generateSecureToken() {
+        return RandomStringUtils.random(32, 0, 0, true, true, null, new SecureRandom());
     }
 }

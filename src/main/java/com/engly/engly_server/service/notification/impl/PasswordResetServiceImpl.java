@@ -48,12 +48,13 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     public EmailSendInfo sendMessage(String email) {
         try {
             return new EmailSenderUtil(
-                    email, tokenRepo,
+                    tokenRepo,
                     messageGenerator,
                     emailService,
                     messageTemplate,
                     urlTemplate,
-                    "PasswordResetServiceImpl:sendMessage").sendTokenEmail(userRepository::existsByEmail, TokenType.PASSWORD_RESET);
+                    "PasswordResetServiceImpl:sendMessage")
+                    .sendTokenEmail(email, userRepository::existsByEmail, TokenType.PASSWORD_RESET);
         } catch (Exception e) {
             log.error("[PasswordResetServiceImpl:sendMessage]Errors in user:{}", e.getMessage());
             throw new TokenNotFoundException("token not saved exception email %s".formatted(email));

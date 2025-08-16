@@ -2,10 +2,11 @@ package com.engly.engly_server.utils.passwordgenerateutil;
 
 @FunctionalInterface
 public interface PasswordGenerator {
-    final String upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    final String lower = "abcdefghijklmnopqrstuvwxyz";
-    final String digits = "0123456789";
-    final String symbols = "!@#$%^&*";
+    String UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    String LOWER = "abcdefghijklmnopqrstuvwxyz";
+    String DIGITS = "0123456789";
+    String SYMBOLS = "!@#$%^&*";
+    String ALL_CHARS = UPPER + LOWER + DIGITS + SYMBOLS;
 
     String generate(int length);
 }
