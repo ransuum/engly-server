@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 @Slf4j
@@ -51,17 +52,16 @@ public class RoomServiceImpl implements RoomService {
     public RoomsDto createRoom(String id, CategoryType name, RoomRequest roomRequestDto) {
         if (roomRepository.existsByName(roomRequestDto.name()))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
-        final var creator = userService.findEntityById(id);
 
         final var room = roomRepository.save(Rooms.builder()
-                .creator(creator)
+                .creator(userService.findEntityById(id))
                 .createdAt(Instant.now())
                 .category(categoriesService.findByName(name))
                 .description(roomRequestDto.description())
                 .name(roomRequestDto.name())
                 .build());
 
-        chatParticipantsService.addParticipant(room, creator, RoomRoles.ADMIN);
+        chatParticipantsService.addParticipant(room, room.getCreator(), RoomRoles.ADMIN);
         return RoomMapper.INSTANCE.roomToDto(room);
     }
 
@@ -105,11 +105,11 @@ public class RoomServiceImpl implements RoomService {
                     if (isValid(request.newCategory()))
                         room.setCategory(categoriesService.findByName(request.newCategory()));
 
-                    if (isValid(request.updateCreatorByEmail()))
+                    if (isNotBlank(request.updateCreatorByEmail()))
                         room.setCreator(userService.findUserEntityByEmail(request.updateCreatorByEmail()));
 
-                    if (isValid(request.description())) room.setDescription(request.description());
-                    if (isValid(request.name())) room.setName(request.name());
+                    if (isNotBlank(request.description())) room.setDescription(request.description());
+                    if (isNotBlank(request.name())) room.setName(request.name());
                     return RoomMapper.INSTANCE.roomToDto(roomRepository.save(room));
                 })
                 .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));

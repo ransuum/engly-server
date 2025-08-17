@@ -68,7 +68,6 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
 
         String testEmail = "test@example.com";
         testUser = Users.builder()
-                // Remove .id(testUserId) - let JPA generate the ID
                 .username("testuser")
                 .email(testEmail)
                 .password("password123")
@@ -78,8 +77,6 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
-
-        // Don't setup mocks here - do it in setupUserAndSettings()
     }
 
     private void setupUserAndSettings() {

@@ -8,6 +8,7 @@ import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -45,7 +46,7 @@ public class ProfileServiceImpl implements ProfileService {
     public UsersDto updateProfile(String id, ProfileUpdateRequest profileUpdateData) {
         return userRepository.findById(id)
                 .map(user -> {
-                    if (isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
+                    if (StringUtils.isNotBlank(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
                     if (isValid(profileUpdateData.goal())) user.getAdditionalInfo().setGoal(profileUpdateData.goal());
                     if (isValid(profileUpdateData.englishLevel()))
                         user.getAdditionalInfo().setEnglishLevel(profileUpdateData.englishLevel());
