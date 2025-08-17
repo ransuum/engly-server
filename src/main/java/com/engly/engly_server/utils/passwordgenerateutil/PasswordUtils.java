@@ -24,7 +24,7 @@ public final class PasswordUtils {
         if (length <= 0) throw new IllegalArgumentException("Length must be positive");
 
         final var random = RANDOM.get();
-        char[] password = new char[length];
+        final char[] password = new char[length];
 
         if (ensureComplexity && length >= 4) {
             password[0] = PasswordGenerator.UPPER.charAt(random.nextInt(PasswordGenerator.UPPER.length()));

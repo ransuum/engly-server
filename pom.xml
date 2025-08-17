@@ -92,16 +92,16 @@
 			<artifactId>spring-retry</artifactId>
 			<version>2.0.12</version>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.google.apis</groupId>-->
-<!--			<artifactId>google-api-services-drive</artifactId>-->
-<!--			<version>${com.google.apis.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>com.google.api-client</groupId>-->
-<!--			<artifactId>google-api-client</artifactId>-->
-<!--			<version>${google-api-client-version}</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>com.google.apis</groupId>
+			<artifactId>google-api-services-drive</artifactId>
+			<version>${com.google.apis.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.api-client</groupId>
+			<artifactId>google-api-client</artifactId>
+			<version>${google-api-client-version}</version>
+		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
 		<dependency>
 			<groupId>org.apache.commons</groupId>

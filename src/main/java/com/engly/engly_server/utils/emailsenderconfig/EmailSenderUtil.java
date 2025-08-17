@@ -24,7 +24,6 @@ public record EmailSenderUtil(
         String urlTemplate,
         String logTag) {
 
-    // Remove email from record, pass it as parameter
     public EmailSendInfo sendTokenEmail(String email, Predicate<String> existsChecker, TokenType tokenType) {
         if (!existsChecker.test(email))
             throw new NotFoundException("User not found exception email " + email);

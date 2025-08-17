@@ -212,12 +212,12 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAccessTokenFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(ex -> {
                     log.error("[SecurityConfig:actuatorSecurityFilterChain] Exception: {}", ex.toString());
-                    ex.authenticationEntryPoint((request, response, authException) -> {
+                    ex.authenticationEntryPoint((_, response, _) -> {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                         response.getWriter().write("{\"error\":\"Unauthorized access to actuator endpoint\"}");
                     });
-                    ex.accessDeniedHandler((request, response, accessDeniedException) -> {
+                    ex.accessDeniedHandler((_, response, _) -> {
                         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
                         response.getWriter().write("{\"error\":\"Access denied to actuator endpoint\"}");

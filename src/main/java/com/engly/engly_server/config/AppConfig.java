@@ -1,6 +1,7 @@
 package com.engly.engly_server.config;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -29,7 +30,8 @@ public class AppConfig {
         mapper.registerModule(new JavaTimeModule());
         mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm"));
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         mapper.setTimeZone(TimeZone.getTimeZone("UTC"));
         return mapper;
     }

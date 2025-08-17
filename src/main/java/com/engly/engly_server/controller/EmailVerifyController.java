@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/email-verify")
-@Slf4j
 @Tag(name = "02. Email Verification", description = "APIs for verifying a user's email address after registration.")
 @SecurityRequirement(name = "bearerAuth")
 public class EmailVerifyController {
@@ -94,8 +92,9 @@ public class EmailVerifyController {
     @GetMapping("/check")
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @RateLimiter(name = "EmailVerifyController")
-    public ResponseEntity<AuthResponseDto> checkToken(@Parameter(description = "The verification token received via email.", required = true, example = "FDGDitreKFfdsd")
-                                                      @RequestParam("token") String token, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDto> checkToken(
+            @Parameter(description = "The verification token received via email.", required = true, example = "FDGDitreKFfdsd")
+            @RequestParam("token") String token, HttpServletResponse response) {
         return ResponseEntity.ok(emailVerificationService.checkToken(token, response));
     }
 }
