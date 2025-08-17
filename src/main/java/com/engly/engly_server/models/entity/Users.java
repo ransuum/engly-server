@@ -10,6 +10,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 
 @AllArgsConstructor
@@ -92,4 +93,11 @@ public class Users implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Message> messages;
+
+    public boolean checkRolesForBan() {
+        if (roles == null) return false;
+        return Arrays.stream(this.roles.split(","))
+                .map(String::trim)
+                .anyMatch("ROLE_BAN"::equals);
+    }
 }

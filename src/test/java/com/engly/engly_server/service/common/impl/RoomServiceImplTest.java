@@ -18,7 +18,7 @@ import com.engly.engly_server.repository.CategoriesRepository;
 import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.repository.RoomRepository;
 import com.engly.engly_server.repository.UserRepository;
-import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.UserService;
@@ -72,7 +72,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     private ChatParticipantRepository chatParticipantsRepository;
 
     @MockitoBean
-    private SecurityService securityService;
+    private AuthenticatedUserProvider authenticatedUserProvider;
 
     @MockitoBean
     private UserService userService;

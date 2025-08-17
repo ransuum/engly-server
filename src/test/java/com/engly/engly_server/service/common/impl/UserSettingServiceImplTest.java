@@ -11,7 +11,7 @@ import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.models.enums.Theme;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.repository.UserSettingsRepository;
-import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.service.common.UserSettingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +52,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
     private UserRepository userRepository;
 
     @MockitoBean
-    private SecurityService securityService;
+    private AuthenticatedUserProvider authenticatedUserProvider;
 
     @MockitoBean
     private UserService userService;
@@ -85,7 +85,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         testUserId = testUser.getId(); // Get the actual generated ID
 
         // Setup mocks with the actual user ID
-        when(securityService.getCurrentUserEmail()).thenReturn(testUser.getEmail());
+        when(authenticatedUserProvider.getCurrentUserEmail()).thenReturn(testUser.getEmail());
         when(userService.getUserIdByEmail(testUser.getEmail())).thenReturn(testUserId);
 
         // Create settings with the managed user entity and generated ID

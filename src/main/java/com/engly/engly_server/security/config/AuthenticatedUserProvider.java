@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SecurityService {
+public class AuthenticatedUserProvider {
 
     public String getCurrentUserEmail() {
         return getAuthenticationOrThrow().orElseThrow(()
@@ -41,7 +41,6 @@ public class SecurityService {
         final var roleList = Arrays.stream(roles.split(","))
                 .map(String::trim)
                 .toList();
-        log.info("[SecurityService:getPermissionsFromRoles] Roles: {}", roleList);
 
         final var authorities = Roles.getPermissionsForRoles(roleList);
         return authorities.stream()
@@ -51,8 +50,8 @@ public class SecurityService {
 
     private Collection<SimpleGrantedAuthority> getCurrentUserRoles() {
         final var authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
-        return authentication.map(authentication1 ->
-                        authentication1.getAuthorities()
+        return authentication.map(authenticationSafe ->
+                        authenticationSafe.getAuthorities()
                                 .stream()
                                 .filter(SimpleGrantedAuthority.class::isInstance)
                                 .map(SimpleGrantedAuthority.class::cast)

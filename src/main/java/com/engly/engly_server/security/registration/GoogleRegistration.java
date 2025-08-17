@@ -37,7 +37,8 @@ public final class GoogleRegistration implements RegistrationChooser {
 
         final var user = Users.builder()
                 .roles(signUpRequestDto.email().equals(devEmail)
-                        ? "ROLE_ADMIN" : "ROLE_GOOGLE")
+                        ? "ROLE_ADMIN"
+                        : "ROLE_GOOGLE")
                 .email(signUpRequestDto.email())
                 .emailVerified(Boolean.TRUE)
                 .username(signUpRequestDto.username())

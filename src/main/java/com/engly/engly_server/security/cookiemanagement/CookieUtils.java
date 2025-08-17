@@ -15,7 +15,8 @@ public record CookieUtils(Cookie[] cookies) {
     }
 
     public String getRefreshTokenCookie() {
-        return cookies == null ? null : Arrays.stream(cookies)
+        if (cookies == null) throw new TokenNotFoundException("No cookies found in request");
+        return Arrays.stream(cookies)
                 .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)

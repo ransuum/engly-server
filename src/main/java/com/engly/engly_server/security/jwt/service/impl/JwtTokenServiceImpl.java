@@ -4,7 +4,7 @@ import com.engly.engly_server.exception.TokenGenerationException;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.repository.RefreshTokenRepository;
-import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import com.engly.engly_server.security.jwt.JwtProperties;
 import com.engly.engly_server.security.jwt.service.JwtTokenService;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
@@ -19,14 +19,14 @@ import java.time.temporal.ChronoUnit;
 @Service
 @Slf4j
 public class JwtTokenServiceImpl extends JwtTokenService {
-    private final SecurityService securityService;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
     private final JwtEncoder jwtEncoder;
 
     public JwtTokenServiceImpl(ChatParticipantRepository chatParticipantRepository,
-                               RefreshTokenRepository refreshTokenRepository, SecurityService securityService,
+                               RefreshTokenRepository refreshTokenRepository, AuthenticatedUserProvider authenticatedUserProvider,
                                JwtEncoder jwtEncoder, JwtProperties jwtProperties) {
         super(chatParticipantRepository, refreshTokenRepository, jwtProperties);
-        this.securityService = securityService;
+        this.authenticatedUserProvider = authenticatedUserProvider;
         this.jwtEncoder = jwtEncoder;
     }
 
@@ -37,10 +37,10 @@ public class JwtTokenServiceImpl extends JwtTokenService {
 
             final var claims = createBaseClaimsBuilder(authentication)
                     .expiresAt(Instant.now().plus(jwtProperties.getAccessTokenValidityMinutes(), ChronoUnit.MINUTES))
-                    .claim("scope", securityService.getPermissionsFromRoles(securityService.getRolesOfUser(authentication)))
+                    .claim("scope", authenticatedUserProvider.getPermissionsFromRoles(authenticatedUserProvider.getRolesOfUser(authentication)))
                     .claim("roomRoles", getRoomRolesForUser(authentication.getName()))
                     .claim("type", TokenType.ACCESS.name())
-                    .claim("roles", securityService.getRolesOfUser(authentication))
+                    .claim("roles", authenticatedUserProvider.getRolesOfUser(authentication))
                     .claim("userId", userDetails.user().getId())
                     .build();
 
@@ -57,7 +57,7 @@ public class JwtTokenServiceImpl extends JwtTokenService {
                     .expiresAt(Instant.now().plus(jwtProperties.getRefreshTokenValidityDays(), ChronoUnit.DAYS))
                     .claim("scope", "REFRESH_TOKEN")
                     .claim("type", TokenType.REFRESH.name())
-                    .claim("roles", securityService.getRolesOfUser(authentication))
+                    .claim("roles", authenticatedUserProvider.getRolesOfUser(authentication))
                     .build();
 
             return encodeToken(claims, jwtEncoder);

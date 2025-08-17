@@ -16,6 +16,7 @@ import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
@@ -102,7 +102,7 @@ public class RoomServiceImpl implements RoomService {
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepository.findById(id)
                 .map(room -> {
-                    if (isValid(request.newCategory()))
+                    if (FieldUtil.isValid(request.newCategory()))
                         room.setCategory(categoriesService.findByName(request.newCategory()));
 
                     if (isNotBlank(request.updateCreatorByEmail()))
