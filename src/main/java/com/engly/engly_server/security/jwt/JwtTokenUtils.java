@@ -68,11 +68,9 @@ public class JwtTokenUtils {
         try {
             if (securityContextConfig.isAuthenticationEmpty()) {
                 final UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(token);
-                log.info("UserDetails {} has been created", userDetails.getUsername());
 
-                if (tokenValidator.validateToken(token, userDetails) && isTokenValidInContext) {
+                if (tokenValidator.validateToken(token, userDetails) && isTokenValidInContext)
                     securityContextConfig.setSecurityContext(token, userDetails, request);
-                } else log.info("Invalid JWT Token");
             }
         } catch (Exception e) {
             throw new TokenNotFoundException("Error during token authentication " + e.getMessage());

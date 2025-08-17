@@ -1,7 +1,6 @@
 package com.engly.engly_server.security.websocket;
 
 import com.engly.engly_server.exception.WebSocketException;
-import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 return message;
 
             var authToken = authorization.getFirst();
-            if (authToken != null && authToken.startsWith(TokenType.BEARER.name())) {
+            if (authToken != null && authToken.startsWith("Bearer ")) {
                 authToken = authToken.substring(7);
                 try {
                     final var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
