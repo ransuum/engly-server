@@ -6,6 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @FunctionalInterface
 public interface AdditionalService {
-    AuthResponseDto additionalRegistration(GoogleUserInfoRequest additionalRequest,
+    AuthResponseDto additionalRegistration(String id, GoogleUserInfoRequest additionalRequest,
                                            HttpServletResponse httpServletResponse);
 }

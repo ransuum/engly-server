@@ -11,7 +11,6 @@ import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.RoomRepository;
-import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.RoomService;
@@ -39,7 +38,6 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final UserService userService;
     private final CategoriesService categoriesService;
-    private final SecurityService service;
     private final ChatParticipantsService chatParticipantsService;
 
     @Override
@@ -50,12 +48,10 @@ public class RoomServiceImpl implements RoomService {
                     @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
             }
     )
-    public RoomsDto createRoom(CategoryType name, RoomRequest roomRequestDto) {
+    public RoomsDto createRoom(String id, CategoryType name, RoomRequest roomRequestDto) {
         if (roomRepository.existsByName(roomRequestDto.name()))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
-
-        final var username = service.getCurrentUserEmail();
-        final var creator = userService.findUserEntityByEmail(username);
+        final var creator = userService.findEntityById(id);
 
         final var room = roomRepository.save(Rooms.builder()
                 .creator(creator)

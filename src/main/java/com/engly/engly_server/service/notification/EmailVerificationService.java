@@ -5,7 +5,7 @@ import com.engly.engly_server.models.dto.response.EmailSendInfo;
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface EmailVerificationService {
-    EmailSendInfo sendMessage();
+    EmailSendInfo sendMessage(String email);
 
-    AuthResponseDto checkToken(String token, HttpServletResponse httpServletResponse);
+    AuthResponseDto checkToken(String email, String token, HttpServletResponse httpServletResponse);
 }

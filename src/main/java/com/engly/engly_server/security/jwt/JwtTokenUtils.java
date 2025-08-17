@@ -1,10 +1,14 @@
 package com.engly.engly_server.security.jwt;
 
 import com.engly.engly_server.exception.TokenGenerationException;
+import com.engly.engly_server.exception.TokenNotFoundException;
+import com.engly.engly_server.models.entity.Users;
+import com.engly.engly_server.security.config.SecurityContextConfig;
 import com.engly.engly_server.security.jwt.validation.CompositeTokenValidator;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
-import com.engly.engly_server.service.common.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,10 +26,11 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtTokenUtils {
-    private final UserService userService;
     private final JwtDecoder jwtDecoder;
     private final CompositeTokenValidator tokenValidator;
+    private final SecurityContextConfig securityContextConfig;
 
     public String getUsername(Jwt jwtToken) {
         return jwtToken.getSubject();
@@ -39,8 +44,11 @@ public class JwtTokenUtils {
         }
     }
 
-    public UserDetails loadUserDetails(String email) {
-        return new UserDetailsImpl(userService.findUserEntityByEmail(email));
+    public JwtHelper loadUserDetails() {
+        return jwt -> new UserDetailsImpl(Users.builder()
+                .email(jwt.getSubject())
+                .roles(jwt.getClaim("roles"))
+                .build());
     }
 
     public Collection<GrantedAuthority> extractAuthorities(Jwt jwt, UserDetails userDetails) {
@@ -56,15 +64,28 @@ public class JwtTokenUtils {
         return authorities;
     }
 
-    public Authentication createAuthentication(String token) {
-        Jwt jwt = decodeToken(token);
-        String username = getUsername(jwt);
-        UserDetails userDetails = loadUserDetails(username);
+    public void authenticateToken(Jwt token, HttpServletRequest request, boolean isTokenValidInContext) {
+        try {
+            if (securityContextConfig.isAuthenticationEmpty()) {
+                final UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(token);
+                log.info("UserDetails {} has been created", userDetails.getUsername());
+
+                if (tokenValidator.validateToken(token, userDetails) && isTokenValidInContext) {
+                    securityContextConfig.setSecurityContext(token, userDetails, request);
+                } else log.info("Invalid JWT Token");
+            }
+        } catch (Exception e) {
+            throw new TokenNotFoundException("Error during token authentication " + e.getMessage());
+        }
+    }
+
+    public Authentication createSocketAuthentication(String token) {
+        final Jwt jwt = this.decodeToken(token);
+        final UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(jwt);
 
         if (!tokenValidator.validateToken(jwt, userDetails))
             throw new TokenGenerationException("Invalid JWT token");
 
-        Collection<GrantedAuthority> authorities = extractAuthorities(jwt, userDetails);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+        return new UsernamePasswordAuthenticationToken(userDetails, null, extractAuthorities(jwt, userDetails));
     }
 }

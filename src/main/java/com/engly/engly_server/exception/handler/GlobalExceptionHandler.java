@@ -130,6 +130,8 @@ public class GlobalExceptionHandler {
             case FieldValidationException _ -> "Field validation error";
             case MaxUploadSizeExceededException _ -> "File size exceeds maximum allowed size";
             case ResponseStatusException e -> e.getReason() != null ? e.getReason() : "Request processing error";
+            case AuthenticationObjectException _ -> "Cannot parse authentication object";
+            case TokenGenerationException _  -> "Token creation failed";
             default -> "An unexpected error occurred";
         };
     }

@@ -79,13 +79,13 @@ public final class RoomSpecification {
 
     public static Specification<Rooms> participantsLessThan(Integer participants) {
         return ((root, _, criteriaBuilder) -> participants != null
-                ? criteriaBuilder.lessThan(root.join(CHAT_PARTICIPANTS_FIELD).get("size"), participants)
+                ? criteriaBuilder.lessThan(criteriaBuilder.size(root.get(CHAT_PARTICIPANTS_FIELD)), participants)
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> participantsGreaterThan(Integer participants) {
         return ((root, _, criteriaBuilder) -> participants != null
-                ? criteriaBuilder.greaterThan(root.join(CHAT_PARTICIPANTS_FIELD).get("size"), participants)
+                ? criteriaBuilder.greaterThan(criteriaBuilder.size(root.get(CHAT_PARTICIPANTS_FIELD)), participants)
                 : criteriaBuilder.conjunction());
     }
 }

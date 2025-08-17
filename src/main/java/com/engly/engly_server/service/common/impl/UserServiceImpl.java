@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,7 +31,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_ID, key = "#id"),
-            @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
+            @CacheEvict(value = CacheName.USER_ENTITY_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
+            @CacheEvict(value = CacheName.USER_EXISTS_BY_ID, key = "#id")
     })
     public ApiResponse delete(String id) {
         return userRepository.findById(id)
@@ -53,24 +54,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = CacheName.USER_ENTITY_BY_EMAIL, key = "#email", sync = true)
-    public Optional<Users> findByEmail(String email) {
-        return userRepository.findByEmail(email);
-    }
-
-
-    @Override
-    @Cacheable(value = CacheName.USER_BY_EMAIL_DTO, key = "#email", sync = true)
-    public UsersDto findByEmailDto(String email) {
-        return userRepository.findByEmail(email).map(UserMapper.INSTANCE::toUsersDto)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
+    @Cacheable(value = CacheName.USER_ENTITY_ID, key = "#id", sync = true)
+    public Users findEntityById(String id) {
+        return userRepository.findById(id).orElseThrow(()
+                -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id)));
     }
 
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()"),
-            @CacheEvict(value = CacheName.USER_BY_EMAIL_DTO, key = "#email.toLowerCase()"),
-            @CacheEvict(value = CacheName.USER_ENTITY_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_EXISTS_BY_ID, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()"),
             @CacheEvict(value = CacheName.USER_PROFILES, key = "#username")
     })
@@ -98,15 +91,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = CacheName.USER_EXISTS_BY_ID, key = "#id", sync = true)
+    public boolean existsById(String id) {
+        return userRepository.existsById(id);
+    }
+
+    @Override
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.USER_ID, allEntries = true),
+            @CacheEvict(value = CacheName.USER_ENTITY_ID, allEntries = true),
             @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
             @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USER_EXISTS_BY_ID, allEntries = true),
             @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, allEntries = true),
             @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
-            @CacheEvict(value = CacheName.USER_ENTITY_BY_EMAIL, allEntries = true),
     })
     public Integer deleteSomeUsers(List<String> ids) {
         if (ids == null || ids.isEmpty()) return 0;

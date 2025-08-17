@@ -1,12 +1,11 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.models.dto.response.UsersDto;
-import com.engly.engly_server.models.dto.request.ProfileUpdateRequest;
-import com.engly.engly_server.repository.UserRepository;
-import com.engly.engly_server.security.config.SecurityService;
-import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.mapper.UserMapper;
+import com.engly.engly_server.models.dto.request.ProfileUpdateRequest;
+import com.engly.engly_server.models.dto.response.UsersDto;
+import com.engly.engly_server.repository.UserRepository;
+import com.engly.engly_server.service.common.ProfileService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -22,33 +21,29 @@ import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
     private final UserRepository userRepository;
-    private final SecurityService securityService;
 
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.USER_PROFILES, key = "@securityService.getCurrentUserEmail()")
-    public UsersDto getProfile() {
-        final var email = securityService.getCurrentUserEmail();
-        final var user = userRepository.findByEmail(email)
+    @Cacheable(value = CacheName.USER_PROFILES, key = "#id")
+    public UsersDto getProfile(String id) {
+        return userRepository.findById(id)
+                .map(UserMapper.INSTANCE::toUsersDto)
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
-        return UserMapper.INSTANCE.toUsersDto(user);
     }
 
     @Override
     @Caching(
             put = {
-                    @CachePut(value = CacheName.USER_PROFILES, key = "#result.email()"),
-                    @CachePut(value = CacheName.USER_ID, key = "#result.id"),
-                    @CachePut(value = CacheName.USER_BY_EMAIL_DTO, key = "@securityService.getCurrentUserEmail()")
+                    @CachePut(value = CacheName.USER_PROFILES, key = "#id"),
+                    @CachePut(value = CacheName.USER_ID, key = "#result.id")
             },
             evict = {
                     @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
             }
     )
     @Transactional
-    public UsersDto updateProfile(ProfileUpdateRequest profileUpdateData) {
-        final var email = securityService.getCurrentUserEmail();
-        return userRepository.findByEmail(email)
+    public UsersDto updateProfile(String id, ProfileUpdateRequest profileUpdateData) {
+        return userRepository.findById(id)
                 .map(user -> {
                     if (isValid(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
                     if (isValid(profileUpdateData.goal())) user.getAdditionalInfo().setGoal(profileUpdateData.goal());

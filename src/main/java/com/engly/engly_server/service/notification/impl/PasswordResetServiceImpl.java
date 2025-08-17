@@ -56,7 +56,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                     "PasswordResetServiceImpl:sendMessage")
                     .sendTokenEmail(email, userRepository::existsByEmail, TokenType.PASSWORD_RESET);
         } catch (Exception e) {
-            log.error("[PasswordResetServiceImpl:sendMessage]Errors in user:{}", e.getMessage());
             throw new TokenNotFoundException("token not saved exception email %s".formatted(email));
         }
     }
@@ -66,28 +65,28 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     @Transactional
     public AuthResponseDto passwordReset(PasswordResetRequest data, HttpServletResponse response) {
         return tokenRepo.findById(data.token()).map(verifyToken -> {
-            if (!verifyToken.getTokenType().equals(TokenType.PASSWORD_RESET))
-                throw new TokenNotFoundException("Invalid token for password reset");
+                    if (!verifyToken.getTokenType().equals(TokenType.PASSWORD_RESET))
+                        throw new TokenNotFoundException("Invalid token for password reset");
 
-            return userRepository.findByEmail(verifyToken.getEmail()).map(user -> {
-                user.setPassword(passwordEncoder.encode(data.newPassword()));
-                if (Boolean.FALSE.equals(user.getEmailVerified())) {
-                    user.setEmailVerified(true);
-                    user.setRoles(sysadminEmails.contains(verifyToken.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
-                }
+                    return userRepository.findByEmail(verifyToken.getEmail()).map(user -> {
+                                user.setPassword(passwordEncoder.encode(data.newPassword()));
+                                if (Boolean.FALSE.equals(user.getEmailVerified())) {
+                                    user.setEmailVerified(true);
+                                    user.setRoles(sysadminEmails.contains(verifyToken.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
+                                }
 
-                tokenRepo.delete(verifyToken);
+                                tokenRepo.delete(verifyToken);
 
-                final var jwtHolder = jwtAuthenticationService.authentication(user, response);
-                log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted",
-                        verifyToken.getToken(), verifyToken.getEmail());
+                                final var jwtHolder = jwtAuthenticationService.authentication(user, response);
 
-                return new AuthResponseDto(jwtHolder.accessToken(),
-                        12,
-                        TokenType.BEARER,
-                        user.getUsername());
-            }).orElseThrow(() -> new NotFoundException("User not found"));
-        }).orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
+                                return new AuthResponseDto(jwtHolder.accessToken(),
+                                        12,
+                                        TokenType.BEARER,
+                                        user.getUsername());
+                            })
+                            .orElseThrow(() -> new NotFoundException("User not found"));
+                })
+                .orElseThrow(() -> new TokenNotFoundException("Token not found or already verified"));
     }
 }
 

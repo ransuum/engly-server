@@ -24,6 +24,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.when;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(classes = {TestJpaConfiguration.class, UserSettingServiceImpl.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
 class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
 
     @Autowired
@@ -57,7 +59,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
 
     private Users testUser;
     private UserSettings testUserSettings;
-    private final String testUserId = "test-user-id";
+    private String testUserId;
 
     @BeforeEach
     void setUp() {
@@ -66,7 +68,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
 
         String testEmail = "test@example.com";
         testUser = Users.builder()
-                .id(testUserId)
+                // Remove .id(testUserId) - let JPA generate the ID
                 .username("testuser")
                 .email(testEmail)
                 .password("password123")
@@ -77,18 +79,21 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
                 .updatedAt(Instant.now())
                 .build();
 
-        // Setup common mock behavior
-        when(securityService.getCurrentUserEmail()).thenReturn(testEmail);
-        when(userService.getUserIdByEmail(testEmail)).thenReturn(testUserId);
+        // Don't setup mocks here - do it in setupUserAndSettings()
     }
 
     private void setupUserAndSettings() {
-        // Save user first
+        // Save user first and get the generated ID
         testUser = userRepository.save(testUser);
+        testUserId = testUser.getId(); // Get the actual generated ID
 
-        // Create settings with the managed user entity
+        // Setup mocks with the actual user ID
+        when(securityService.getCurrentUserEmail()).thenReturn(testUser.getEmail());
+        when(userService.getUserIdByEmail(testUser.getEmail())).thenReturn(testUserId);
+
+        // Create settings with the managed user entity and generated ID
         testUserSettings = UserSettings.builder()
-                .id(testUserId)
+                .id(testUserId) // Use the actual generated ID
                 .user(testUser)
                 .theme(Theme.DARK)
                 .notifications(true)
@@ -105,7 +110,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         setupUserAndSettings();
 
         // Act
-        UserSettingsDto result = userSettingService.getById();
+        UserSettingsDto result = userSettingService.getById(testUserId);
 
         // Assert
         assertThat(result).isNotNull();
@@ -118,8 +123,11 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
     @Test
     @DisplayName("Should throw NotFoundException when user settings do not exist")
     void getById_UserSettingsDoNotExist_ThrowsNotFoundException() {
+        // Arrange
+        String nonExistentId = "non-existent-id";
+
         // Act & Assert
-        assertThatThrownBy(() -> userSettingService.getById())
+        assertThatThrownBy(() -> userSettingService.getById(nonExistentId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("UserSettings not found");
     }
@@ -131,7 +139,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         setupUserAndSettings();
 
         // Act
-        userSettingService.update(null, Theme.BRIGHT);
+        userSettingService.update(testUserId, null, Theme.BRIGHT);
 
         // Assert
         UserSettings updatedSettings = userSettingsRepository.findById(testUserId).orElseThrow();
@@ -147,7 +155,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         setupUserAndSettings();
 
         // Act
-        userSettingService.update(false, null);
+        userSettingService.update(testUserId, false, null);
 
         // Assert
         UserSettings updatedSettings = userSettingsRepository.findById(testUserId).orElseThrow();
@@ -163,7 +171,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         setupUserAndSettings();
 
         // Act
-        userSettingService.update(false, Theme.CYAN);
+        userSettingService.update(testUserId, false, Theme.CYAN);
 
         // Assert
         UserSettings updatedSettings = userSettingsRepository.findById(testUserId).orElseThrow();
@@ -179,7 +187,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         setupUserAndSettings();
 
         // Act
-        userSettingService.update(null, null);
+        userSettingService.update(testUserId, null, null);
 
         // Assert
         UserSettings updatedSettings = userSettingsRepository.findById(testUserId).orElseThrow();
@@ -191,8 +199,11 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
     @Test
     @DisplayName("Should throw NotFoundException when trying to update non-existent user settings")
     void update_UserSettingsDoNotExist_ThrowsNotFoundException() {
+        // Arrange
+        String nonExistentId = "non-existent-id";
+
         // Act & Assert
-        assertThatThrownBy(() -> userSettingService.update(false, Theme.BRIGHT))
+        assertThatThrownBy(() -> userSettingService.update(nonExistentId, false, Theme.BRIGHT))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("User not found");
     }
@@ -204,17 +215,17 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         setupUserAndSettings();
 
         // Test DARK theme
-        userSettingService.update(null, Theme.DARK);
+        userSettingService.update(testUserId, null, Theme.DARK);
         UserSettings settings = userSettingsRepository.findById(testUserId).orElseThrow();
         assertThat(settings.getTheme()).isEqualTo(Theme.DARK);
 
         // Test BRIGHT theme
-        userSettingService.update(null, Theme.BRIGHT);
+        userSettingService.update(testUserId, null, Theme.BRIGHT);
         settings = userSettingsRepository.findById(testUserId).orElseThrow();
         assertThat(settings.getTheme()).isEqualTo(Theme.BRIGHT);
 
         // Test CYAN theme
-        userSettingService.update(null, Theme.CYAN);
+        userSettingService.update(testUserId, null, Theme.CYAN);
         settings = userSettingsRepository.findById(testUserId).orElseThrow();
         assertThat(settings.getTheme()).isEqualTo(Theme.CYAN);
     }
@@ -226,12 +237,12 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         setupUserAndSettings();
 
         // Initially true, set to false
-        userSettingService.update(false, null);
+        userSettingService.update(testUserId, false, null);
         UserSettings settings = userSettingsRepository.findById(testUserId).orElseThrow();
         assertThat(settings.isNotifications()).isFalse();
 
         // Set back to true
-        userSettingService.update(true, null);
+        userSettingService.update(testUserId, true, null);
         settings = userSettingsRepository.findById(testUserId).orElseThrow();
         assertThat(settings.isNotifications()).isTrue();
     }
@@ -247,7 +258,7 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
         userSettingsRepository.save(testUserSettings);
 
         // Act
-        userSettingService.update(true, Theme.DARK);
+        userSettingService.update(testUserId, true, Theme.DARK);
 
         // Assert
         UserSettings updatedSettings = userSettingsRepository.findById(testUserId).orElseThrow();

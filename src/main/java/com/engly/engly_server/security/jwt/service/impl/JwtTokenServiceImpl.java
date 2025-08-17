@@ -7,6 +7,7 @@ import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.JwtProperties;
 import com.engly.engly_server.security.jwt.service.JwtTokenService;
+import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
@@ -32,22 +33,19 @@ public class JwtTokenServiceImpl extends JwtTokenService {
     @Override
     protected String generateAccessToken(Authentication authentication) {
         try {
-            log.debug("Generating access token for user: {}", authentication.getName());
-
-            final var permissions = securityService.getPermissionsFromRoles(
-                    securityService.getRolesOfUser(authentication));
-            final var roomRoles = getRoomRolesForUser(authentication.getName());
+            final UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
             final var claims = createBaseClaimsBuilder(authentication)
                     .expiresAt(Instant.now().plus(jwtProperties.getAccessTokenValidityMinutes(), ChronoUnit.MINUTES))
-                    .claim("scope", permissions)
-                    .claim("roomRoles", roomRoles)
+                    .claim("scope", securityService.getPermissionsFromRoles(securityService.getRolesOfUser(authentication)))
+                    .claim("roomRoles", getRoomRolesForUser(authentication.getName()))
                     .claim("type", TokenType.ACCESS.name())
+                    .claim("roles", securityService.getRolesOfUser(authentication))
+                    .claim("userId", userDetails.user().getId())
                     .build();
 
             return encodeToken(claims, jwtEncoder);
         } catch (Exception e) {
-            log.error("Failed to generate access token for user: {}", authentication.getName(), e);
             throw new TokenGenerationException("Access token generation failed", e);
         }
     }
@@ -55,17 +53,15 @@ public class JwtTokenServiceImpl extends JwtTokenService {
     @Override
     protected String generateRefreshToken(Authentication authentication) {
         try {
-            log.debug("Generating refresh token for user: {}", authentication.getName());
-
             final var claims = createBaseClaimsBuilder(authentication)
                     .expiresAt(Instant.now().plus(jwtProperties.getRefreshTokenValidityDays(), ChronoUnit.DAYS))
                     .claim("scope", "REFRESH_TOKEN")
                     .claim("type", TokenType.REFRESH.name())
+                    .claim("roles", securityService.getRolesOfUser(authentication))
                     .build();
 
             return encodeToken(claims, jwtEncoder);
         } catch (Exception e) {
-            log.error("Failed to generate refresh token for user: {}", authentication.getName(), e);
             throw new TokenGenerationException("Refresh token generation failed", e);
         }
     }

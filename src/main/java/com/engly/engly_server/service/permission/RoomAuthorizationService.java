@@ -1,5 +1,6 @@
 package com.engly.engly_server.service.permission;
 
+import com.engly.engly_server.exception.AuthenticationObjectException;
 import com.engly.engly_server.models.enums.RoomAuthority;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.ChatParticipantRepository;
@@ -18,6 +19,8 @@ public class RoomAuthorizationService {
     private final ChatParticipantRepository chatParticipantsRepository;
     private final SecurityService securityService;
 
+    private static final String AUTH_NOT_FOUND = "Authentication object not found";
+
     public boolean hasRoomPermission(String roomId, RoomAuthority authority) {
         final var userEmail = securityService.getCurrentUserEmail();
         return hasRoomPermission(userEmail, roomId, authority);
@@ -25,7 +28,8 @@ public class RoomAuthorizationService {
 
     public boolean hasRoomPermission(String email, String roomId, RoomAuthority authority) {
         try {
-            var auth = securityService.getAuthenticationOrThrow();
+            final var auth = securityService.getAuthenticationOrThrow()
+                    .orElseThrow(() -> new AuthenticationObjectException(AUTH_NOT_FOUND));
             if (hasGlobalAdminRights(auth)) return true;
 
             return chatParticipantsRepository.findActiveParticipationByUserEmailAndRoomId(email, roomId)
@@ -79,7 +83,8 @@ public class RoomAuthorizationService {
     }
 
     public boolean canAccessRoom(String roomId) {
-        final var auth = securityService.getAuthenticationOrThrow();
+        final var auth = securityService.getAuthenticationOrThrow()
+                .orElseThrow(() -> new AuthenticationObjectException(AUTH_NOT_FOUND));
 
         if (hasGlobalAdminRights(auth)) return true;
 

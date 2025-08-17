@@ -22,8 +22,11 @@ import java.util.Optional;
 public class SecurityContextConfig {
 
     public Authentication createAndSetAuthenticationAndReturn(Users user, String password) {
+        UserDetailsImpl userDetails = new UserDetailsImpl(user);
         final Authentication auth = new UsernamePasswordAuthenticationToken(
-                user.getEmail(), password, new UserDetailsImpl(user).getAuthorities());
+                userDetails,
+                password,
+                userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
         return auth;
     }
@@ -38,15 +41,20 @@ public class SecurityContextConfig {
                         });
 
         final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                userDetails, null, authorities);
+                userDetails,
+                null,
+                authorities);
         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         createAndSetContext(authToken);
     }
 
     public Authentication createAuthenticationObject(Users users) {
-        return new UsernamePasswordAuthenticationToken(users.getEmail(),
-                users.getPassword(), new UserDetailsImpl(users).getAuthorities());
+        UserDetailsImpl userDetails = new UserDetailsImpl(users);
+        return new UsernamePasswordAuthenticationToken(
+                userDetails,
+                users.getPassword(),
+                userDetails.getAuthorities());
     }
 
     public boolean isAuthenticationEmpty() {

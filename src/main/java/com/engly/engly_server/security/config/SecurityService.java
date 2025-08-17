@@ -21,7 +21,8 @@ import java.util.stream.Collectors;
 public class SecurityService {
 
     public String getCurrentUserEmail() {
-        return getAuthenticationOrThrow().getName();
+        return getAuthenticationOrThrow().orElseThrow(()
+                -> new AuthenticationObjectException("Authentication object was not found in context")).getName();
     }
 
     public boolean hasRole(String role) {
@@ -59,12 +60,8 @@ public class SecurityService {
                 .orElseThrow(() -> new AuthenticationObjectException("No authenticated user found"));
     }
 
-    public Authentication getAuthenticationOrThrow() {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated())
-            throw new AuthenticationObjectException("No authenticated user found in SecurityContext");
-
-        return authentication;
+    public Optional<Authentication> getAuthenticationOrThrow() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
     }
 
 }

@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -53,8 +55,8 @@ public class ProfileController {
     })
     @GetMapping("/check")
     @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
-    public UsersDto getProfile() {
-        return profileService.getProfile();
+    public UsersDto getProfile(@AuthenticationPrincipal Jwt jwt) {
+        return profileService.getProfile(jwt.getClaim("userId"));
     }
 
     @Operation(
@@ -93,7 +95,8 @@ public class ProfileController {
     @PatchMapping("/update")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     @RateLimiter(name = "ProfileController")
-    public ResponseEntity<UsersDto> updateProfile(@RequestBody ProfileUpdateRequest profileUpdateData) {
-        return ResponseEntity.ok(profileService.updateProfile(profileUpdateData));
+    public ResponseEntity<UsersDto> updateProfile(@AuthenticationPrincipal Jwt jwt,
+                                                  @RequestBody ProfileUpdateRequest profileUpdateData) {
+        return ResponseEntity.ok(profileService.updateProfile(jwt.getClaim("userId"), profileUpdateData));
     }
 }

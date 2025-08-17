@@ -1,7 +1,7 @@
 package com.engly.engly_server.controller;
 
-import com.engly.engly_server.models.dto.response.AuthResponseDto;
 import com.engly.engly_server.models.dto.request.GoogleUserInfoRequest;
+import com.engly.engly_server.models.dto.response.AuthResponseDto;
 import com.engly.engly_server.service.common.AdditionalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -67,8 +69,9 @@ public class AdditionalInfoController {
     @PreAuthorize("hasAuthority('SCOPE_ADDITIONAL_INFO')")
     @PostMapping("/for-google")
     public ResponseEntity<AuthResponseDto> addInfo(@RequestBody GoogleUserInfoRequest additionalRequestForGoogleUserDto,
-                                                   HttpServletResponse httpServletResponse) {
+                                                   HttpServletResponse httpServletResponse,
+                                                   @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.status(201)
-                .body(additionalService.additionalRegistration(additionalRequestForGoogleUserDto, httpServletResponse));
+                .body(additionalService.additionalRegistration(jwt.getClaim("userId"), additionalRequestForGoogleUserDto, httpServletResponse));
     }
 }

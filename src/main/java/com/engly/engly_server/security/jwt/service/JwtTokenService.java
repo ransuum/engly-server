@@ -89,7 +89,6 @@ public abstract class JwtTokenService {
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
     }
 
     /**

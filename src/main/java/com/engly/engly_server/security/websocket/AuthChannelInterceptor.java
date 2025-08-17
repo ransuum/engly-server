@@ -37,13 +37,14 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             if (authorization == null || authorization.isEmpty()) {
                 log.warn("No Authorization header found in STOMP CONNECT frame.");
                 return message;
+
             }
 
             String authToken = authorization.getFirst();
             if (authToken != null && authToken.startsWith(BEARER_PREFIX)) {
                 authToken = authToken.substring(BEARER_PREFIX.length());
                 try {
-                    final var authentication = jwtTokenUtils.createAuthentication(authToken);
+                    final var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
 
                     accessor.setUser(authentication);
                     log.info("Authenticated user {} for WebSocket session.", authentication.getName());
