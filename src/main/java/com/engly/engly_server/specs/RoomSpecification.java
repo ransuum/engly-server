@@ -8,6 +8,8 @@ import java.time.LocalDate;
 
 import static com.engly.engly_server.specs.DateSpecificationConverter.toInstantPlusOneDay;
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class RoomSpecification {
     private static final String CREATED_AT_FIELD = "createdAt";
@@ -23,7 +25,7 @@ public final class RoomSpecification {
 
     public static Specification<Rooms> search(String keyword) {
         return (root, _, cb) -> {
-            if (!isValid(keyword)) return cb.conjunction();
+            if (isBlank(keyword)) return cb.conjunction();
             final var pattern = "%" + keyword.toLowerCase() + "%";
             return cb.or(
                     cb.like(cb.lower(root.get(NAME_FIELD)), pattern),
@@ -54,38 +56,38 @@ public final class RoomSpecification {
     }
 
     public static Specification<Rooms> nameLike(String name) {
-        return ((root, _, criteriaBuilder) -> isValid(name)
+        return ((root, _, criteriaBuilder) -> isNotBlank(name)
                 ? criteriaBuilder.like(criteriaBuilder.lower(root.get(NAME_FIELD)), "%" + name.toLowerCase() + "%")
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> descriptionLike(String description) {
-        return ((root, _, criteriaBuilder) -> isValid(description)
+        return ((root, _, criteriaBuilder) -> isNotBlank(description)
                 ? criteriaBuilder.like(criteriaBuilder.lower(root.get(DESCRIPTION_FIELD)), "%" + description.toLowerCase() + "%")
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> categoryEquals(CategoryType category) {
-        return ((root, _, criteriaBuilder) -> isValid(category)
+        return ((root, _, criteriaBuilder) -> category != null
                 ? criteriaBuilder.equal(root.join(CATEGORY_FIELD).get("name"), category)
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> creatorUsernameLike(String creatorUsername) {
-        return ((root, _, criteriaBuilder) -> isValid(creatorUsername)
+        return ((root, _, criteriaBuilder) -> isNotBlank(creatorUsername)
                 ? criteriaBuilder.like(root.join(CREATOR_FIELD).get("username"), "%" + creatorUsername.toLowerCase() + "%")
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> participantsLessThan(Integer participants) {
         return ((root, _, criteriaBuilder) -> participants != null
-                ? criteriaBuilder.lessThan(root.join(CHAT_PARTICIPANTS_FIELD).get("size"), participants)
+                ? criteriaBuilder.lessThan(criteriaBuilder.size(root.get(CHAT_PARTICIPANTS_FIELD)), participants)
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> participantsGreaterThan(Integer participants) {
         return ((root, _, criteriaBuilder) -> participants != null
-                ? criteriaBuilder.greaterThan(root.join(CHAT_PARTICIPANTS_FIELD).get("size"), participants)
+                ? criteriaBuilder.greaterThan(criteriaBuilder.size(root.get(CHAT_PARTICIPANTS_FIELD)), participants)
                 : criteriaBuilder.conjunction());
     }
 }

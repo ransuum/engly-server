@@ -13,13 +13,12 @@ import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.enums.Provider;
-import com.engly.engly_server.models.enums.Roles;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.CategoriesRepository;
 import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.repository.RoomRepository;
 import com.engly.engly_server.repository.UserRepository;
-import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.UserService;
@@ -39,7 +38,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,7 +72,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     private ChatParticipantRepository chatParticipantsRepository;
 
     @MockitoBean
-    private SecurityService securityService;
+    private AuthenticatedUserProvider authenticatedUserProvider;
 
     @MockitoBean
     private UserService userService;
@@ -113,15 +111,14 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     void createRoom_Success() {
         // Given
         RoomRequest roomRequest = new RoomRequest("New Test Room", "Test Description");
-        String userEmail = "test@example.com";
+        String userId = testUser.getId();
 
-        when(securityService.getCurrentUserEmail()).thenReturn(userEmail);
-        when(userService.findUserEntityByEmail(userEmail)).thenReturn(testUser);
+        when(userService.findEntityById(userId)).thenReturn(testUser);
         when(categoriesService.findByName(CategoryType.GENERAL_CHAT)).thenReturn(testCategory);
         doNothing().when(chatParticipantsService).addParticipant(any(Rooms.class), any(Users.class), eq(RoomRoles.ADMIN));
 
         // When
-        RoomsDto result = roomService.createRoom(CategoryType.GENERAL_CHAT, roomRequest);
+        RoomsDto result = roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomRequest);
 
         // Then
         assertThat(result).isNotNull();
@@ -140,9 +137,12 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     void createRoom_ThrowsEntityAlreadyExistsException_WhenRoomNameExists() {
         // Given
         RoomRequest roomRequest = new RoomRequest(testRoom.getName(), "Different Description");
+        String userId = testUser.getId();
+
+        when(userService.findEntityById(userId)).thenReturn(testUser);
 
         // When & Then
-        assertThatThrownBy(() -> roomService.createRoom(CategoryType.GENERAL_CHAT, roomRequest))
+        assertThatThrownBy(() -> roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomRequest))
                 .isInstanceOf(EntityAlreadyExistsException.class);
     }
 
@@ -304,15 +304,14 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     void createRoom_WithNullDescription() {
         // Given
         RoomRequest roomRequest = new RoomRequest("Room Without Description", null);
-        String userEmail = "test@example.com";
+        String userId = testUser.getId();
 
-        when(securityService.getCurrentUserEmail()).thenReturn(userEmail);
-        when(userService.findUserEntityByEmail(userEmail)).thenReturn(testUser);
+        when(userService.findEntityById(userId)).thenReturn(testUser);
         when(categoriesService.findByName(CategoryType.GENERAL_CHAT)).thenReturn(testCategory);
         doNothing().when(chatParticipantsService).addParticipant(any(Rooms.class), any(Users.class), eq(RoomRoles.ADMIN));
 
         // When
-        RoomsDto result = roomService.createRoom(CategoryType.GENERAL_CHAT, roomRequest);
+        RoomsDto result = roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomRequest);
 
         // Then
         assertThat(result).isNotNull();
@@ -340,20 +339,21 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
         assertThat(result.description()).isEqualTo(testRoom.getDescription());
     }
 
-    // Helper methods for creating test data
+    // Helper methods
     private Users createTestUser() {
         return createTestUser("test@example.com", "testuser");
     }
 
     private Users createTestUser(String email, String username) {
         Users user = Users.builder()
-                .email(email)
                 .username(username)
-                .password("password")
-                .roles(Roles.ROLE_USER.name())
-                .provider(Provider.LOCAL)
+                .email(email)
+                .password("password123")
+                .roles("ROLE_USER")
+                .provider(Provider.GOOGLE)
                 .emailVerified(true)
                 .createdAt(Instant.now())
+                .updatedAt(Instant.now())
                 .build();
         return usersRepository.save(user);
     }
@@ -365,8 +365,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     private Categories createTestCategory(CategoryType categoryType) {
         Categories category = Categories.builder()
                 .name(categoryType)
-                .description("Test Category Description")
-                .createdAt(Instant.now())
+                .description("Test category for " + categoryType.name())
                 .build();
         return categoriesRepository.save(category);
     }
@@ -375,12 +374,9 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
         Rooms room = Rooms.builder()
                 .name("Test Room")
                 .description("Test Room Description")
-                .category(testCategory)
                 .creator(testUser)
+                .category(testCategory)
                 .createdAt(Instant.now())
-                .chatParticipants(new ArrayList<>())
-                .messages(new ArrayList<>())
-                .moderation(new ArrayList<>())
                 .build();
         return roomRepository.save(room);
     }

@@ -24,6 +24,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -54,8 +56,9 @@ public class RoomController {
     public ResponseEntity<RoomsDto> createRoom(
             @Parameter(description = "The category to assign the new room to.", required = true)
             @RequestParam CategoryType name,
-            @Valid @RequestBody RoomRequest roomRequestDto) {
-        return ResponseEntity.status(201).body(roomService.createRoom(name, roomRequestDto));
+            @Valid @RequestBody RoomRequest roomRequestDto,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.status(201).body(roomService.createRoom(jwt.getClaim("userId"), name, roomRequestDto));
     }
 
 
@@ -77,8 +80,7 @@ public class RoomController {
     public ResponseEntity<Page<RoomsDto>> getRoomsByCategory(
             @Parameter(description = "Filter rooms by a specific category.")
             @RequestParam(defaultValue = "NEWS") CategoryType category,
-            @ParameterObject @PageableDefault(page = 0, size = 8,
-                    sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
+            @ParameterObject @PageableDefault(size = 8, sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(roomService.findAllRoomsByCategoryType(category, pageable));
     }
 
@@ -103,8 +105,8 @@ public class RoomController {
     @GetMapping("/by-criteria")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public Page<RoomsDto> findRoomsByCriteria(@ModelAttribute RoomSearchCriteriaRequest request,
-                                              @ParameterObject @PageableDefault(page = 0, size = 8,
-                                                      sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                                              @ParameterObject @PageableDefault(size = 8, sort = {"name"},
+                                                      direction = Sort.Direction.ASC) Pageable pageable) {
         return roomService.findAllWithCriteria(request, pageable);
     }
 

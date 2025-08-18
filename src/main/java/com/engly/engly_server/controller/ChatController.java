@@ -6,8 +6,8 @@ import com.engly.engly_server.models.events.WebSocketEvent;
 import com.engly.engly_server.models.events.TypingEvent;
 import com.engly.engly_server.models.dto.request.*;
 import com.engly.engly_server.models.enums.EventType;
-import com.engly.engly_server.security.config.SecurityService;
-import com.engly.engly_server.security.root.RequireRoomPermission;
+import com.engly.engly_server.security.config.AuthenticatedUserProvider;
+import com.engly.engly_server.security.annotation.RequireRoomPermission;
 import com.engly.engly_server.service.common.MessageReadService;
 import com.engly.engly_server.service.common.MessageService;
 import com.engly.engly_server.service.common.UserService;
@@ -28,7 +28,7 @@ public class ChatController {
     private final MessageService messageService;
     private final MessageReadService messageReadService;
     private final UserService userService;
-    private final SecurityService securityService;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
     private final SimpMessagingTemplate messagingTemplate;
 
     private static final String TOPIC_MESSAGES = "/topic/messages/";
@@ -43,7 +43,7 @@ public class ChatController {
 
     @MessageMapping("/chat/message.markAsRead")
     public void markMessagesAsRead(@Payload MarkAsReadRequest request) {
-        final var userId = userService.getUserIdByEmail(securityService.getCurrentUserEmail());
+        final var userId = userService.getUserIdByEmail(authenticatedUserProvider.getCurrentUserEmail());
         messageReadService.markMessageAsRead(request.messageId(), userId);
 
         messagingTemplate.convertAndSend(
@@ -87,7 +87,7 @@ public class ChatController {
 
     @MessageMapping("/chat/user.typing")
     public void userTyping(@Payload TypingRequest typingRequest) {
-        final var username = userService.getUsernameByEmail(securityService.getCurrentUserEmail());
+        final var username = userService.getUsernameByEmail(authenticatedUserProvider.getCurrentUserEmail());
         final var typingEvent = new TypingEvent(
                 typingRequest.roomId(),
                 username,

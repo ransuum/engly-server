@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
@@ -19,13 +18,13 @@ public interface UserService {
 
     UsersDto findById(String id);
 
-    Optional<Users> findByEmail(String email);
-
-    UsersDto findByEmailDto(String email);
+    Users findEntityById(String id);
 
     Page<UsersDto> allUsers(Pageable pageable);
 
     String getUsernameByEmail(String email);
+
+    boolean existsById(String id);
 
     Integer deleteSomeUsers(List<String> ids);
 

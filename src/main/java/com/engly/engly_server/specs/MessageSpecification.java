@@ -7,6 +7,8 @@ import java.time.LocalDate;
 
 import static com.engly.engly_server.specs.DateSpecificationConverter.toInstantPlusOneDay;
 import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public final class MessageSpecification {
     private static final String CREATED_AT_FIELD = "createdAt";
@@ -24,7 +26,7 @@ public final class MessageSpecification {
 
     public static Specification<Message> search(String keyword) {
         return (root, _, cb) -> {
-            if (!isValid(keyword)) return cb.conjunction();
+            if (isBlank(keyword)) return cb.conjunction();
             final var pattern = "%" + keyword.toLowerCase() + "%";
             return cb.or(
                     cb.like(cb.lower(root.get(CONTENT_FIELD)), pattern),
@@ -67,31 +69,31 @@ public final class MessageSpecification {
     }
 
     public static Specification<Message> contentLike(String content) {
-        return (root, _, cb) -> isValid(content)
+        return (root, _, cb) -> isNotBlank(content)
                 ? cb.like(cb.lower(root.get(CONTENT_FIELD)), "%" + content.toLowerCase() + "%")
                 : cb.conjunction();
     }
 
     public static Specification<Message> usernameLike(String username) {
-        return (root, _, cb) -> isValid(username)
+        return (root, _, cb) -> isNotBlank(username)
                 ? cb.like(cb.lower(root.join(USER_FIELD).get(USERNAME_FIELD)), "%" + username.toLowerCase() + "%")
                 : cb.conjunction();
     }
 
     public static Specification<Message> userIdEquals(String userId) {
-        return (root, _, cb) -> isValid(userId)
+        return (root, _, cb) -> isNotBlank(userId)
                 ? cb.equal(root.join(USER_FIELD).get(ID_FIELD), userId)
                 : cb.conjunction();
     }
 
     public static Specification<Message> roomIdEquals(String roomId) {
-        return (root, _, cb) -> isValid(roomId)
+        return (root, _, cb) -> isNotBlank(roomId)
                 ? cb.equal(root.join(ROOM_FIELD).get(ID_FIELD), roomId)
                 : cb.conjunction();
     }
 
     public static Specification<Message> roomNameLike(String roomName) {
-        return (root, _, cb) -> isValid(roomName)
+        return (root, _, cb) -> isNotBlank(roomName)
                 ? cb.like(cb.lower(root.join(ROOM_FIELD).get("name")), "%" + roomName.toLowerCase() + "%")
                 : cb.conjunction();
     }

@@ -1,4 +1,4 @@
-package com.engly.engly_server.security.root;
+package com.engly.engly_server.security.annotation;
 
 import com.engly.engly_server.models.dto.request.CreateMessageData;
 import com.engly.engly_server.models.dto.request.DeleteMessageRequest;

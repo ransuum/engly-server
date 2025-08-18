@@ -4,20 +4,19 @@ import com.engly.engly_server.exception.TokenNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import java.util.Arrays;
 
-@Slf4j
 public record CookieUtils(Cookie[] cookies) {
     public CookieUtils(Cookie[] cookies) {
         this.cookies = cookies == null ? null : cookies.clone();
     }
 
     public String getRefreshTokenCookie() {
-        return cookies == null ? null : Arrays.stream(cookies)
+        if (cookies == null) throw new TokenNotFoundException("No cookies found in request");
+        return Arrays.stream(cookies)
                 .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)

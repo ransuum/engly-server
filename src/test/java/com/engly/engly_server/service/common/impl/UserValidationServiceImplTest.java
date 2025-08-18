@@ -7,7 +7,7 @@ import com.engly.engly_server.models.dto.response.GoogleAvailabilityDto;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.repository.UserRepository;
-import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import com.engly.engly_server.service.common.UserValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,7 +43,7 @@ class UserValidationServiceImplTest extends AbstractTestcontainersConfiguration 
     private UserRepository userRepository;
 
     @MockitoBean
-    private SecurityService securityService;
+    private AuthenticatedUserProvider authenticatedUserProvider;
 
     private Users testUser;
 
@@ -67,7 +67,7 @@ class UserValidationServiceImplTest extends AbstractTestcontainersConfiguration 
     @DisplayName("Should return user exists false when user has SCOPE_ADDITIONAL_INFO role")
     void firstLogin_UserHasAdditionalInfoScope_ReturnsFalse() {
         // Arrange
-        when(securityService.hasRole("SCOPE_ADDITIONAL_INFO")).thenReturn(true);
+        when(authenticatedUserProvider.hasRole("SCOPE_ADDITIONAL_INFO")).thenReturn(true);
 
         // Act
         GoogleAvailabilityDto result = userValidationService.firstLogin();
@@ -81,7 +81,7 @@ class UserValidationServiceImplTest extends AbstractTestcontainersConfiguration 
     @DisplayName("Should return user exists true when user does not have SCOPE_ADDITIONAL_INFO role")
     void firstLogin_UserDoesNotHaveAdditionalInfoScope_ReturnsTrue() {
         // Arrange
-        when(securityService.hasRole("SCOPE_ADDITIONAL_INFO")).thenReturn(false);
+        when(authenticatedUserProvider.hasRole("SCOPE_ADDITIONAL_INFO")).thenReturn(false);
 
         // Act
         GoogleAvailabilityDto result = userValidationService.firstLogin();

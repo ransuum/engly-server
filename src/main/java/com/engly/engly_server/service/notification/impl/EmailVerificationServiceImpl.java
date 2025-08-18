@@ -7,7 +7,6 @@ import com.engly.engly_server.models.dto.response.EmailSendInfo;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.repository.VerifyTokenRepository;
-import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
@@ -34,7 +33,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
     private final UserRepository userRepository;
-    private final SecurityService service;
     private final JwtAuthenticationService jwtAuthenticationService;
 
     @Value("classpath:/emailTemplates/verificationTemplate.txt")
@@ -46,8 +44,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
 
     @Override
-    public EmailSendInfo sendMessage() {
-        final var email = service.getCurrentUserEmail();
+    public EmailSendInfo sendMessage(String email) {
         try {
             return new EmailSenderUtil(
                     tokenRepo,
@@ -58,7 +55,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
                     "EmailVerificationServiceImpl:sendMessage")
                     .sendTokenEmail(email, userRepository::existsByEmail, TokenType.EMAIL_VERIFICATION);
         } catch (Exception e) {
-            log.error("[EmailVerificationServiceImpl:sendNotifyMessage]Errors: {}", e.getMessage());
             throw new TokenNotFoundException("token not saved exception email " + email);
         }
     }
@@ -67,13 +63,11 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.USER_PROFILES, key = "@securityService.getCurrentUserEmail()"),
+            @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
             @CacheEvict(value = CacheName.USER_ID, allEntries = true),
-            @CacheEvict(value = CacheName.USER_BY_EMAIL_DTO, key = "@securityService.getCurrentUserEmail()"),
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
     })
-    public AuthResponseDto checkToken(String token, HttpServletResponse response) {
-        final var email = service.getCurrentUserEmail();
+    public AuthResponseDto checkToken(String email, String token, HttpServletResponse response) {
         return tokenRepo.findByTokenAndEmail(token, email).map(verifyToken -> {
                     if (!verifyToken.getTokenType().equals(TokenType.EMAIL_VERIFICATION))
                         throw new TokenNotFoundException("Invalid token for email verification");
@@ -86,7 +80,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
                                 final var userSaved = userRepository.save(user);
                                 final var jwtHolder = jwtAuthenticationService.authenticationForVerification(userSaved, response);
-                                log.info("[NotificationServiceImpl:checkToken]Token:{} for email:{} was checked and deleted", token, email);
 
                                 return new AuthResponseDto(jwtHolder.accessToken(),
                                         12,

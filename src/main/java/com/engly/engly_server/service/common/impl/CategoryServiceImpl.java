@@ -13,6 +13,7 @@ import com.engly.engly_server.utils.cache.CacheName;
 import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -56,7 +57,7 @@ public class CategoryServiceImpl implements CategoriesService {
         return categoriesRepository.findById(id)
                 .map(category -> {
                     if (FieldUtil.isValid(categoryRequest.name())) category.setName(categoryRequest.name());
-                    if (FieldUtil.isValid(categoryRequest.description())) category.setDescription(categoryRequest.description());
+                    if (StringUtils.isNotBlank(categoryRequest.description())) category.setDescription(categoryRequest.description());
 
                     return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepository.save(category));
                 })

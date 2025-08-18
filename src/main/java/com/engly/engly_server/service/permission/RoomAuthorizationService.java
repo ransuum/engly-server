@@ -1,9 +1,10 @@
 package com.engly.engly_server.service.permission;
 
+import com.engly.engly_server.exception.AuthenticationObjectException;
 import com.engly.engly_server.models.enums.RoomAuthority;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.ChatParticipantRepository;
-import com.engly.engly_server.security.config.SecurityService;
+import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -16,19 +17,22 @@ import java.util.Map;
 @Slf4j
 public class RoomAuthorizationService {
     private final ChatParticipantRepository chatParticipantsRepository;
-    private final SecurityService securityService;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
+
+    private static final String AUTH_NOT_FOUND = "Authentication object not found";
 
     public boolean hasRoomPermission(String roomId, RoomAuthority authority) {
-        final var userEmail = securityService.getCurrentUserEmail();
+        final var userEmail = authenticatedUserProvider.getCurrentUserEmail();
         return hasRoomPermission(userEmail, roomId, authority);
     }
 
     public boolean hasRoomPermission(String email, String roomId, RoomAuthority authority) {
         try {
-            var auth = securityService.getAuthenticationOrThrow();
+            final var auth = authenticatedUserProvider.getAuthenticationOrThrow()
+                    .orElseThrow(() -> new AuthenticationObjectException(AUTH_NOT_FOUND));
             if (hasGlobalAdminRights(auth)) return true;
 
-            return chatParticipantsRepository.findActiveParticipationByUserEmailAndRoomId(email, roomId)
+            return chatParticipantsRepository.findByEmailAndRoom(email, roomId)
                     .map(chatParticipants -> {
                         RoomRoles roomRole = chatParticipants.getRole();
                         return roomRole.getPermissions().contains(authority);
@@ -40,13 +44,13 @@ public class RoomAuthorizationService {
     }
 
     public boolean hasRoomRole(String roomId, RoomRoles requiredRole) {
-        final var userEmail = securityService.getCurrentUserEmail();
+        final var userEmail = authenticatedUserProvider.getCurrentUserEmail();
         return hasRoomRole(userEmail, roomId, requiredRole);
     }
 
     public boolean hasRoomRole(String userEmail, String roomId, RoomRoles requiredRole) {
         try {
-            return chatParticipantsRepository.findActiveParticipationByUserEmailAndRoomId(userEmail, roomId)
+            return chatParticipantsRepository.findByEmailAndRoom(userEmail, roomId)
                     .map(participation -> {
                         final var userRole = participation.getRole();
                         return userRole == requiredRole || isHigherRole(userRole, requiredRole);
@@ -79,13 +83,14 @@ public class RoomAuthorizationService {
     }
 
     public boolean canAccessRoom(String roomId) {
-        final var auth = securityService.getAuthenticationOrThrow();
+        final var auth = authenticatedUserProvider.getAuthenticationOrThrow()
+                .orElseThrow(() -> new AuthenticationObjectException(AUTH_NOT_FOUND));
 
         if (hasGlobalAdminRights(auth)) return true;
 
         final var userEmail = auth.getName();
         final var participation = chatParticipantsRepository
-                .findActiveParticipationByUserEmailAndRoomId(userEmail, roomId);
+                .findByEmailAndRoom(userEmail, roomId);
 
         return participation.isPresent() && participation.get().getRole() != RoomRoles.BANNED;
     }

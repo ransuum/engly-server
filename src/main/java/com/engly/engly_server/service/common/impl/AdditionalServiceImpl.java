@@ -6,7 +6,6 @@ import com.engly.engly_server.models.dto.request.GoogleUserInfoRequest;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.UserRepository;
-import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.AdditionalService;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,7 +20,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class AdditionalServiceImpl implements AdditionalService {
     private final UserRepository userRepository;
-    private final SecurityService securityService;
     private final JwtAuthenticationService jwtAuthenticationService;
 
     @Value("#{'${sysadmin.email}'.split(',\\s*')}")
@@ -32,10 +30,9 @@ public class AdditionalServiceImpl implements AdditionalService {
 
     @Override
     @Transactional
-    public AuthResponseDto additionalRegistration(GoogleUserInfoRequest additionalRequest,
+    public AuthResponseDto additionalRegistration(String id, GoogleUserInfoRequest additionalRequest,
                                                   HttpServletResponse httpServletResponse) {
-        final var email = securityService.getCurrentUserEmail();
-        return userRepository.findByEmail(email)
+        return userRepository.findById(id)
                 .map(user -> {
                     user.setRoles(sysadminEmails.contains(user.getEmail()) ? ROLE_SYSADMIN : ROLE_USER);
                     user.setImgUrl(additionalRequest.imgUrl());

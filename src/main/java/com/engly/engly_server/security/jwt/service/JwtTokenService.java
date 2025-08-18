@@ -60,7 +60,7 @@ public abstract class JwtTokenService {
     }
 
     protected final Map<String, String> getRoomRolesForUser(String email) {
-        final var participants = chatParticipantRepository.findActiveParticipantsByUserEmail(email);
+        final var participants = chatParticipantRepository.findByEmail(email);
 
         return participants.stream()
                 .collect(Collectors.toMap(
@@ -89,7 +89,6 @@ public abstract class JwtTokenService {
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
     }
 
     /**

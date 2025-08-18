@@ -11,12 +11,12 @@ import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.RoomRepository;
-import com.engly.engly_server.security.config.SecurityService;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
-import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 @Slf4j
@@ -39,7 +39,6 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final UserService userService;
     private final CategoriesService categoriesService;
-    private final SecurityService service;
     private final ChatParticipantsService chatParticipantsService;
 
     @Override
@@ -50,22 +49,19 @@ public class RoomServiceImpl implements RoomService {
                     @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
             }
     )
-    public RoomsDto createRoom(CategoryType name, RoomRequest roomRequestDto) {
+    public RoomsDto createRoom(String id, CategoryType name, RoomRequest roomRequestDto) {
         if (roomRepository.existsByName(roomRequestDto.name()))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 
-        final var username = service.getCurrentUserEmail();
-        final var creator = userService.findUserEntityByEmail(username);
-
         final var room = roomRepository.save(Rooms.builder()
-                .creator(creator)
+                .creator(userService.findEntityById(id))
                 .createdAt(Instant.now())
                 .category(categoriesService.findByName(name))
                 .description(roomRequestDto.description())
                 .name(roomRequestDto.name())
                 .build());
 
-        chatParticipantsService.addParticipant(room, creator, RoomRoles.ADMIN);
+        chatParticipantsService.addParticipant(room, room.getCreator(), RoomRoles.ADMIN);
         return RoomMapper.INSTANCE.roomToDto(room);
     }
 
@@ -106,14 +102,14 @@ public class RoomServiceImpl implements RoomService {
     public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
         return roomRepository.findById(id)
                 .map(room -> {
-                    if (isValid(request.newCategory()))
+                    if (FieldUtil.isValid(request.newCategory()))
                         room.setCategory(categoriesService.findByName(request.newCategory()));
 
-                    if (isValid(request.updateCreatorByEmail()))
+                    if (isNotBlank(request.updateCreatorByEmail()))
                         room.setCreator(userService.findUserEntityByEmail(request.updateCreatorByEmail()));
 
-                    if (isValid(request.description())) room.setDescription(request.description());
-                    if (isValid(request.name())) room.setName(request.name());
+                    if (isNotBlank(request.description())) room.setDescription(request.description());
+                    if (isNotBlank(request.name())) room.setName(request.name());
                     return RoomMapper.INSTANCE.roomToDto(roomRepository.save(room));
                 })
                 .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));

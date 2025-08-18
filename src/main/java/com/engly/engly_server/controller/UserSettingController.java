@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,8 +20,9 @@ public class UserSettingController {
     @PatchMapping
     @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
     public ResponseEntity<Void> update(@RequestParam(required = false) Boolean notifications,
-                                       @RequestParam(required = false) Theme theme) {
-        userSettingService.update(notifications, theme);
+                                       @RequestParam(required = false) Theme theme,
+                                       @AuthenticationPrincipal Jwt jwt) {
+        userSettingService.update(jwt.getClaim("userId"), notifications, theme);
         return ResponseEntity.noContent().build();
     }
 }

@@ -4,8 +4,7 @@ import com.engly.engly_server.models.dto.response.UserSettingsDto;
 import com.engly.engly_server.models.enums.Theme;
 
 public interface UserSettingService {
+    UserSettingsDto getById(String id);
 
-    UserSettingsDto getById();
-
-    void update(Boolean notifications, Theme theme);
+    void update(String id, Boolean notifications, Theme theme);
 }

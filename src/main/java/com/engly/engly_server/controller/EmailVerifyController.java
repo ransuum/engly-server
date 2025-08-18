@@ -16,6 +16,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -59,8 +61,8 @@ public class EmailVerifyController {
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @PostMapping
     @RateLimiter(name = "EmailVerifyController")
-    public ResponseEntity<EmailSendInfo> notifyUserEmailVerify() {
-        return ResponseEntity.status(202).body(emailVerificationService.sendMessage());
+    public ResponseEntity<EmailSendInfo> notifyUserEmailVerify(@AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.status(202).body(emailVerificationService.sendMessage(jwt.getSubject()));
     }
 
     @Operation(
@@ -94,7 +96,8 @@ public class EmailVerifyController {
     @RateLimiter(name = "EmailVerifyController")
     public ResponseEntity<AuthResponseDto> checkToken(
             @Parameter(description = "The verification token received via email.", required = true, example = "FDGDitreKFfdsd")
-            @RequestParam("token") String token, HttpServletResponse response) {
-        return ResponseEntity.ok(emailVerificationService.checkToken(token, response));
+            @RequestParam("token") String token, HttpServletResponse response,
+            @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(emailVerificationService.checkToken(jwt.getSubject(), token, response));
     }
 }

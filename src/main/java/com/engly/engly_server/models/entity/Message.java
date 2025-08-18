@@ -53,9 +53,9 @@ public class Message implements Serializable {
 
     @Column(name = "is_edited", nullable = false, columnDefinition = "boolean default false")
     @Builder.Default
-    private Boolean isEdited = null;
+    private Boolean isEdited = false;
 
     @Column(name = "is_deleted", nullable = false, columnDefinition = "boolean default false")
     @Builder.Default
-    private Boolean isDeleted = null;
+    private Boolean isDeleted = false;
 }

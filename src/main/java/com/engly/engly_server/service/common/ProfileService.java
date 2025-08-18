@@ -7,7 +7,7 @@ public interface ProfileService {
 
     String NOT_FOUND_PROFILE = "Cannot found this profile";
 
-    UsersDto getProfile();
+    UsersDto getProfile(String id);
 
-    UsersDto updateProfile(ProfileUpdateRequest profileUpdateData);
+    UsersDto updateProfile(String userId, ProfileUpdateRequest profileUpdateData);
 }
