@@ -20,14 +20,15 @@ import org.springframework.web.socket.config.annotation.WebSocketTransportRegist
 @EnableWebSocketMessageBroker
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+
     private final AuthChannelInterceptor authChannelInterceptor;
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.setApplicationDestinationPrefixes("/app")
-                .enableSimpleBroker("/topic")
+        config.enableSimpleBroker("/topic")
                 .setHeartbeatValue(new long[]{10000, 10000})
                 .setTaskScheduler(heartbeatTaskScheduler());
+        config.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
@@ -38,21 +39,27 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(authChannelInterceptor, new SecurityContextChannelInterceptor())
-                .taskExecutor().corePoolSize(8).maxPoolSize(16).queueCapacity(200);
+        registration.interceptors(authChannelInterceptor, new SecurityContextChannelInterceptor());
+        registration.taskExecutor()
+                .corePoolSize(8)
+                .maxPoolSize(16)
+                .queueCapacity(200);
     }
 
     @Override
     public void configureClientOutboundChannel(ChannelRegistration registration) {
-        registration.taskExecutor().corePoolSize(8).maxPoolSize(16).queueCapacity(200);
+        registration.taskExecutor()
+                .corePoolSize(8)
+                .maxPoolSize(16)
+                .queueCapacity(200);
     }
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.addDecoratorFactory(CustomExceptionWebSocketHandlerDecorator::new)
-                .setMessageSizeLimit(1024 * 1024)
-                .setSendBufferSizeLimit(1024 * 1024)
-                .setSendTimeLimit(30000);
+        registration.addDecoratorFactory(CustomExceptionWebSocketHandlerDecorator::new);
+        registration.setMessageSizeLimit(128 * 1024);
+        registration.setSendBufferSizeLimit(1024 * 1024);
+        registration.setSendTimeLimit(30000);
     }
 
     @Bean("heartbeatTaskScheduler")

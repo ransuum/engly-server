@@ -67,7 +67,7 @@ public class MessageController {
     @GetMapping("/current-room/native/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public Page<MessagesDto> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
-                                                              @ParameterObject @PageableDefault(size = 8,
+                                                              @ParameterObject @PageableDefault(page = 0, size = 8,
                                                                       sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return messageService.findAllMessageInCurrentRoomNative(roomId, pageable);
     }

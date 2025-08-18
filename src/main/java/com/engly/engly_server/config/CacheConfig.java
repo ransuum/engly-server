@@ -42,8 +42,6 @@ public class CacheConfig {
                 .maximumSize(spec.maxSize())
                 .expireAfterWrite(spec.expireAfterWrite())
                 .expireAfterAccess(spec.expireAfterAccess())
-                .recordStats()
-                .softValues()
                 .build());
     }
 
