@@ -92,7 +92,7 @@ public class ProfileController {
                     content = @Content
             )
     })
-    @PatchMapping("/update")
+    @PatchMapping
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     @RateLimiter(name = "ProfileController")
     public ResponseEntity<UsersDto> updateProfile(@AuthenticationPrincipal Jwt jwt,

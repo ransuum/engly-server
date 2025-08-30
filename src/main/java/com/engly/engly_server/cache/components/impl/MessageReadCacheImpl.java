@@ -26,8 +26,6 @@ public class MessageReadCacheImpl implements MessageReadCache {
     private final CacheManager cacheManager;
     private final Executor virtualThreadExecutor;
 
-    private static final int BATCH_SIZE = 100;
-
     @Override
     @Cacheable(
             value = CacheName.MESSAGE_READ_STATUS,
@@ -49,7 +47,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
 
         final var futures = IntStream.range(0, messageReads.size())
                 .boxed()
-                .collect(Collectors.groupingBy(i -> i / BATCH_SIZE))
+                .collect(Collectors.groupingBy(i -> i / 100))
                 .values()
                 .stream()
                 .map(indices -> CompletableFuture.supplyAsync(() -> {
@@ -78,10 +76,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
 
     private void updateCacheForSavedReads(List<MessageRead> savedReads) {
         var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
-        if (cache != null) {
-            savedReads.forEach(mr ->
-                    cache.put(mr.getMessageId() + "_" + mr.getUserId(), true)
-            );
-        }
+        if (cache != null) savedReads.forEach(mr ->
+                cache.put(mr.getMessageId() + "_" + mr.getUserId(), true));
     }
 }

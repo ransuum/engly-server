@@ -88,9 +88,8 @@ public class RoomAuthorizationService {
 
         if (hasGlobalAdminRights(auth)) return true;
 
-        final var userEmail = auth.getName();
         final var participation = chatParticipantsRepository
-                .findByEmailAndRoom(userEmail, roomId);
+                .findByEmailAndRoom(auth.getName(), roomId);
 
         return participation.isPresent() && participation.get().getRole() != RoomRoles.BANNED;
     }

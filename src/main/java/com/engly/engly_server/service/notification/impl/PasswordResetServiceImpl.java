@@ -55,7 +55,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                     urlTemplate,
                     "PasswordResetServiceImpl:sendMessage")
                     .sendTokenEmail(email, userRepository::existsByEmail, TokenType.PASSWORD_RESET);
-        } catch (Exception e) {
+        } catch (Exception _) {
             throw new TokenNotFoundException("token not saved exception email %s".formatted(email));
         }
     }

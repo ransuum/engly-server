@@ -18,8 +18,8 @@ public final class FieldUtil {
         return val != null;
     }
 
-    public static boolean isValid(Object o) {
-        return o != null;
+    public static <T> boolean isValid(T t) {
+        return t != null;
     }
 
     public static void isValid(String email, String name, String providerId) {
