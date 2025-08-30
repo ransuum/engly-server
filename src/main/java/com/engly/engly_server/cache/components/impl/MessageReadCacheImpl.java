@@ -45,7 +45,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
 
         log.debug("Batch saving {} message reads", messageReads.size());
 
-        final var futures = IntStream.range(0, messageReads.size())
+        final List<CompletableFuture<List<MessageRead>>> futures = IntStream.range(0, messageReads.size())
                 .boxed()
                 .collect(Collectors.groupingBy(i -> i / 100))
                 .values()
@@ -75,7 +75,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
     }
 
     private void updateCacheForSavedReads(List<MessageRead> savedReads) {
-        var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
+        final var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
         if (cache != null) savedReads.forEach(mr ->
                 cache.put(mr.getMessageId() + "_" + mr.getUserId(), true));
     }
