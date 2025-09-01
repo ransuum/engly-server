@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.config.AbstractTestcontainersConfiguration;
-import com.engly.engly_server.config.TestJpaConfiguration;
+import com.engly.engly_server.config.DataJpaTestWithContainer;
 import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.request.RoomRequest;
@@ -24,17 +24,11 @@ import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -47,13 +41,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-@Testcontainers
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = {TestJpaConfiguration.class, RoomServiceImpl.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Transactional
+@DataJpaTestWithContainer
+@Import(RoomServiceImpl.class)
 class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
 
     @Autowired

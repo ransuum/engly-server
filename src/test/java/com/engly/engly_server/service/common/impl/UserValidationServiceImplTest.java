@@ -1,7 +1,7 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.config.AbstractTestcontainersConfiguration;
-import com.engly.engly_server.config.TestJpaConfiguration;
+import com.engly.engly_server.config.DataJpaTestWithContainer;
 import com.engly.engly_server.models.dto.response.AvailabilityResponseDto;
 import com.engly.engly_server.models.dto.response.GoogleAvailabilityDto;
 import com.engly.engly_server.models.entity.Users;
@@ -12,28 +12,17 @@ import com.engly.engly_server.service.common.UserValidationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Transactional;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
-@Testcontainers
-@DataJpaTest
-@ActiveProfiles("test")
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(classes = {TestJpaConfiguration.class, UserValidationServiceImpl.class})
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Transactional
+@DataJpaTestWithContainer
+@Import(UserValidationServiceImpl.class)
 class UserValidationServiceImplTest extends AbstractTestcontainersConfiguration {
 
     @Autowired
