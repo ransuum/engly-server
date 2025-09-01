@@ -80,17 +80,16 @@ class UserSettingServiceImplTest extends AbstractTestcontainersConfiguration {
     }
 
     private void setupUserAndSettings() {
-        // Save user first and get the generated ID
+        // Save user and get generated ID
         testUser = userRepository.save(testUser);
-        testUserId = testUser.getId(); // Get the actual generated ID
+        testUserId = testUser.getId();
 
-        // Setup mocks with the actual user ID
+        // Setup mocks
         when(authenticatedUserProvider.getCurrentUserEmail()).thenReturn(testUser.getEmail());
         when(userService.getUserIdByEmail(testUser.getEmail())).thenReturn(testUserId);
 
-        // Create settings with the managed user entity and generated ID
+        // Create settings without manually assigning ID
         testUserSettings = UserSettings.builder()
-                .id(testUserId) // Use the actual generated ID
                 .user(testUser)
                 .theme(Theme.DARK)
                 .notifications(true)
