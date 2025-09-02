@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoriesService {
+
     private final CategoriesRepository categoriesRepository;
 
     @Override

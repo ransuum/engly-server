@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class UserSettingServiceImpl implements UserSettingService {
+
     private final UserSettingsRepository userSettingsRepository;
 
     @Override

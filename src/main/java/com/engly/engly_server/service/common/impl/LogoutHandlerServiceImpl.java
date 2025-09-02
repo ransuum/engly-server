@@ -18,6 +18,7 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class LogoutHandlerServiceImpl implements LogoutHandler {
+
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override

@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AuthServiceImpl implements AuthService {
+
     private final UserRepository userRepository;
     private final JwtAuthenticationService jwtAuthenticationService;
     private final RefreshTokenRepository refreshTokenRepository;

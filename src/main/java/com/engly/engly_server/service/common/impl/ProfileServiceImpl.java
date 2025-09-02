@@ -21,6 +21,7 @@ import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
+
     private final UserRepository userRepository;
 
     @Override

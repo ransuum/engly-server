@@ -27,6 +27,7 @@ import java.util.concurrent.Executor;
 @Service
 @Slf4j
 public class MessageReadServiceImpl implements MessageReadService {
+
     private final MessageReadRepository messageReadRepository;
     private final MessageReadCache messageReadCache;
     private final Executor virtualThreadExecutor;

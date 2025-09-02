@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 public class ChatParticipantsServiceImpl implements ChatParticipantsService {
+
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatParticipantCache chatParticipantCache;
 

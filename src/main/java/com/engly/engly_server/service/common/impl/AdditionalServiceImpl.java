@@ -19,6 +19,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class AdditionalServiceImpl implements AdditionalService {
+
     private final UserRepository userRepository;
     private final JwtAuthenticationService jwtAuthenticationService;
 
