@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,7 +69,7 @@ public class AdditionalInfoController {
     })
     @PreAuthorize("hasAuthority('SCOPE_ADDITIONAL_INFO')")
     @PostMapping("/for-google")
-    public ResponseEntity<AuthResponseDto> addInfo(@RequestBody GoogleUserInfoRequest additionalRequestForGoogleUserDto,
+    public ResponseEntity<AuthResponseDto> addInfo(@RequestBody @Valid GoogleUserInfoRequest additionalRequestForGoogleUserDto,
                                                    HttpServletResponse httpServletResponse,
                                                    @AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.status(201)

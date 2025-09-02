@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.jwt.service.impl;
 
-import com.engly.engly_server.models.dto.request.SignInRequest;
+import com.engly.engly_server.models.dto.request.AuthRequest;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.security.config.SecurityContextConfig;
@@ -44,7 +44,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     @Override
-    public Authentication authenticateCredentials(SignInRequest sign) {
+    public Authentication authenticateCredentials(AuthRequest.SignInRequest sign) {
         return authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(sign.email(), sign.password()));
     }

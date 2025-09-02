@@ -1,11 +1,7 @@
 package com.engly.engly_server.security.annotation;
 
-import com.engly.engly_server.models.dto.request.CreateMessageData;
-import com.engly.engly_server.models.dto.request.DeleteMessageRequest;
-import com.engly.engly_server.models.dto.request.EditMessageRequest;
-import com.engly.engly_server.models.dto.request.TypingRequest;
+import com.engly.engly_server.models.dto.request.MessageRequest;
 import com.engly.engly_server.models.enums.RoomAuthority;
-import com.engly.engly_server.models.events.MessageReadersRequest;
 import com.engly.engly_server.service.permission.RoomAuthorizationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,12 +42,14 @@ public class WebSocketRoomAuthorizationAspect {
 
     private String extractRoomIdFromPayload(Object payload) {
         return switch (payload) {
-            case CreateMessageData dto -> dto.roomId();
-            case TypingRequest dto -> dto.roomId();
-            case DeleteMessageRequest dto -> dto.roomId();
-            case MessageReadersRequest dto -> dto.roomId();
-            case EditMessageRequest dto -> dto.roomId();
+            case MessageRequest.CreateMessageRequest dto -> dto.roomId();
+            case MessageRequest.EditMessageRequest dto -> dto.roomId();
+            case MessageRequest.DeleteMessageRequest dto -> dto.roomId();
+            case MessageRequest.MessageReadersRequest dto -> dto.roomId();
+            case MessageRequest.MarkAsReadRequest dto -> dto.roomId();
+            case MessageRequest.TypingRequest dto -> dto.roomId();
             default -> null;
         };
     }
+
 }

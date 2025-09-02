@@ -3,7 +3,7 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.googledrive.GoogleDriveService;
 import com.engly.engly_server.mapper.MessageMapper;
-import com.engly.engly_server.models.dto.request.CreateMessageData;
+import com.engly.engly_server.models.dto.request.MessageRequest;
 import com.engly.engly_server.models.dto.request.MessageSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.MessagesDto;
 import com.engly.engly_server.models.entity.Message;
@@ -38,17 +38,17 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessagesDto sendMessage(CreateMessageData createMessageData) {
+    public MessagesDto sendMessage(MessageRequest.CreateMessageRequest createMessageRequest) {
         final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
-        final var room = roomService.findRoomEntityById(createMessageData.roomId());
+        final var room = roomService.findRoomEntityById(createMessageRequest.roomId());
 
         chatParticipantsService.addParticipant(room, user, RoomRoles.USER);
 
         final var savedMessage = messageRepository.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
-                .content(createMessageData.content())
-                .imageUrl(driveService.getImageThumbnailLink(createMessageData.imageId()))
+                .content(createMessageRequest.content())
+                .imageUrl(driveService.getImageThumbnailLink(createMessageRequest.imageId()))
                 .user(user)
                 .room(room)
                 .build());

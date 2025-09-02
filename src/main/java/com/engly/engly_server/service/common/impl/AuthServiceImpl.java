@@ -1,17 +1,17 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.models.dto.request.AuthRequest;
 import com.engly.engly_server.models.dto.response.AuthResponseDto;
-import com.engly.engly_server.models.dto.request.SignInRequest;
-import com.engly.engly_server.models.dto.request.SignUpRequest;
 import com.engly.engly_server.models.entity.Users;
-import com.engly.engly_server.models.enums.*;
+import com.engly.engly_server.models.enums.Provider;
+import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.jwt.JwtHolder;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
-import com.engly.engly_server.service.common.AuthService;
 import com.engly.engly_server.security.registration.RegistrationChooser;
+import com.engly.engly_server.service.common.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDto getJwtTokensAfterAuthentication(SignInRequest signInDto, HttpServletResponse response) {
+    public AuthResponseDto getJwtTokensAfterAuthentication(AuthRequest.SignInRequest signInDto, HttpServletResponse response) {
         final var authentication = jwtAuthenticationService.authenticateCredentials(signInDto);
         return userRepository.findByEmail(signInDto.email())
                 .map(users -> {
@@ -83,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDto registerUser(SignUpRequest signUpRequestDto, HttpServletResponse httpServletResponse) {
+    public AuthResponseDto registerUser(AuthRequest.SignUpRequest signUpRequestDto, HttpServletResponse httpServletResponse) {
         final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
         final var jwtHolder = jwtAuthenticationService.authentication(user, httpServletResponse);
 
@@ -99,7 +99,7 @@ public class AuthServiceImpl implements AuthService {
                     return existingUser;
                 })
                 .orElseGet(() -> chooserMap.get(Provider.GOOGLE)
-                        .registration(SignUpRequest.builder()
+                        .registration(AuthRequest.SignUpRequest.builder()
                                 .username(name)
                                 .email(email)
                                 .providerId(providerId)

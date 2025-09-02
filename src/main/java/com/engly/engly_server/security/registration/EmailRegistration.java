@@ -1,7 +1,7 @@
 package com.engly.engly_server.security.registration;
 
 import com.engly.engly_server.exception.FieldValidationException;
-import com.engly.engly_server.models.dto.request.SignUpRequest;
+import com.engly.engly_server.models.dto.request.AuthRequest;
 import com.engly.engly_server.models.entity.AdditionalInfo;
 import com.engly.engly_server.models.entity.UserSettings;
 import com.engly.engly_server.models.entity.Users;
@@ -30,7 +30,7 @@ public final class EmailRegistration implements RegistrationChooser {
     private String devEmail;
 
     @Override
-    public Users registration(SignUpRequest signUpRequestDto) {
+    public Users registration(AuthRequest.SignUpRequest signUpRequestDto) {
         try {
             log.info("[AuthService:registerUser]User Registration Started with :::{}", signUpRequestDto);
             userRepository.findByEmail(signUpRequestDto.email()).ifPresent(_ -> {
