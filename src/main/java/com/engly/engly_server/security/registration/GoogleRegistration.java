@@ -1,6 +1,6 @@
 package com.engly.engly_server.security.registration;
 
-import com.engly.engly_server.models.dto.request.SignUpRequest;
+import com.engly.engly_server.models.dto.request.AuthRequest;
 import com.engly.engly_server.models.entity.UserSettings;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.NativeLanguage;
@@ -29,7 +29,7 @@ public final class GoogleRegistration implements RegistrationChooser {
     private String devEmail;
 
     @Override
-    public Users registration(SignUpRequest signUpRequestDto) {
+    public Users registration(AuthRequest.SignUpRequest signUpRequestDto) {
         log.info("Registering Google user with email: {}", signUpRequestDto.email());
         userRepository.findByEmail(signUpRequestDto.email()).ifPresent(_ -> {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this Google email already exists");

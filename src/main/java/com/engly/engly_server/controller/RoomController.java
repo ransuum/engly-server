@@ -1,9 +1,8 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.RoomsDto;
-import com.engly.engly_server.models.dto.request.RoomRequest;
-import com.engly.engly_server.models.dto.request.RoomUpdateRequest;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.service.common.RoomService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
@@ -56,9 +55,9 @@ public class RoomController {
     public ResponseEntity<RoomsDto> createRoom(
             @Parameter(description = "The category to assign the new room to.", required = true)
             @RequestParam CategoryType name,
-            @Valid @RequestBody RoomRequest roomRequestDto,
+            @RequestBody @Valid RoomRequest.RoomCreateRequest roomCreateRequestDto,
             @AuthenticationPrincipal Jwt jwt) {
-        return ResponseEntity.status(201).body(roomService.createRoom(jwt.getClaim("userId"), name, roomRequestDto));
+        return ResponseEntity.status(201).body(roomService.createRoom(jwt.getClaim("userId"), name, roomCreateRequestDto));
     }
 
 
@@ -115,7 +114,7 @@ public class RoomController {
     @PreAuthorize("hasAuthority('SCOPE_UPDATE_GLOBAL')")
     @RateLimiter(name = "RoomController")
     public RoomsDto updateRoom(@PathVariable String id,
-                               @Valid @RequestBody RoomUpdateRequest request) {
+                               @RequestBody RoomRequest.RoomUpdateRequest request) {
         return roomService.updateRoom(id, request);
     }
 }

@@ -3,10 +3,9 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
+import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.RoomsDto;
-import com.engly.engly_server.models.dto.request.RoomRequest;
-import com.engly.engly_server.models.dto.request.RoomUpdateRequest;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.enums.RoomRoles;
@@ -49,19 +48,19 @@ public class RoomServiceImpl implements RoomService {
                     @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
             }
     )
-    public RoomsDto createRoom(String id, CategoryType name, RoomRequest roomRequestDto) {
-        if (roomRepository.existsByName(roomRequestDto.name()))
+    public RoomsDto createRoom(String id, CategoryType name, RoomRequest.RoomCreateRequest roomCreateRequestDto) {
+        if (roomRepository.existsByName(roomCreateRequestDto.name()))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 
-        final var room = roomRepository.save(Rooms.builder()
+        final var room = Rooms.builder()
                 .creator(userService.findEntityById(id))
                 .createdAt(Instant.now())
                 .category(categoriesService.findByName(name))
-                .description(roomRequestDto.description())
-                .name(roomRequestDto.name())
-                .build());
+                .description(roomCreateRequestDto.description())
+                .name(roomCreateRequestDto.name())
+                .build();
 
-        chatParticipantsService.addParticipant(room, room.getCreator(), RoomRoles.ADMIN);
+        chatParticipantsService.addParticipant(roomRepository.save(room), room.getCreator(), RoomRoles.ADMIN);
         return RoomMapper.INSTANCE.roomToDto(room);
     }
 
@@ -99,7 +98,7 @@ public class RoomServiceImpl implements RoomService {
                     @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
             }
     )
-    public RoomsDto updateRoom(String id, RoomUpdateRequest request) {
+    public RoomsDto updateRoom(String id, RoomRequest.RoomUpdateRequest request) {
         return roomRepository.findById(id)
                 .map(room -> {
                     if (FieldUtil.isValid(request.newCategory()))

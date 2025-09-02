@@ -1,8 +1,7 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.request.AuthRequest;
 import com.engly.engly_server.models.dto.response.AuthResponseDto;
-import com.engly.engly_server.models.dto.request.SignInRequest;
-import com.engly.engly_server.models.dto.request.SignUpRequest;
 import com.engly.engly_server.service.common.AuthService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,7 +18,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -56,7 +58,7 @@ public class AuthController {
     })
     @PostMapping("/sign-in")
     @RateLimiter(name = "AuthController")
-    public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody SignInRequest signInDto, HttpServletResponse response) {
+    public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody AuthRequest.SignInRequest signInDto, HttpServletResponse response) {
         return ResponseEntity.ok(authService.getJwtTokensAfterAuthentication(signInDto, response));
     }
 
@@ -90,7 +92,7 @@ public class AuthController {
     })
     @PostMapping("/sign-up")
     @RateLimiter(name = "AuthController")
-    public ResponseEntity<Object> signUpUser(@Valid @RequestBody SignUpRequest signUpRequestDto,
+    public ResponseEntity<Object> signUpUser(@Valid @RequestBody AuthRequest.SignUpRequest signUpRequestDto,
                                              BindingResult bindingResult, HttpServletResponse httpServletResponse) {
 
         log.info("[AuthController:registerUser]Signup Process Started for user:{}", signUpRequestDto.username());

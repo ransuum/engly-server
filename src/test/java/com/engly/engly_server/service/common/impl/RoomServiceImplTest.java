@@ -6,7 +6,6 @@ import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
-import com.engly.engly_server.models.dto.request.RoomUpdateRequest;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.entity.Rooms;
@@ -98,8 +97,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
 
     @Test
     void createRoom_Success() {
-        // Given
-        RoomRequest roomRequest = new RoomRequest("New Test Room", "Test Description");
+        var roomCreateRequest = new RoomRequest.RoomCreateRequest("New Test Room", "Test Description");
         String userId = testUser.getId();
 
         when(userService.findEntityById(userId)).thenReturn(testUser);
@@ -107,7 +105,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
         doNothing().when(chatParticipantsService).addParticipant(any(Rooms.class), any(Users.class), eq(RoomRoles.ADMIN));
 
         // When
-        RoomsDto result = roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomRequest);
+        RoomsDto result = roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomCreateRequest);
 
         // Then
         assertThat(result).isNotNull();
@@ -125,13 +123,13 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     @Test
     void createRoom_ThrowsEntityAlreadyExistsException_WhenRoomNameExists() {
         // Given
-        RoomRequest roomRequest = new RoomRequest(testRoom.getName(), "Different Description");
+        var roomCreateRequest = new RoomRequest.RoomCreateRequest(testRoom.getName(), "Different Description");
         String userId = testUser.getId();
 
         when(userService.findEntityById(userId)).thenReturn(testUser);
 
         // When & Then
-        assertThatThrownBy(() -> roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomRequest))
+        assertThatThrownBy(() -> roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomCreateRequest))
                 .isInstanceOf(EntityAlreadyExistsException.class);
     }
 
@@ -200,7 +198,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     void updateRoom_Success() {
         // Given
         String roomId = testRoom.getId();
-        RoomUpdateRequest updateRequest = new RoomUpdateRequest(
+        var updateRequest = new RoomRequest.RoomUpdateRequest(
                 "Updated Room Name",
                 "Updated Description",
                 CategoryType.TECH,
@@ -226,7 +224,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     void updateRoom_ThrowsNotFoundException_WhenRoomNotExists() {
         // Given
         String nonExistentRoomId = "non-existent-id";
-        RoomUpdateRequest updateRequest = new RoomUpdateRequest(
+        var updateRequest = new RoomRequest.RoomUpdateRequest(
                 "Updated Name", "Updated Description", null, null
         );
 
@@ -292,7 +290,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     @Test
     void createRoom_WithNullDescription() {
         // Given
-        RoomRequest roomRequest = new RoomRequest("Room Without Description", null);
+        var roomCreateRequest = new RoomRequest.RoomCreateRequest("Room Without Description", null);
         String userId = testUser.getId();
 
         when(userService.findEntityById(userId)).thenReturn(testUser);
@@ -300,7 +298,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
         doNothing().when(chatParticipantsService).addParticipant(any(Rooms.class), any(Users.class), eq(RoomRoles.ADMIN));
 
         // When
-        RoomsDto result = roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomRequest);
+        RoomsDto result = roomService.createRoom(userId, CategoryType.GENERAL_CHAT, roomCreateRequest);
 
         // Then
         assertThat(result).isNotNull();
@@ -312,7 +310,7 @@ class RoomServiceImplTest extends AbstractTestcontainersConfiguration {
     void updateRoom_PartialUpdate() {
         // Given
         String roomId = testRoom.getId();
-        RoomUpdateRequest updateRequest = new RoomUpdateRequest(
+        var updateRequest = new RoomRequest.RoomUpdateRequest(
                 "Only Name Updated",
                 null,
                 null,
