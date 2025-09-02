@@ -35,6 +35,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Slf4j
 @RequiredArgsConstructor
 public class RoomServiceImpl implements RoomService {
+
     private final RoomRepository roomRepository;
     private final UserService userService;
     private final CategoriesService categoriesService;

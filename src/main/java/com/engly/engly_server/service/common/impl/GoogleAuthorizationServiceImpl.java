@@ -21,6 +21,7 @@ import java.util.Optional;
 @Slf4j
 @RequiredArgsConstructor
 public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHandler {
+
     private final AuthService authService;
 
     @Value("${app.frontend.url}")
@@ -40,7 +41,7 @@ public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHand
 
         authService.processOAuth2PostLogin(email, name, providerId, response);
 
-        final var builderUrl = UriComponentsBuilder.fromUriString(frontendUrl)
+        final String builderUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                 .path("/google-auth/callback")
                 .build().toUriString();
         response.sendRedirect(builderUrl);

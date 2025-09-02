@@ -89,60 +89,12 @@ management:
       maximum-expected-value:
         "[http.server.requests]": "10s"
 
-      tags:
-        application: ${spring.application.name:engly-server}
-        environment: ${spring.profiles.active:default}
-        version: ${app.version:1.0.0}
-        region: ${app.region:local}
-
-      web:
-        server:
-          request:
-            autotime:
-              enabled: true
-              percentiles: "0.5,0.75,0.95,0.99"
-            metric-name: http_server_requests
-
   prometheus:
     metrics:
       export:
         enabled: true
         step: 30s
         descriptions: true
-        # Common labels for all metrics
-        common-tags:
-          application: ${spring.application.name}
-          instance: ${spring.application.name}-${random.uuid}
-
-    # Simple metrics export (for testing)
-    simple:
-      metrics:
-        export:
-          enabled: false  # Disable in production, only use prometheus
-
-    # Info endpoint configuration
-    info:
-      build:
-        enabled: true
-      env:
-        enabled: true
-      git:
-        enabled: true
-        mode: full
-      java:
-        enabled: true
-      os:
-        enabled: true
-
-  # Application info
-  info:
-    app:
-      name: ${spring.application.name}
-      description: "Engly Server Application"
-      version: "@project.version@"
-      encoding: "@project.build.sourceEncoding@"
-      java:
-        version: "@java.version@"
 
 springdoc:
   swagger-ui:
