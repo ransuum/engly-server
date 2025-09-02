@@ -1,9 +1,9 @@
 package com.engly.engly_server.cache.components.impl;
 
 import com.engly.engly_server.cache.components.MessageReadCache;
+import com.engly.engly_server.exception.RepositoryException;
 import com.engly.engly_server.models.entity.MessageRead;
 import com.engly.engly_server.repository.MessageReadRepository;
-import com.engly.engly_server.exception.RepositoryException;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -24,7 +23,6 @@ import java.util.stream.IntStream;
 public class MessageReadCacheImpl implements MessageReadCache {
     private final MessageReadRepository messageReadRepository;
     private final CacheManager cacheManager;
-    private final Executor virtualThreadExecutor;
 
     @Override
     @Cacheable(
@@ -60,10 +58,10 @@ public class MessageReadCacheImpl implements MessageReadCache {
                         log.debug("Saved batch of {} message reads", batch.size());
                         return saved;
                     } catch (Exception e) {
-                        log.error("Failed to save batch: {}", e.getMessage(), e);
+                        log.error("Failed to save batch: {}", e.getMessage());
                         throw new RepositoryException("Batch save failed", e);
                     }
-                }, virtualThreadExecutor))
+                }))
                 .toList();
 
         final var savedReads = futures.stream()
