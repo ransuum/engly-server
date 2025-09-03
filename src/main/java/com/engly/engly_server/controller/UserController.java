@@ -11,11 +11,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.PagedModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -52,11 +50,9 @@ public class UserController {
     })
     @GetMapping
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<PagedModel<EntityModel<UsersDto>>> getUsers(@ParameterObject
-                                                                      @PageableDefault(sort = "username,asc") Pageable pageable,
-                                                                      PagedResourcesAssembler<UsersDto> assembler) {
-        final var users = userService.allUsers(pageable);
-        return ResponseEntity.ok(assembler.toModel(users));
+    public Page<UsersDto> getUsers(@ParameterObject
+                                   @PageableDefault(sort = "username,asc") Pageable pageable) {
+        return userService.allUsers(pageable);
     }
 
     @Operation(summary = "Delete a single user by ID")
