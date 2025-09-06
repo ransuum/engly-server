@@ -44,7 +44,7 @@ public class ChatController {
     @MessageMapping("/chat/message.markAsRead")
     public void markMessagesAsRead(@Payload MessageRequest.MarkAsReadRequest request) {
         final var userId = userService.getUserIdByEmail(authenticatedUserProvider.getCurrentUserEmail());
-        messageReadService.markMessageAsRead(request.messageId(), userId);
+        messageReadService.markMessageAsRead(request.messageId(), userId).join();
 
         messagingTemplate.convertAndSend(
                 TOPIC_MESSAGES + request.roomId(),

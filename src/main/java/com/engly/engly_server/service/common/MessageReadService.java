@@ -5,9 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface MessageReadService {
-    void markMessageAsRead(List<String> messageIds, String userId);
+    CompletableFuture<Void> markMessageAsRead(List<String> messageIds, String userId);
 
     Page<UserWhoReadsMessageDto> getUsersWhoReadMessage(String messageId, Pageable pageable);
 }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ import java.util.stream.IntStream;
 @Component
 @RequiredArgsConstructor
 public class MessageReadCacheImpl implements MessageReadCache {
+
     private final MessageReadRepository messageReadRepository;
     private final CacheManager cacheManager;
 
@@ -34,11 +36,12 @@ public class MessageReadCacheImpl implements MessageReadCache {
     }
 
     @Override
+    @Async
     @Transactional
-    public void batchSaveMessageReads(List<MessageRead> messageReads) {
+    public CompletableFuture<Void> batchSaveMessageReads(List<MessageRead> messageReads) {
         if (messageReads == null || messageReads.isEmpty()) {
             log.debug("No message reads to save");
-            return;
+            return null;
         }
 
         log.debug("Batch saving {} message reads", messageReads.size());
@@ -58,7 +61,6 @@ public class MessageReadCacheImpl implements MessageReadCache {
                         log.debug("Saved batch of {} message reads", batch.size());
                         return saved;
                     } catch (Exception e) {
-                        log.error("Failed to save batch: {}", e.getMessage());
                         throw new RepositoryException("Batch save failed", e);
                     }
                 }))
@@ -69,12 +71,14 @@ public class MessageReadCacheImpl implements MessageReadCache {
                 .flatMap(List::stream)
                 .toList();
 
-        updateCacheForSavedReads(savedReads);
+        return CompletableFuture.completedFuture(updateCacheForSavedReads(savedReads));
     }
 
-    private void updateCacheForSavedReads(List<MessageRead> savedReads) {
+
+    private Void updateCacheForSavedReads(List<MessageRead> savedReads) {
         final var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
         if (cache != null) savedReads.forEach(mr ->
                 cache.put(mr.getMessageId() + "_" + mr.getUserId(), true));
+        return null;
     }
 }
