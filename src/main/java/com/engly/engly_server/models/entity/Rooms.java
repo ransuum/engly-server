@@ -28,9 +28,8 @@ public class Rooms implements Serializable {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "id")
-    private Categories category;
+    @Column(name = "category_id", nullable = false)
+    private String categoryId;
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -48,12 +47,6 @@ public class Rooms implements Serializable {
     @ManyToOne
     @JoinColumn(referencedColumnName = "id", name = "creator_id")
     private Users creator;
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Message> messages;
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ChatParticipants> chatParticipants;
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Moderation> moderation;

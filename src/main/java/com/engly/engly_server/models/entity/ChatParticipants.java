@@ -27,9 +27,8 @@ public class ChatParticipants implements Serializable {
     @Column(nullable = false, updatable = false)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "room_id", referencedColumnName = "id")
-    private Rooms room;
+    @Column(name = "room_id", nullable = false)
+    private String roomId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")

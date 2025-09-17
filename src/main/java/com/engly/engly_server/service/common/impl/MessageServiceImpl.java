@@ -39,11 +39,10 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessagesDto sendMessage(MessageRequest.CreateMessageRequest createMessageRequest) {
+    public MessagesDto sendMessage(MessageRequest createMessageRequest) {
         final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
-        final var room = roomService.findRoomEntityById(createMessageRequest.roomId());
 
-        chatParticipantsService.addParticipant(room, user, RoomRoles.USER);
+        chatParticipantsService.addParticipant(createMessageRequest.roomId(), user, RoomRoles.USER);
 
         final var savedMessage = messageRepository.save(Message.builder()
                 .isEdited(Boolean.FALSE)
@@ -51,7 +50,7 @@ public class MessageServiceImpl implements MessageService {
                 .content(createMessageRequest.content())
                 .imageUrl(driveService.getImageThumbnailLink(createMessageRequest.imageId()))
                 .user(user)
-                .room(room)
+                .roomId(createMessageRequest.roomId())
                 .build());
         return MessageMapper.INSTANCE.toMessageDto(savedMessage);
     }
@@ -60,15 +59,16 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     @Caching(
             evict = {
-                    @CacheEvict(value = CacheName.MESSAGE_ID, key = "#id"),
+                    @CacheEvict(value = CacheName.MESSAGE_ID, key = "#deleteRequest.messageId()"),
                     @CacheEvict(value = CacheName.MESSAGE_COUNT_BY_ROOM, allEntries = true)
             }
     )
-    public void deleteMessage(String id) {
-        messageRepository.findById(id).ifPresentOrElse(_ -> messageRepository.deleteById(id),
-                () -> {
-                    throw new NotFoundException(NOT_FOUND_MESSAGE);
-                });
+    public void deleteMessage(MessageRequest deleteRequest) {
+        messageRepository.findById(deleteRequest.messageId())
+                .ifPresentOrElse(_ -> messageRepository.deleteById(deleteRequest.messageId()),
+                        () -> {
+                            throw new NotFoundException(NOT_FOUND_MESSAGE);
+                        });
     }
 
     @Override
@@ -82,10 +82,10 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessagesDto editMessage(String id, String content) {
-        return messageRepository.findById(id)
+    public MessagesDto editMessage(MessageRequest editRequest) {
+        return messageRepository.findById(editRequest.messageId())
                 .map(message -> {
-                    message.setContent(content);
+                    message.setContent(editRequest.content());
                     message.setIsEdited(Boolean.TRUE);
                     return MessageMapper.INSTANCE.toMessageDto(messageRepository.save(message));
                 })

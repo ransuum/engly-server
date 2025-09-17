@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Builder
 public record MessageSearchCriteriaRequest(
         String roomId,
-        String roomName,
         CategoryType roomCategory,
         String userId,
         String username,
@@ -38,7 +37,6 @@ public record MessageSearchCriteriaRequest(
                 MessageSpecification.updatedBefore(updatedBefore),
                 MessageSpecification.userIdEquals(userId),
                 MessageSpecification.roomIdEquals(roomId),
-                MessageSpecification.roomNameLike(roomName),
                 MessageSpecification.search(keyword)
         );
     }

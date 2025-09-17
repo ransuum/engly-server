@@ -6,9 +6,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface MessageReadRepository extends JpaRepository<MessageRead, MessageRead.MessageReadId> {
+public interface MessageReadRepository extends JpaRepository<MessageRead, String> {
 
     boolean existsByMessageIdAndUserId(String messageId, String userId);
 
-    Page<MessageRead> findAllByMessageId(@Param("messageId") String messageId, Pageable pageable);
+    Page<MessageRead> findAllByMessageId(@Param("messageIds") String messageId, Pageable pageable);
 }

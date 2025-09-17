@@ -6,13 +6,15 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CategoryMapper {
     CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
-    @Mapping(target = "activeRoomsCount",
-            expression = "java(categories.getRooms() != null ? categories.getRooms().size() : 0)")
+    @Mapping(target = "activeRoomsCount", source = "count")
     @Mapping(target = "icon", expression = "java(categories.getName().getIcon())")
     @Mapping(target = "name", expression = "java(categories.getName().getVal())")
+    CategoriesDto toCategoriesDto(Categories categories, int count);
+
+    @Mapping(target = "activeRoomsCount", ignore = true)
     CategoriesDto toCategoriesDto(Categories categories);
 }

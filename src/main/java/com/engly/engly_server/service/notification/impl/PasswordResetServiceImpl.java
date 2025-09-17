@@ -28,6 +28,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class PasswordResetServiceImpl implements PasswordResetService {
+
     private final VerifyTokenRepository tokenRepo;
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
@@ -35,13 +36,10 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     private final PasswordEncoder passwordEncoder;
     private final JwtAuthenticationService jwtAuthenticationService;
 
-
     @Value("classpath:/emailTemplates/password-resetTemplate.txt")
     private Resource messageTemplate;
     @Value("${app.email.notification.password-reset.url}")
     private String urlTemplate;
-    @Value("#{'${sysadmin.email}'.split(',\\s*')}")
-    private Set<String> sysadminEmails;
 
 
     @Override
@@ -60,7 +58,6 @@ public class PasswordResetServiceImpl implements PasswordResetService {
         }
     }
 
-
     @Override
     @Transactional
     public AuthResponseDto passwordReset(PasswordResetRequest data, HttpServletResponse response) {
@@ -72,7 +69,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                                 user.setPassword(passwordEncoder.encode(data.newPassword()));
                                 if (Boolean.FALSE.equals(user.getEmailVerified())) {
                                     user.setEmailVerified(true);
-                                    user.setRoles(sysadminEmails.contains(verifyToken.getEmail()) ? "ROLE_SYSADMIN" : "ROLE_USER");
+                                    user.setRoles("ROLE_USER");
                                 }
 
                                 tokenRepo.delete(verifyToken);

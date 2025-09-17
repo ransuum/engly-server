@@ -8,14 +8,16 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Entity
-@Table(name = "messages")
-@ToString(exclude = {"room", "user", "messageReads"})
+@Table(name = "messages", indexes = {
+        @Index(name = "idx_room_created", columnList = "room_id, created_at"),
+        @Index(name = "idx_user_created", columnList = "user_id, created_at")
+})
+@ToString(exclude = {"user"})
 @Builder
 public class Message implements Serializable {
     @Serial
@@ -23,24 +25,19 @@ public class Message implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(nullable = false, updatable = false)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "room_id", referencedColumnName = "id")
-    private Rooms room;
+    @Column(name = "room_id", nullable = false)
+    private String roomId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private Users user;
 
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<MessageRead> messageReads;
-
-    @Column(name = "content")
+    @Column(name = "content", length = 4000)
     private String content;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", length = 500)
     private String imageUrl;
 
     @CreationTimestamp

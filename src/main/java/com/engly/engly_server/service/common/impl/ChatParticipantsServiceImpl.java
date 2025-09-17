@@ -38,12 +38,12 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true),
-            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#rooms.id + '-' + #user.id")
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#roomId + '-' + #user.id")
     })
-    public void addParticipant(Rooms rooms, Users user, RoomRoles role) {
-        if (!chatParticipantCache.isParticipantExists(rooms.getId(), user.getId())) {
+    public void addParticipant(String roomId, Users user, RoomRoles role) {
+        if (!chatParticipantCache.isParticipantExists(roomId, user.getId())) {
             final var chatParticipant = ChatParticipants.builder()
-                    .room(rooms)
+                    .roomId(roomId)
                     .user(user)
                     .role(role)
                     .build();
@@ -56,7 +56,8 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     @Transactional(timeout = 30)
     @Caching(evict = {
             @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true),
-            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true),
+            @CacheEvict(value = CacheName.COUNT_PARTICIPANTS, allEntries = true)
     })
     public void removeParticipant(String participantId) {
         chatParticipantRepository.findById(participantId)
@@ -83,6 +84,12 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
                     throw new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId));
                 });
 
+    }
+
+    @Override
+    @Cacheable(value = CacheName.COUNT_PARTICIPANTS, key = "#roomId")
+    public int countActiveParticipants(String roomId) {
+        return chatParticipantRepository.countChatParticipantsByRoomId(roomId);
     }
 
     @Override

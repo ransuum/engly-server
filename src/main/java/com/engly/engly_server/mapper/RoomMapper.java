@@ -2,8 +2,8 @@ package com.engly.engly_server.mapper;
 
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.entity.Rooms;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import com.engly.engly_server.service.common.ChatParticipantsService;
+import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 @Mapper(uses = {
@@ -11,17 +11,20 @@ import org.mapstruct.factory.Mappers;
         UserMapper.class,
         ChatParticipantMapper.class,
         ModerationMapper.class,
-        MessageMapper.class })
+        MessageMapper.class},
+        componentModel = "spring")
 public interface RoomMapper {
     RoomMapper INSTANCE = Mappers.getMapper(RoomMapper.class);
 
-    @Mapping(
-            target = "lastMessage",
-            expression = "java(MessageMapper.INSTANCE.getLastMessage(rooms))"
-    )
-    @Mapping(
-            target = "members",
-            expression = "java(rooms.getChatParticipants() != null ? (long) rooms.getChatParticipants().size() : 0L)"
-    )
+    @Mapping(target = "members", expression = "java(getMemberCount(rooms.getId(), chatParticipantsService))")
+    RoomsDto roomToDto(Rooms rooms, @Context ChatParticipantsService chatParticipantsService);
+
+    @Mapping(target = "members", ignore = true)
+    @Mapping(target = "lastMessage", ignore = true)
     RoomsDto roomToDto(Rooms rooms);
+
+    default int getMemberCount(String roomId, ChatParticipantsService chatParticipantsService) {
+        if (roomId == null) return 0;
+        return chatParticipantsService.countActiveParticipants(roomId);
+    }
 }

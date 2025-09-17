@@ -3,10 +3,12 @@ package com.engly.engly_server.service.common.impl;
 import com.engly.engly_server.cache.CacheCoordinator;
 import com.engly.engly_server.cache.components.MessageReadCache;
 import com.engly.engly_server.mapper.UserMapper;
+import com.engly.engly_server.models.dto.request.MessageRequest;
 import com.engly.engly_server.models.dto.response.UserWhoReadsMessageDto;
 import com.engly.engly_server.models.entity.MessageRead;
 import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.service.common.MessageReadService;
+import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -19,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.AbstractMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,11 +30,13 @@ public class MessageReadServiceImpl implements MessageReadService {
 
     private final MessageReadRepository messageReadRepository;
     private final MessageReadCache messageReadCache;
+    private final UserService userService;
 
     public MessageReadServiceImpl(MessageReadRepository messageReadRepository,
-                                  CacheCoordinator messageReadCache) {
+                                  CacheCoordinator messageReadCache, UserService userService) {
         this.messageReadRepository = messageReadRepository;
         this.messageReadCache = messageReadCache.getMessageReadCache();
+        this.userService = userService;
     }
 
     @Override
@@ -43,10 +46,10 @@ public class MessageReadServiceImpl implements MessageReadService {
             @CacheEvict(value = CacheName.USERS_WHO_READ_MESSAGE, allEntries = true),
             @CacheEvict(value = CacheName.MESSAGE_READ_STATUS, allEntries = true)
     })
-    public CompletableFuture<Void> markMessageAsRead(List<String> messageIds, String userId) {
-        if (messageIds == null || messageIds.isEmpty()) return null;
+    public CompletableFuture<Void> markMessageAsRead(MessageRequest messageRequest, String userId) {
+        if (messageRequest.messageIds() == null || messageRequest.messageIds().isEmpty()) return null;
 
-        final var futures = messageIds.stream()
+        final var futures = messageRequest.messageIds().stream()
                 .map(messageId -> CompletableFuture.supplyAsync(() ->
                                 new AbstractMap.SimpleEntry<>(messageId,
                                         messageReadCache.hasUserReadMessage(messageId, userId))))
@@ -63,7 +66,7 @@ public class MessageReadServiceImpl implements MessageReadService {
         final var newReads = unreadMessageIds.stream()
                 .map(messageId -> MessageRead.builder()
                         .messageId(messageId)
-                        .userId(userId)
+                        .user(userService.findEntityById(userId))
                         .build())
                 .toList();
 

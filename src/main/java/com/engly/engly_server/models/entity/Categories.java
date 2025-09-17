@@ -12,7 +12,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -43,7 +42,4 @@ public class Categories implements Serializable {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Rooms> rooms;
 }

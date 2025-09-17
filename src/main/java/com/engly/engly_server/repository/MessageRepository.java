@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface MessageRepository extends JpaRepository<Message, String>, JpaSpecificationExecutor<Message> {
-    @Query("SELECT m FROM Message m WHERE m.room.id = :roomId AND m.isDeleted = false")
+    @Query("SELECT m FROM Message m WHERE m.roomId = :roomId AND m.isDeleted = false")
     Page<Message> findActive(@Param("roomId") String roomId, Pageable pageable);
 }

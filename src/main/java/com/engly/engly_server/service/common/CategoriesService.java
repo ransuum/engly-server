@@ -23,5 +23,7 @@ public interface CategoriesService {
 
     Categories findByName(CategoryType name);
 
+    String getCategoryIdByName(CategoryType name);
+
     Categories findCategoryEntityById(String id);
 }
