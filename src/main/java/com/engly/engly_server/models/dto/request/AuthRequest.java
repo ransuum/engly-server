@@ -14,7 +14,7 @@ import lombok.Builder;
         @JsonSubTypes.Type(value = AuthRequest.SignUpRequest.class, name = "signup"),
         @JsonSubTypes.Type(value = AuthRequest.SignInRequest.class, name = "signin")
 })
-public sealed interface AuthRequest {
+public sealed interface     AuthRequest {
 
     @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)

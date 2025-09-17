@@ -31,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MessageServiceImpl implements MessageService {
 
     private final MessageRepository messageRepository;
-    private final RoomService roomService;
     private final UserService userService;
     private final AuthenticatedUserProvider service;
     private final ChatParticipantsService chatParticipantsService;
