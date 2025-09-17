@@ -2,6 +2,7 @@ package com.engly.engly_server.specs;
 
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -15,9 +16,8 @@ public final class RoomSpecification {
     private static final String CREATED_AT_FIELD = "createdAt";
     private static final String NAME_FIELD = "name";
     private static final String DESCRIPTION_FIELD = "description";
-    private static final String CATEGORY_FIELD = "category";
+    private static final String CATEGORY_FIELD = "categoryId";
     private static final String CREATOR_FIELD = "creator";
-    private static final String CHAT_PARTICIPANTS_FIELD = "chatParticipants";
 
     private RoomSpecification() {
         throw new UnsupportedOperationException("Utility class");
@@ -67,27 +67,15 @@ public final class RoomSpecification {
                 : criteriaBuilder.conjunction());
     }
 
-    public static Specification<Rooms> categoryEquals(CategoryType category) {
-        return ((root, _, criteriaBuilder) -> category != null
-                ? criteriaBuilder.equal(root.join(CATEGORY_FIELD).get("name"), category)
+    public static Specification<Rooms> categoryEquals(String categoryId) {
+        return ((root, _, criteriaBuilder) -> StringUtils.isNotBlank(categoryId)
+                ? criteriaBuilder.equal(root.get(CATEGORY_FIELD), categoryId)
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> creatorUsernameLike(String creatorUsername) {
         return ((root, _, criteriaBuilder) -> isNotBlank(creatorUsername)
                 ? criteriaBuilder.like(root.join(CREATOR_FIELD).get("username"), "%" + creatorUsername.toLowerCase() + "%")
-                : criteriaBuilder.conjunction());
-    }
-
-    public static Specification<Rooms> participantsLessThan(Integer participants) {
-        return ((root, _, criteriaBuilder) -> participants != null
-                ? criteriaBuilder.lessThan(criteriaBuilder.size(root.get(CHAT_PARTICIPANTS_FIELD)), participants)
-                : criteriaBuilder.conjunction());
-    }
-
-    public static Specification<Rooms> participantsGreaterThan(Integer participants) {
-        return ((root, _, criteriaBuilder) -> participants != null
-                ? criteriaBuilder.greaterThan(criteriaBuilder.size(root.get(CHAT_PARTICIPANTS_FIELD)), participants)
                 : criteriaBuilder.conjunction());
     }
 }

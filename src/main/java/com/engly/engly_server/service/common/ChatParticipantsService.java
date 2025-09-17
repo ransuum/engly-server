@@ -11,11 +11,13 @@ public interface ChatParticipantsService {
 
     String NOT_FOUND_MESSAGE = "Participant with id %s not found";
 
-    void addParticipant(Rooms rooms, Users user, RoomRoles role);
+    void addParticipant(String roomId, Users user, RoomRoles role);
 
     void removeParticipant(String participantId);
 
     void updateRoleOfParticipant(String participantId, RoomRoles role);
+
+    int countActiveParticipants(String roomId);
 
     Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable);
 }

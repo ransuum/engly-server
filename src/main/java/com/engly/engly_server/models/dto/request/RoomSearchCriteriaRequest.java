@@ -14,7 +14,7 @@ public record RoomSearchCriteriaRequest(
         String keyword,
         String name,
         String description,
-        CategoryType categoryType,
+        String categoryId,
         String creatorUsername,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdAfter,
@@ -32,14 +32,12 @@ public record RoomSearchCriteriaRequest(
                 RoomSpecification.search(keyword),
                 RoomSpecification.nameLike(name),
                 RoomSpecification.search(description),
-                RoomSpecification.categoryEquals(categoryType),
+                RoomSpecification.categoryEquals(categoryId),
                 RoomSpecification.creatorUsernameLike(creatorUsername),
                 RoomSpecification.createdAfter(createdAfter),
                 RoomSpecification.createdBefore(createdBefore),
                 RoomSpecification.descriptionLike(description),
-                RoomSpecification.between(startDate, endDate),
-                RoomSpecification.participantsLessThan(minParticipants),
-                RoomSpecification.participantsGreaterThan(maxParticipants)
+                RoomSpecification.between(startDate, endDate)
         );
     }
 }

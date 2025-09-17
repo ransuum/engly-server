@@ -13,7 +13,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public final class MessageSpecification {
     private static final String CREATED_AT_FIELD = "createdAt";
     private static final String UPDATED_AT_FIELD = "updatedAt";
-    private static final String ROOM_FIELD = "room";
+    private static final String ROOM_FIELD = "roomId";
     private static final String USER_FIELD = "user";
     private static final String ID_FIELD = "id";
     private static final String CONTENT_FIELD = "content";
@@ -88,13 +88,7 @@ public final class MessageSpecification {
 
     public static Specification<Message> roomIdEquals(String roomId) {
         return (root, _, cb) -> isNotBlank(roomId)
-                ? cb.equal(root.join(ROOM_FIELD).get(ID_FIELD), roomId)
-                : cb.conjunction();
-    }
-
-    public static Specification<Message> roomNameLike(String roomName) {
-        return (root, _, cb) -> isNotBlank(roomName)
-                ? cb.like(cb.lower(root.join(ROOM_FIELD).get("name")), "%" + roomName.toLowerCase() + "%")
+                ? cb.equal(root.get(ROOM_FIELD), roomId)
                 : cb.conjunction();
     }
 

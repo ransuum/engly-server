@@ -29,6 +29,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public class EmailVerificationServiceImpl implements EmailVerificationService {
+
     private final VerifyTokenRepository tokenRepo;
     private final EmailService emailService;
     private final EmailMessageGenerator messageGenerator;
@@ -39,9 +40,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private Resource messageTemplate;
     @Value("${app.email.notification.check.url}")
     private String urlTemplate;
-    @Value("#{'${sysadmin.email}'.split(',\\s*')}")
-    private Set<String> sysadminEmails;
-
 
     @Override
     public EmailSendInfo sendMessage(String email) {
@@ -74,7 +72,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
                     return userRepository.findByEmail(email).map(user -> {
                                 user.setEmailVerified(true);
-                                user.setRoles(sysadminEmails.contains(email) ? "ROLE_SYSADMIN" : "ROLE_USER");
+                                user.setRoles("ROLE_USER");
 
                                 tokenRepo.delete(verifyToken);
 

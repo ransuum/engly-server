@@ -16,43 +16,31 @@ import java.time.Instant;
 @Data
 @Builder
 @Entity
-@Table(name = "message_reads")
-@IdClass(MessageRead.MessageReadId.class)
+@Table(name = "message_reads", indexes = {
+        @Index(name = "idx_user_read_at", columnList = "user_id, read_at"),
+        @Index(name = "idx_message_user", columnList = "message_id, user_id")
+})
 public class MessageRead implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "message_id")
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @Column(name = "message_id", nullable = false)
     private String messageId;
 
-    @Id
-    @Column(name = "user_id")
-    private String userId;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_id", insertable = false, updatable = false)
-    private Message message;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
 
+    @Column(name = "room_id", nullable = false)
+    private String roomId;
+
     @CreationTimestamp
-    @Builder.Default
     @Column(nullable = false, name = "read_at")
-    private Instant readAt = Instant.now();
-
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Data
-    public static class MessageReadId implements Serializable {
-        @Serial
-        private static final long serialVersionUID = 1L;
-
-        private String messageId;
-        private String userId;
-    }
+    private Instant readAt;
 }
 
 

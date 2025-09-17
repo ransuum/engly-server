@@ -78,7 +78,7 @@ public class MessageReadCacheImpl implements MessageReadCache {
     private Void updateCacheForSavedReads(List<MessageRead> savedReads) {
         final var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
         if (cache != null) savedReads.forEach(mr ->
-                cache.put(mr.getMessageId() + "_" + mr.getUserId(), true));
+                cache.put(mr.getMessageId() + "_" + mr.getUser().getId(), true));
         return null;
     }
 }

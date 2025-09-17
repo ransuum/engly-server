@@ -2,6 +2,7 @@ package com.engly.engly_server.security.jwt.service;
 
 import com.engly.engly_server.exception.InvalidTokenTypeException;
 import com.engly.engly_server.exception.TokenGenerationException;
+import com.engly.engly_server.models.entity.ChatParticipants;
 import com.engly.engly_server.models.entity.RefreshToken;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.TokenType;
@@ -64,7 +65,7 @@ public abstract class JwtTokenService {
 
         return participants.stream()
                 .collect(Collectors.toMap(
-                        p -> p.getRoom().getId(),
+                        ChatParticipants::getRoomId,
                         p -> p.getRole().name()
                 ));
     }

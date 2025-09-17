@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface RoomRepository extends JpaRepository<Rooms, String>, JpaSpecificationExecutor<Rooms> {
-    Page<Rooms> findByCategoryName(CategoryType categoryName, Pageable pageable);
+    Page<Rooms> findByCategoryId(String categoryId, Pageable pageable);
 
     boolean existsByName(String name);
 }
