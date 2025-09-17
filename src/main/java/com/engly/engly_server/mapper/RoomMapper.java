@@ -1,5 +1,6 @@
 package com.engly.engly_server.mapper;
 
+import com.engly.engly_server.models.dto.response.RoomDtoShort;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.service.common.ChatParticipantsService;
@@ -22,6 +23,8 @@ public interface RoomMapper {
     @Mapping(target = "members", ignore = true)
     @Mapping(target = "lastMessage", ignore = true)
     RoomsDto roomToDto(Rooms rooms);
+
+    RoomDtoShort roomToDtoShort(Rooms rooms);
 
     default int getMemberCount(String roomId, ChatParticipantsService chatParticipantsService) {
         if (roomId == null) return 0;
