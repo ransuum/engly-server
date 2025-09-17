@@ -1,9 +1,9 @@
 package com.engly.engly_server.security.cookiemanagement;
 
-import com.engly.engly_server.exception.TokenNotFoundException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
@@ -14,16 +14,16 @@ public record CookieUtils(Cookie[] cookies) {
         this.cookies = cookies == null ? null : cookies.clone();
     }
 
-    public String getRefreshTokenCookie() {
-        if (cookies == null) throw new TokenNotFoundException("No cookies found in request");
+    public @Nullable String getRefreshTokenCookie() {
+        if (cookies == null) return null;
         return Arrays.stream(cookies)
                 .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)
-                .orElseThrow(() -> new TokenNotFoundException("Refresh token is not found in cookies"));
+                .orElse(null);
     }
 
-    public void clearCookies(HttpServletResponse response) {
+    public void clearCookies(@NonNull HttpServletResponse response) {
         final var cookie = ResponseCookie.from("refreshToken", "deleted")
                 .maxAge(0)
                 .path("/")

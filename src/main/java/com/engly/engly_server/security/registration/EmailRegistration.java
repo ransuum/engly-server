@@ -23,11 +23,9 @@ import java.time.Instant;
 @Slf4j
 @RequiredArgsConstructor
 public final class EmailRegistration implements RegistrationChooser {
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${dev.email}")
-    private String devEmail;
 
     @Override
     public Users registration(AuthRequest.SignUpRequest signUpRequestDto) {
@@ -38,7 +36,7 @@ public final class EmailRegistration implements RegistrationChooser {
             });
 
             final var users = Users.builder()
-                    .roles(signUpRequestDto.email().equals(devEmail) ? "ROLE_ADMIN" : "ROLE_NOT_VERIFIED")
+                    .roles("ROLE_NOT_VERIFIED")
                     .email(signUpRequestDto.email())
                     .imgUrl(signUpRequestDto.imgUrl())
                     .emailVerified(Boolean.FALSE)

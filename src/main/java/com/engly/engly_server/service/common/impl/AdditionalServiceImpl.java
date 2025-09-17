@@ -23,10 +23,6 @@ public class AdditionalServiceImpl implements AdditionalService {
     private final UserRepository userRepository;
     private final JwtAuthenticationService jwtAuthenticationService;
 
-    @Value("#{'${sysadmin.email}'.split(',\\s*')}")
-    private Set<String> sysadminEmails;
-
-    private static final String ROLE_SYSADMIN = "ROLE_SYSADMIN";
     private static final String ROLE_USER = "ROLE_USER";
 
     @Override
@@ -35,7 +31,7 @@ public class AdditionalServiceImpl implements AdditionalService {
                                                   HttpServletResponse httpServletResponse) {
         return userRepository.findById(id)
                 .map(user -> {
-                    user.setRoles(sysadminEmails.contains(user.getEmail()) ? ROLE_SYSADMIN : ROLE_USER);
+                    user.setRoles(ROLE_USER);
                     user.setImgUrl(additionalRequest.imgUrl());
                     user.setAdditionalInfo(AdditionalInfo.builder()
                             .user(user)

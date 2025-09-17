@@ -25,6 +25,7 @@ import java.time.Instant;
 @RequiredArgsConstructor
 @PreAuthorize("hasAuthority('SCOPE_WRITE')")
 public class ChatController {
+
     private final MessageService messageService;
     private final MessageReadService messageReadService;
     private final UserService userService;
@@ -42,14 +43,15 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/message.markAsRead")
+    @RequireRoomPermission(permission = "ROOM_READ")
     public void markMessagesAsRead(@Payload MessageRequest.MarkAsReadRequest request) {
         final var userId = userService.getUserIdByEmail(authenticatedUserProvider.getCurrentUserEmail());
-        messageReadService.markMessageAsRead(request.messageId(), userId);
+        messageReadService.markMessageAsRead(request, userId).join();
 
         messagingTemplate.convertAndSend(
                 TOPIC_MESSAGES + request.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_READ,
-                        new MessageReadEvent(request.messageId(), userId, Instant.now()))
+                        new MessageReadEvent(request.messageIds(), userId, Instant.now()))
         );
     }
 
@@ -69,7 +71,7 @@ public class ChatController {
     @MessageMapping("/chat/message.edit")
     @RequireRoomPermission(permission = "ROOM_WRITE")
     public void editMessage(@Payload MessageRequest.EditMessageRequest request) {
-        final var message = messageService.editMessage(request.id(), request.content());
+        final var message = messageService.editMessage(request);
         messagingTemplate.convertAndSend(
                 TOPIC_MESSAGES + request.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_EDIT, message));
@@ -78,7 +80,7 @@ public class ChatController {
     @MessageMapping("/chat/message.delete")
     @RequireRoomPermission(permission = "ROOM_WRITE")
     public void deleteMessage(@Payload MessageRequest.DeleteMessageRequest deleteMessageRequest) {
-        messageService.deleteMessage(deleteMessageRequest.messageId());
+        messageService.deleteMessage(deleteMessageRequest);
         messagingTemplate.convertAndSend(
                 TOPIC_MESSAGES + deleteMessageRequest.roomId(),
                 new WebSocketEvent<>(EventType.MESSAGE_DELETE,

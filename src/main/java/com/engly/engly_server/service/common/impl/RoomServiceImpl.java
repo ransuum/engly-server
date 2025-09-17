@@ -40,6 +40,7 @@ public class RoomServiceImpl implements RoomService {
     private final UserService userService;
     private final CategoriesService categoriesService;
     private final ChatParticipantsService chatParticipantsService;
+    private final RoomMapper roomMapper;
 
     @Override
     @Transactional
@@ -53,16 +54,16 @@ public class RoomServiceImpl implements RoomService {
         if (roomRepository.existsByName(roomCreateRequestDto.name()))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 
-        final var room = Rooms.builder()
+        final var room = roomRepository.save(Rooms.builder()
                 .creator(userService.findEntityById(id))
                 .createdAt(Instant.now())
-                .category(categoriesService.findByName(name))
+                .categoryId(categoriesService.getCategoryIdByName(name))
                 .description(roomCreateRequestDto.description())
                 .name(roomCreateRequestDto.name())
-                .build();
+                .build());
 
-        chatParticipantsService.addParticipant(roomRepository.save(room), room.getCreator(), RoomRoles.ADMIN);
-        return RoomMapper.INSTANCE.roomToDto(room);
+        chatParticipantsService.addParticipant(room.getId(), room.getCreator(), RoomRoles.ADMIN);
+        return roomMapper.roomToDto(room);
     }
 
     @Override
@@ -74,7 +75,8 @@ public class RoomServiceImpl implements RoomService {
             unless = "#result.content.isEmpty()"
     )
     public Page<RoomsDto> findAllWithCriteria(RoomSearchCriteriaRequest request, Pageable pageable) {
-        return roomRepository.findAll(request.buildSpecification(), pageable).map(RoomMapper.INSTANCE::roomToDto);
+        return roomRepository.findAll(request.buildSpecification(), pageable)
+                .map(roomMapper::roomToDto);
     }
 
     @Override
@@ -103,14 +105,14 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.findById(id)
                 .map(room -> {
                     if (FieldUtil.isValid(request.newCategory()))
-                        room.setCategory(categoriesService.findByName(request.newCategory()));
+                        room.setCategoryId(categoriesService.getCategoryIdByName(CategoryType.valueOf(request.name())));
 
                     if (isNotBlank(request.updateCreatorByEmail()))
                         room.setCreator(userService.findUserEntityByEmail(request.updateCreatorByEmail()));
 
                     if (isNotBlank(request.description())) room.setDescription(request.description());
                     if (isNotBlank(request.name())) room.setName(request.name());
-                    return RoomMapper.INSTANCE.roomToDto(roomRepository.save(room));
+                    return roomMapper.roomToDto(roomRepository.save(room));
                 })
                 .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
     }
@@ -124,13 +126,15 @@ public class RoomServiceImpl implements RoomService {
             unless = "#result.content.isEmpty()"
     )
     public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
-        return roomRepository.findByCategoryName(category, pageable).map(RoomMapper.INSTANCE::roomToDto);
+        return roomRepository.findByCategoryId(categoriesService.getCategoryIdByName(category), pageable)
+                .map(rooms -> roomMapper.roomToDto(rooms, chatParticipantsService));
     }
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.ROOM_ENTITY_ID, key = "#id", sync = true)
     public Rooms findRoomEntityById(String id) {
-        return roomRepository.findById(id).orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
+        return roomRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
     }
 }

@@ -24,7 +24,7 @@ spring:
         cacheServerConfiguration: true
         elideSetAutoCommits: true
         maintainTimeStats: false
-    url: jdbc:postgresql://localhost:5432/${DB_NAME}?user=${DB_USER}&password=${DB_PASSWORD}
+    url: ${DB_URL}
 
   jpa:
     show-sql: false

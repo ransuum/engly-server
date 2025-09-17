@@ -19,6 +19,8 @@ public interface ChatParticipantRepository extends JpaRepository<ChatParticipant
     @Query("SELECT cp FROM ChatParticipants cp WHERE cp.user.email = :email AND cp.leaveAt IS NULL")
     List<ChatParticipants> findByEmail(@Param("email") String email);
 
-    @Query("SELECT cp FROM ChatParticipants cp WHERE cp.user.email = :email AND cp.room.id = :roomId AND cp.leaveAt IS NULL")
+    @Query("SELECT cp FROM ChatParticipants cp WHERE cp.user.email = :email AND cp.roomId = :roomId AND cp.leaveAt IS NULL")
     Optional<ChatParticipants> findByEmailAndRoom(@Param("email") String email, @Param("roomId") String roomId);
+
+    int countChatParticipantsByRoomId(String roomId);
 }

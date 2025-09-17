@@ -1,11 +1,11 @@
 package com.engly.engly_server.models.dto.response;
 
-import java.util.List;
+import lombok.Builder;
 
+@Builder
 public record RoomsDto(String id,
                        String name,
                        String description,
                        MessagesDto lastMessage,
-                       Long members,
-                       List<ChatParticipantsDto> chatParticipants) {
+                       int members) {
 }

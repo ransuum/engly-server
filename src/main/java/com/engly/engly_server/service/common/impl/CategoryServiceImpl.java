@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryServiceImpl implements CategoriesService {
 
     private final CategoriesRepository categoriesRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional
@@ -38,12 +39,12 @@ public class CategoryServiceImpl implements CategoriesService {
         if (categoriesRepository.existsByName(categoryRequest.name()))
             throw new EntityAlreadyExistsException("Category with name " + categoryRequest.name() + " already exists");
 
-        return CategoryMapper.INSTANCE.toCategoriesDto(
-                categoriesRepository.save(Categories.builder()
-                        .description(categoryRequest.description())
-                        .name(categoryRequest.name())
-                        .build())
-        );
+        final var save = categoriesRepository.save(Categories.builder()
+                .description(categoryRequest.description())
+                .name(categoryRequest.name())
+                .build());
+
+        return categoryMapper.toCategoriesDto(save);
     }
 
     @Override
@@ -60,7 +61,7 @@ public class CategoryServiceImpl implements CategoriesService {
                     if (FieldUtil.isValid(categoryRequest.name())) category.setName(categoryRequest.name());
                     if (StringUtils.isNotBlank(categoryRequest.description())) category.setDescription(categoryRequest.description());
 
-                    return CategoryMapper.INSTANCE.toCategoriesDto(categoriesRepository.save(category));
+                    return categoryMapper.toCategoriesDto(categoriesRepository.save(category));
                 })
                 .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(id)));
     }
@@ -74,16 +75,17 @@ public class CategoryServiceImpl implements CategoriesService {
             unless = "#result.content.isEmpty()"
     )
     public Page<CategoriesDto> getAllCategories(Pageable pageable) {
-        return categoriesRepository.findAll(pageable).map(CategoryMapper.INSTANCE::toCategoriesDto);
+        return categoriesRepository.findAll(pageable)
+                .map(categories -> categoryMapper
+                        .toCategoriesDto(categories, categoriesRepository.roomsCount(categories.getId())));
     }
 
     @Override
     @Transactional(readOnly = true)
     public CategoriesDto getCategoryById(String categoryId) {
-        return CategoryMapper.INSTANCE.toCategoriesDto(
-                categoriesRepository.findById(categoryId).orElseThrow(()
-                        -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(categoryId)))
-        );
+        final var categories = categoriesRepository.findById(categoryId).orElseThrow(()
+                -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(categoryId)));
+        return categoryMapper.toCategoriesDto(categories, categoriesRepository.roomsCount(categories.getId()));
     }
 
     @Override
@@ -102,6 +104,13 @@ public class CategoryServiceImpl implements CategoriesService {
     public Categories findByName(CategoryType name) {
         return categoriesRepository.findByName(name).orElseThrow(()
                         -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
+    }
+
+    @Override
+    @Cacheable(value = CacheName.CATEGORY_ID_BY_NAME, key = "#name.toString()", sync = true)
+    public String getCategoryIdByName(CategoryType name) {
+        return categoriesRepository.getCategoryIdByName(name)
+                .orElseThrow(() -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
     }
 
     @Override

@@ -10,13 +10,13 @@ public interface MessageService {
 
     String NOT_FOUND_MESSAGE = "Cannot found this message";
 
-    MessagesDto sendMessage(MessageRequest.CreateMessageRequest createMessageRequest);
+    MessagesDto sendMessage(MessageRequest createMessageRequest);
 
-    void deleteMessage(String id);
+    void deleteMessage(MessageRequest deleteRequest);
 
     MessagesDto findById(String id);
 
-    MessagesDto editMessage(String id, String content);
+    MessagesDto editMessage(MessageRequest editRequest);
 
     Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable);
 

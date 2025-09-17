@@ -19,7 +19,7 @@ public class EmailServiceImpl implements EmailService {
     @Value("${app.email.notification.subject}")
     private String subject;
 
-    @Async("virtualThreadExecutor")
+    @Async
     public void sendEmail(String to, String body) {
         try {
             var message = new SimpleMailMessage();
