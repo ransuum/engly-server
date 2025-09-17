@@ -54,7 +54,7 @@ public class CacheConfig {
 
             case ALL_USER -> new CacheSpec(1, Duration.ofMinutes(2), Duration.ofMinutes(1));
 
-            case ROOM_DTO_ID, ROOM_ENTITY_ID, ROOMS_BY_CATEGORY, ROOMS_BY_CRITERIA ->
+            case ROOM_DTO_ID, ROOM_ENTITY_ID, ROOMS_BY_CATEGORY, ROOMS_BY_CRITERIA, ROOM_SHORT_ID ->
                     new CacheSpec(5, Duration.ofMinutes(2), Duration.ofMinutes(1));
 
             case MESSAGE_ID, MESSAGE_COUNT_BY_ROOM -> new CacheSpec(10, Duration.ofMinutes(2), Duration.ofMinutes(1));

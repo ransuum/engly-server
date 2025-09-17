@@ -35,6 +35,8 @@ public class MessageServiceImpl implements MessageService {
     private final AuthenticatedUserProvider service;
     private final ChatParticipantsService chatParticipantsService;
     private final GoogleDriveService driveService;
+    private final RoomService roomService;
+    private final MessageMapper messageMapper;
 
     @Override
     @Transactional
@@ -51,7 +53,7 @@ public class MessageServiceImpl implements MessageService {
                 .user(user)
                 .roomId(createMessageRequest.roomId())
                 .build());
-        return MessageMapper.INSTANCE.toMessageDto(savedMessage);
+        return messageMapper.toMessageDto(savedMessage, roomService.findRoomByIdShort(savedMessage.getRoomId()));
     }
 
     @Override
@@ -75,7 +77,8 @@ public class MessageServiceImpl implements MessageService {
     @Cacheable(value = CacheName.MESSAGE_ID, key = "#id")
     public MessagesDto findById(String id) {
         return messageRepository.findById(id)
-                .map(MessageMapper.INSTANCE::toMessageDto)
+                .map(message -> messageMapper.toMessageDto(
+                        message, roomService.findRoomByIdShort(message.getRoomId())))
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
     }
 
@@ -86,7 +89,8 @@ public class MessageServiceImpl implements MessageService {
                 .map(message -> {
                     message.setContent(editRequest.content());
                     message.setIsEdited(Boolean.TRUE);
-                    return MessageMapper.INSTANCE.toMessageDto(messageRepository.save(message));
+                    return messageMapper.toMessageDto(
+                            messageRepository.save(message), roomService.findRoomByIdShort(message.getRoomId()));
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
     }
@@ -94,13 +98,16 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional(readOnly = true)
     public Page<MessagesDto> findAllMessageInCurrentRoomNative(String roomId, Pageable pageable) {
-        return messageRepository.findActive(roomId, pageable).map(MessageMapper.INSTANCE::toMessageDto);
+        return messageRepository.findActive(roomId, pageable)
+                .map(message -> messageMapper
+                        .toMessageDto(message, roomService.findRoomByIdShort(roomId)));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<MessagesDto> findMessagesByCriteria(MessageSearchCriteriaRequest request, Pageable pageable) {
         return messageRepository.findAll(request.buildSpecification(), pageable)
-                .map(MessageMapper.INSTANCE::toMessageDto);
+                .map(message -> messageMapper
+                        .toMessageDto(message, roomService.findRoomByIdShort(request.roomId())));
     }
 }

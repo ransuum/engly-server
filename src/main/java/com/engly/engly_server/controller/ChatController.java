@@ -38,7 +38,7 @@ public class ChatController {
     public void sendMessage(@Payload @Valid MessageRequest.CreateMessageRequest createMessageRequest) {
         final var message = messageService.sendMessage(createMessageRequest);
         messagingTemplate.convertAndSend(
-                TOPIC_MESSAGES + message.roomId(),
+                TOPIC_MESSAGES + message.room().id(),
                 new WebSocketEvent<>(EventType.MESSAGE_SEND, message));
     }
 

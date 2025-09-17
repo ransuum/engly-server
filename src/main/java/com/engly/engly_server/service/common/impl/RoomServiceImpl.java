@@ -5,6 +5,7 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
+import com.engly.engly_server.models.dto.response.RoomDtoShort;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
@@ -135,6 +136,15 @@ public class RoomServiceImpl implements RoomService {
     @Cacheable(value = CacheName.ROOM_ENTITY_ID, key = "#id", sync = true)
     public Rooms findRoomEntityById(String id) {
         return roomRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
+    }
+
+    @Override
+    @Transactional
+    @Cacheable(value = CacheName.ROOM_SHORT_ID, key = "#id", sync = true)
+    public RoomDtoShort findRoomByIdShort(String id) {
+        return roomRepository.findById(id)
+                .map(roomMapper::roomToDtoShort)
                 .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
     }
 }

@@ -3,7 +3,6 @@ package com.engly.engly_server.models.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -44,7 +43,6 @@ public class Message implements Serializable {
     @Column(nullable = false, name = "created_at")
     private Instant createdAt;
 
-    @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
 
