@@ -9,6 +9,8 @@ import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -28,15 +30,16 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtTokenUtils {
+
     private final JwtDecoder jwtDecoder;
     private final CompositeTokenValidator tokenValidator;
     private final SecurityContextConfig securityContextConfig;
 
-    public String getUsername(Jwt jwtToken) {
+    public @Nullable String getUsername(@NonNull Jwt jwtToken) {
         return jwtToken.getSubject();
     }
 
-    public Jwt decodeToken(String token) {
+    public Jwt decodeToken(@NonNull String token) {
         try {
             return jwtDecoder.decode(token);
         } catch (JwtException e) {
@@ -51,7 +54,7 @@ public class JwtTokenUtils {
                 .build());
     }
 
-    public Collection<GrantedAuthority> extractAuthorities(Jwt jwt, UserDetails userDetails) {
+    public Collection<GrantedAuthority> extractAuthorities(@NonNull Jwt jwt, @NonNull UserDetails userDetails) {
         Collection<GrantedAuthority> authorities = new ArrayList<>(userDetails.getAuthorities());
 
         Optional.ofNullable(jwt.getClaim("scope"))
@@ -64,7 +67,9 @@ public class JwtTokenUtils {
         return authorities;
     }
 
-    public void authenticateToken(Jwt token, HttpServletRequest request, boolean isTokenValidInContext) {
+    public void authenticateToken(@NonNull Jwt token,
+                                  @NonNull HttpServletRequest request,
+                                  boolean isTokenValidInContext) {
         try {
             if (securityContextConfig.isAuthenticationEmpty()) {
                 final UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(token);
@@ -77,7 +82,7 @@ public class JwtTokenUtils {
         }
     }
 
-    public Authentication createSocketAuthentication(String token) {
+    public Authentication createSocketAuthentication(@NonNull String token) {
         final Jwt jwt = this.decodeToken(token);
         final UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(jwt);
 

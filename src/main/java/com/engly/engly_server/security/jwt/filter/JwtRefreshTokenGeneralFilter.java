@@ -5,6 +5,7 @@ import com.engly.engly_server.security.cookiemanagement.CookieUtils;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
@@ -22,12 +23,12 @@ public class JwtRefreshTokenGeneralFilter extends JwtGeneralFilter {
 
 
     @Override
-    protected String extractToken(HttpServletRequest request) {
+    protected String extractToken(@NonNull HttpServletRequest request) {
         return new CookieUtils(request.getCookies()).getRefreshTokenCookie();
     }
 
     @Override
-    protected boolean isTokenValidInContext(Jwt jwt) {
+    protected boolean isTokenValidInContext(@NonNull Jwt jwt) {
         return refreshTokenRepository.existsByTokenAndRevokedIsFalse(jwt.getTokenValue());
     }
 }
