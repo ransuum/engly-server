@@ -48,9 +48,9 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
         }
     }
 
-    protected abstract String extractToken(HttpServletRequest request);
+    protected abstract String extractToken(@NonNull HttpServletRequest request);
 
-    protected abstract boolean isTokenValidInContext(Jwt jwt);
+    protected abstract boolean isTokenValidInContext(@NonNull Jwt jwt);
 
     private void handleException(HttpServletResponse response, Exception e) throws IOException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());

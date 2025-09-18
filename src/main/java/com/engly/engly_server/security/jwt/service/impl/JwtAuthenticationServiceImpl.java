@@ -11,6 +11,7 @@ import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,19 +27,19 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public JwtHolder authentication(Users user, HttpServletResponse response) {
+    public JwtHolder authentication(Users user, @NonNull HttpServletResponse response) {
         final var auth = securityContextConfig.createAuthenticationObject(user);
         return generateAndSaveTokens(user, auth, response, true);
     }
 
     @Override
-    public void authenticationForGoogle(Users user, HttpServletResponse response) {
+    public void authenticationForGoogle(Users user, @NonNull HttpServletResponse response) {
         final var auth = securityContextConfig.createAuthenticationObject(user);
         generateAndSaveTokens(user, auth, response, false);
     }
 
     @Override
-    public JwtHolder authenticationWithParameters(Users user, Authentication authentication, HttpServletResponse response) {
+    public JwtHolder authenticationWithParameters(Users user, @NonNull Authentication authentication, @NonNull HttpServletResponse response) {
         Authentication properAuth = createProperAuthentication(user, authentication);
         return generateAndSaveTokens(user, properAuth, response, true);
     }
@@ -50,7 +51,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     @Override
-    public JwtHolder authenticationForVerification(Users user, HttpServletResponse response) {
+    public JwtHolder authenticationForVerification(Users user, @NonNull HttpServletResponse response) {
         final var auth = securityContextConfig.createAndSetAuthenticationAndReturn(user, user.getPassword());
         SecurityContextHolder.getContext().setAuthentication(auth);
         return generateAndSaveTokens(user, auth, response, true);

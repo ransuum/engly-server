@@ -10,6 +10,7 @@ import org.springframework.http.ResponseCookie;
 import java.util.Arrays;
 
 public record CookieUtils(Cookie[] cookies) {
+
     public CookieUtils(Cookie[] cookies) {
         this.cookies = cookies == null ? null : cookies.clone();
     }
