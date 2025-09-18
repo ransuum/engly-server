@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
+    @ExceptionHandler({AccessDeniedException.class, RoomAccessException.class})
     public ResponseEntity<ExceptionResponse> handleForbiddenExceptions(Exception ex) {
         return buildResponse(HttpStatus.FORBIDDEN, ex);
     }
