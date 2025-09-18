@@ -20,10 +20,7 @@ public record RoomSearchCriteriaRequest(
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdBefore,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-
-        Integer minParticipants,
-        Integer maxParticipants
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
 ) {
 
     public Specification<Rooms> buildSpecification() {
