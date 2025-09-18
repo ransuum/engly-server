@@ -1,14 +1,12 @@
 package com.engly.engly_server.specs;
 
 import com.engly.engly_server.models.entity.Rooms;
-import com.engly.engly_server.models.enums.CategoryType;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
 
 import static com.engly.engly_server.specs.DateSpecificationConverter.toInstantPlusOneDay;
-import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -36,19 +34,19 @@ public final class RoomSpecification {
     }
 
     public static Specification<Rooms> createdAfter(LocalDate date) {
-        return (root, _, cb) -> isValid(date)
+        return (root, _, cb) -> date != null
                 ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
     public static Specification<Rooms> createdBefore(LocalDate date) {
-        return ((root, _, criteriaBuilder) -> isValid(date)
+        return ((root, _, criteriaBuilder) -> date != null
                 ? criteriaBuilder.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> between(LocalDate min, LocalDate max) {
-        return ((root, _, criteriaBuilder) -> isValid(min) && isValid(max)
+        return ((root, _, criteriaBuilder) -> min != null && max != null
                 ? criteriaBuilder.between(
                 root.get(CREATED_AT_FIELD),
                 toInstantPlusOneDay(min), toInstantPlusOneDay(max))

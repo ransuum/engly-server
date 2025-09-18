@@ -12,7 +12,7 @@ import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import com.engly.engly_server.service.notification.PasswordResetService;
-import com.engly.engly_server.utils.emailsenderconfig.EmailSenderUtil;
+import com.engly.engly_server.utils.emailsenderscript.EmailSender;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +21,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +43,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
     @Override
     public EmailSendInfo sendMessage(String email) {
         try {
-            return new EmailSenderUtil(
+            return new EmailSender(
                     tokenRepo,
                     messageGenerator,
                     emailService,

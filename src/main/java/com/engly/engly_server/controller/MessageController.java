@@ -8,7 +8,6 @@ import com.engly.engly_server.service.common.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springdoc.core.annotations.ParameterObject;
@@ -44,7 +43,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public Page<UserWhoReadsMessageDto> findAllUsersWhoReadMessage(
             @PathVariable String messageId,
-            @ParameterObject @PageableDefault(page = 0, size = 8,
+            @ParameterObject @PageableDefault(size = 8,
                     sort = {"readAt"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return messageReadService.getUsersWhoReadMessage(messageId, pageable);
     }
@@ -56,27 +55,23 @@ public class MessageController {
                     The response is structured according to Native query, including page metadata.
                     """
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "A paginated list of messages.",
-                    content = @Content
-            ),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content),
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "A paginated list of messages.",
+            content = @Content
+    )
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
     @GetMapping("/current-room/native/{roomId}")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public Page<MessagesDto> findAllAvailableMessagesByRoomId(@PathVariable String roomId,
-                                                              @ParameterObject @PageableDefault(page = 0, size = 8,
+                                                              @ParameterObject @PageableDefault(size = 8,
                                                                       sort = {"createdAt"}, direction = Sort.Direction.DESC) Pageable pageable) {
         return messageService.findAllMessageInCurrentRoomNative(roomId, pageable);
     }
 
     @Operation(summary = "Get messages by criteria")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Page with messages displays successfully.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
-    })
+    @ApiResponse(responseCode = "200", description = "Page with messages displays successfully.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
     @GetMapping("/by-criteria")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public Page<MessagesDto> findRoomsByCriteria(@ModelAttribute MessageSearchCriteriaRequest request,

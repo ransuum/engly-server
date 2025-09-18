@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,38 +34,36 @@ public class AdditionalInfoController {
     @Operation(
             summary = "Provide additional info for a Google user",
             description = """
-                          Completes the registration process for a user who has authenticated via Google.
-                          This endpoint is used to collect details like a unique username that are not provided by the social login.
-                          
-                          **Authorization:** Requires an authenticated user with the 'SCOPE_ADDITIONAL_INFO'. This scope is typically granted temporarily after a successful Google login but before this step is completed.
-                          """,
+                    Completes the registration process for a user who has authenticated via Google.
+                    This endpoint is used to collect details like a unique username that are not provided by the social login.
+                    
+                    **Authorization:** Requires an authenticated user with the 'SCOPE_ADDITIONAL_INFO'. This scope is typically granted temporarily after a successful Google login but before this step is completed.
+                    """,
             security = @SecurityRequirement(name = "bearerAuth")
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Successfully registered. Returns new JWT tokens.",
-                    content = { @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AuthResponseDto.class)
-                    )}
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request. The provided data is invalid (e.g., username already taken, invalid format).",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized. The JWT is missing, invalid, or expired.",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden. The user does not have the required 'SCOPE_ADDITIONAL_INFO' scope.",
-                    content = @Content
-            )
-    })
+    @ApiResponse(
+            responseCode = "201",
+            description = "Successfully registered. Returns new JWT tokens.",
+            content = {@Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = AuthResponseDto.class)
+            )}
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request. The provided data is invalid (e.g., username already taken, invalid format).",
+            content = @Content
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized. The JWT is missing, invalid, or expired.",
+            content = @Content
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden. The user does not have the required 'SCOPE_ADDITIONAL_INFO' scope.",
+            content = @Content
+    )
     @PreAuthorize("hasAuthority('SCOPE_ADDITIONAL_INFO')")
     @PostMapping("/for-google")
     public ResponseEntity<AuthResponseDto> addInfo(@RequestBody @Valid GoogleUserInfoRequest additionalRequestForGoogleUserDto,

@@ -1,4 +1,4 @@
-package com.engly.engly_server.utils.emailsenderconfig;
+package com.engly.engly_server.utils.emailsenderscript;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.response.EmailSendInfo;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 @Slf4j
-public record EmailSenderUtil(
+public record EmailSender(
         VerifyTokenRepository tokenRepo,
         EmailMessageGenerator messageGenerator,
         EmailService emailService,

@@ -1,7 +1,6 @@
 package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.models.dto.response.ChatParticipantsDto;
-import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.RoomRoles;
 import org.springframework.data.domain.Page;

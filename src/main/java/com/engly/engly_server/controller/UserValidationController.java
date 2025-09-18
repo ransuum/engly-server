@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Email;
@@ -35,15 +34,13 @@ public class UserValidationController {
                     "This helps the frontend decide whether to redirect the user to the 'complete profile' page after login.",
             security = @SecurityRequirement(name = "bearerAuth")
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Status retrieved successfully.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoogleAvailabilityDto.class))
-            ),
-            @ApiResponse(responseCode = "401", description = "Unauthorized. User is not authenticated.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_AUTHORIZE'.", content = @Content)
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Status retrieved successfully.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GoogleAvailabilityDto.class))
+    )
+    @ApiResponse(responseCode = "401", description = "Unauthorized. User is not authenticated.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_AUTHORIZE'.", content = @Content)
     @GetMapping("/first-login")
     @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
     public GoogleAvailabilityDto firstLogin() {
@@ -72,24 +69,22 @@ public class UserValidationController {
     @Operation(
             summary = "Check if an email is available",
             description = """
-                          Performs a real-time check to see if a given email address is already registered.
-                          This is intended for use on a sign-up form.
-                          
-                          Returns a boolean `isAvailable` field.
-                          """
+                    Performs a real-time check to see if a given email address is already registered.
+                    This is intended for use on a sign-up form.
+                    
+                    Returns a boolean `isAvailable` field.
+                    """
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Check completed successfully.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AvailabilityResponseDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request. The provided email is missing or is not a valid email format.",
-                    content = @Content
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Check completed successfully.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AvailabilityResponseDto.class))
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request. The provided email is missing or is not a valid email format.",
+            content = @Content
+    )
     @GetMapping("/check-email")
     public AvailabilityResponseDto checkEmailAvailability(
             @RequestParam

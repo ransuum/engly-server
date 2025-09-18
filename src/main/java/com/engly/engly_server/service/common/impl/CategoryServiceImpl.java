@@ -10,7 +10,6 @@ import com.engly.engly_server.repository.CategoriesRepository;
 import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.mapper.CategoryMapper;
 import com.engly.engly_server.utils.cache.CacheName;
-import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -22,7 +21,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 @Service
 @Slf4j
@@ -58,7 +56,7 @@ public class CategoryServiceImpl implements CategoriesService {
     public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
         return categoriesRepository.findById(id)
                 .map(category -> {
-                    if (FieldUtil.isValid(categoryRequest.name())) category.setName(categoryRequest.name());
+                    if (categoryRequest.name() != null) category.setName(categoryRequest.name());
                     if (StringUtils.isNotBlank(categoryRequest.description())) category.setDescription(categoryRequest.description());
 
                     return categoryMapper.toCategoriesDto(categoriesRepository.save(category));
