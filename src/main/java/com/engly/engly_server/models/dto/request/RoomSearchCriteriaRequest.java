@@ -1,7 +1,6 @@
 package com.engly.engly_server.models.dto.request;
 
 import com.engly.engly_server.models.entity.Rooms;
-import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.specs.RoomSpecification;
 import lombok.Builder;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,10 +20,7 @@ public record RoomSearchCriteriaRequest(
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate createdBefore,
 
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-
-        Integer minParticipants,
-        Integer maxParticipants
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
 ) {
 
     public Specification<Rooms> buildSpecification() {

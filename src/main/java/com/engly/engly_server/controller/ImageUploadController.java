@@ -5,7 +5,6 @@ import com.engly.engly_server.googledrive.GoogleDriveService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -38,16 +37,14 @@ public class ImageUploadController {
                     and then you need to mark the file upload through websocket
                     """
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "202",
-                    description = "Image uploaded successfully",
-                    content = @Content
-            ),
-            @ApiResponse(responseCode = "400", description = "Bad Request. The file is not an image", content = @Content),
-            @ApiResponse(responseCode = "409", description = "Cannot upload file to storage"),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content),
-    })
+    @ApiResponse(
+            responseCode = "202",
+            description = "Image uploaded successfully",
+            content = @Content
+    )
+    @ApiResponse(responseCode = "400", description = "Bad Request. The file is not an image", content = @Content)
+    @ApiResponse(responseCode = "409", description = "Cannot upload file to storage")
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     public ResponseEntity<FileUploadResponse> uploadImage(@RequestPart("image") MultipartFile image) {

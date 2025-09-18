@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
@@ -29,15 +28,13 @@ public class CategoryController {
     }
 
     @Operation(summary = "Create a new category")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Category created successfully.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoriesDto.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Bad Request. Invalid category data provided.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_CREATE_GLOBAL'.", content = @Content)
-    })
+    @ApiResponse(
+            responseCode = "201",
+            description = "Category created successfully.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoriesDto.class))
+    )
+    @ApiResponse(responseCode = "400", description = "Bad Request. Invalid category data provided.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_CREATE_GLOBAL'.", content = @Content)
     @PreAuthorize("hasAuthority('SCOPE_CREATE_GLOBAL')")
     @PostMapping
     @RateLimiter(name = "CategoryController")
@@ -46,14 +43,12 @@ public class CategoryController {
     }
 
     @Operation(summary = "Get a category by its ID")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Category found.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoriesDto.class))
-            ),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content),
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Category found.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoriesDto.class))
+    )
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     @GetMapping("/{id}")
     public CategoriesDto getCategoryById(
@@ -64,15 +59,13 @@ public class CategoryController {
     }
 
     @Operation(summary = "Update an existing category")
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Category updated successfully.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoriesDto.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Bad Request. Invalid category data provided.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_UPDATE_GLOBAL'.", content = @Content),
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Category updated successfully.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CategoriesDto.class))
+    )
+    @ApiResponse(responseCode = "400", description = "Bad Request. Invalid category data provided.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_UPDATE_GLOBAL'.", content = @Content)
     @PreAuthorize("hasAuthority('SCOPE_UPDATE_GLOBAL')")
     @PutMapping("/{id}")
     @RateLimiter(name = "CategoryController")
@@ -85,10 +78,8 @@ public class CategoryController {
     }
 
     @Operation(summary = "Delete a category by its ID")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Category deleted successfully.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_DELETE_GLOBAL'.", content = @Content),
-    })
+    @ApiResponse(responseCode = "204", description = "Category deleted successfully.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_DELETE_GLOBAL'.", content = @Content)
     @PreAuthorize("hasAuthority('SCOPE_DELETE_GLOBAL')")
     @DeleteMapping("/{id}")
     @RateLimiter(name = "CategoryController")

@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,12 +42,10 @@ public class RoomController {
             summary = "Create a new room",
             description = "Creates a new chat room with the specified details and assigns it to a category."
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Room created successfully.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RoomsDto.class))),
-            @ApiResponse(responseCode = "400", description = "Bad Request. Invalid room data provided.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_CREATE_GLOBAL'.", content = @Content)
-    })
+    @ApiResponse(responseCode = "201", description = "Room created successfully.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RoomsDto.class)))
+    @ApiResponse(responseCode = "400", description = "Bad Request. Invalid room data provided.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_CREATE_GLOBAL'.", content = @Content)
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     @RateLimiter(name = "RoomController")
@@ -70,10 +67,8 @@ public class RoomController {
                     - To filter by category, use the `category` parameter (e.g., `?category=NEWS`).
                     """
     )
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "List of rooms retrieved successfully.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
-    })
+    @ApiResponse(responseCode = "200", description = "List of rooms retrieved successfully.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
     @GetMapping("/by-category")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public ResponseEntity<Page<RoomsDto>> getRoomsByCategory(
@@ -84,10 +79,8 @@ public class RoomController {
     }
 
     @Operation(summary = "Delete a room by its ID")
-    @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Room deleted successfully.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_DELETE_GLOBAL'.", content = @Content)
-    })
+    @ApiResponse(responseCode = "204", description = "Room deleted successfully.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_DELETE_GLOBAL'.", content = @Content)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_DELETE_GLOBAL')")
     @RateLimiter(name = "RoomController")
@@ -97,10 +90,8 @@ public class RoomController {
     }
 
     @Operation(summary = "Get rooms by criteria")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Page with rooms displays successfully.", content = @Content),
-            @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
-    })
+    @ApiResponse(responseCode = "200", description = "Page with rooms displays successfully.", content = @Content)
+    @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
     @GetMapping("/by-criteria")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public Page<RoomsDto> findRoomsByCriteria(@ModelAttribute RoomSearchCriteriaRequest request,

@@ -16,7 +16,6 @@ import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.cache.CacheName;
-import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -105,7 +104,7 @@ public class RoomServiceImpl implements RoomService {
     public RoomsDto updateRoom(String id, RoomRequest.RoomUpdateRequest request) {
         return roomRepository.findById(id)
                 .map(room -> {
-                    if (FieldUtil.isValid(request.newCategory()))
+                    if (request.newCategory() != null)
                         room.setCategoryId(categoriesService.getCategoryIdByName(CategoryType.valueOf(request.name())));
 
                     if (isNotBlank(request.updateCreatorByEmail()))

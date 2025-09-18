@@ -16,8 +16,6 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
-
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
@@ -47,15 +45,16 @@ public class ProfileServiceImpl implements ProfileService {
     public UsersDto updateProfile(String id, ProfileUpdateRequest profileUpdateData) {
         return userRepository.findById(id)
                 .map(user -> {
-                    if (StringUtils.isNotBlank(profileUpdateData.username())) user.setUsername(profileUpdateData.username());
-                    if (isValid(profileUpdateData.goal())) user.getAdditionalInfo().setGoal(profileUpdateData.goal());
-                    if (isValid(profileUpdateData.englishLevel()))
+                    if (StringUtils.isNotBlank(profileUpdateData.username()))
+                        user.setUsername(profileUpdateData.username());
+                    if (profileUpdateData.goal() != null)
+                        user.getAdditionalInfo().setGoal(profileUpdateData.goal());
+                    if (profileUpdateData.englishLevel() != null)
                         user.getAdditionalInfo().setEnglishLevel(profileUpdateData.englishLevel());
-                    if (isValid(profileUpdateData.nativeLanguage()))
+                    if (profileUpdateData.nativeLanguage() != null)
                         user.getAdditionalInfo().setNativeLanguage(profileUpdateData.nativeLanguage());
 
-                    final var savedUser = userRepository.save(user);
-                    return UserMapper.INSTANCE.toUsersDto(savedUser);
+                    return UserMapper.INSTANCE.toUsersDto(userRepository.save(user));
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
     }
