@@ -6,7 +6,6 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 
 import static com.engly.engly_server.specs.DateSpecificationConverter.toInstantPlusOneDay;
-import static com.engly.engly_server.utils.fieldvalidation.FieldUtil.isValid;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -36,31 +35,31 @@ public final class MessageSpecification {
     }
 
     public static Specification<Message> createdAfter(LocalDate date) {
-        return (root, _, cb) -> isValid(date)
+        return (root, _, cb) -> date != null
                 ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
     public static Specification<Message> updatedAfter(LocalDate date) {
-        return (root, _, cb) -> isValid(date)
+        return (root, _, cb) -> date != null
                 ? cb.greaterThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
     public static Specification<Message> createdBefore(LocalDate date) {
-        return (root, _, cb) -> isValid(date)
+        return (root, _, cb) -> date != null
                 ? cb.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
     public static Specification<Message> updatedBefore(LocalDate date) {
-        return (root, _, cb) -> isValid(date)
+        return (root, _, cb) -> date != null
                 ? cb.lessThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
     public static Specification<Message> between(LocalDate min, LocalDate max) {
-        return (root, _, cb) -> isValid(min) && isValid(max)
+        return (root, _, cb) -> min != null && max != null
                 ? cb.between(
                 root.get(CREATED_AT_FIELD),
                 toInstantPlusOneDay(min),

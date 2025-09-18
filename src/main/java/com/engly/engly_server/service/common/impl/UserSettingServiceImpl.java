@@ -7,7 +7,6 @@ import com.engly.engly_server.models.enums.Theme;
 import com.engly.engly_server.repository.UserSettingsRepository;
 import com.engly.engly_server.service.common.UserSettingService;
 import com.engly.engly_server.utils.cache.CacheName;
-import com.engly.engly_server.utils.fieldvalidation.FieldUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -35,8 +34,8 @@ public class UserSettingServiceImpl implements UserSettingService {
     public void update(String id, Boolean notifications, Theme theme) {
         userSettingsRepository.findById(id)
                 .ifPresentOrElse(userSettings -> {
-                    if (FieldUtil.isValid(theme)) userSettings.setTheme(theme);
-                    if (FieldUtil.isValid(notifications)) userSettings.setNotifications(notifications);
+                    if (theme != null) userSettings.setTheme(theme);
+                    if (notifications != null) userSettings.setNotifications(notifications);
                     userSettingsRepository.save(userSettings);
                 }, () -> { throw new NotFoundException("User not found"); });
     }

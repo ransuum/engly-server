@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -41,21 +40,19 @@ public class AuthController {
             description = "Authenticates a user with their credentials (e.g., email and password) and returns JWT tokens. " +
                     "This endpoint uses Basic Authentication."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Authentication successful. Returns new JWT tokens and user details.",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AuthResponseDto.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized. Invalid credentials provided.",
-                    content = @Content
+    @ApiResponse(
+            responseCode = "200",
+            description = "Authentication successful. Returns new JWT tokens and user details.",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = AuthResponseDto.class)
             )
-    })
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized. Invalid credentials provided.",
+            content = @Content
+    )
     @PostMapping("/sign-in")
     @RateLimiter(name = "AuthController")
     public ResponseEntity<AuthResponseDto> authenticateUser(@Valid @RequestBody AuthRequest.SignInRequest signInDto, HttpServletResponse response) {
@@ -65,31 +62,29 @@ public class AuthController {
     @Operation(
             summary = "Register a new user",
             description = """
-                          Creates a new user account with the provided details.
-                          Upon successful registration via email, the user is assigned a `NOT_VERIFIED` role and must verify their email before accessing most protected endpoints.
-                          
-                          Available `goals` enum values:
-                          - `DEFAULT`
-                          - `IMPROVE_ENGLISH`
-                          - `LEARN_NEW_LANGUAGE`
-                          - `MEET_NEW_PEOPLE`
-                          """
+                    Creates a new user account with the provided details.
+                    Upon successful registration via email, the user is assigned a `NOT_VERIFIED` role and must verify their email before accessing most protected endpoints.
+                    
+                    Available `goals` enum values:
+                    - `DEFAULT`
+                    - `IMPROVE_ENGLISH`
+                    - `LEARN_NEW_LANGUAGE`
+                    - `MEET_NEW_PEOPLE`
+                    """
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "User successfully registered. Returns JWT tokens and user details.",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AuthResponseDto.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request. Validation failed (e.g., username/email already exists, password too weak, invalid goal).",
-                    content = @Content
+    @ApiResponse(
+            responseCode = "201",
+            description = "User successfully registered. Returns JWT tokens and user details.",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = AuthResponseDto.class)
             )
-    })
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request. Validation failed (e.g., username/email already exists, password too weak, invalid goal).",
+            content = @Content
+    )
     @PostMapping("/sign-up")
     @RateLimiter(name = "AuthController")
     public ResponseEntity<Object> signUpUser(@Valid @RequestBody AuthRequest.SignUpRequest signUpRequestDto,
@@ -110,21 +105,19 @@ public class AuthController {
             summary = "Refresh an access token",
             description = "Generates a new access token using a valid refresh token. The refresh token must be provided in an `httpOnly` cookie."
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Access token successfully refreshed.",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = AuthResponseDto.class)
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "401",
-                    description = "Unauthorized. The provided refresh token is invalid, expired, or missing.",
-                    content = @Content
+    @ApiResponse(
+            responseCode = "200",
+            description = "Access token successfully refreshed.",
+            content = @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = AuthResponseDto.class)
             )
-    })
+    )
+    @ApiResponse(
+            responseCode = "401",
+            description = "Unauthorized. The provided refresh token is invalid, expired, or missing.",
+            content = @Content
+    )
     @PreAuthorize("hasAuthority('SCOPE_REFRESH_TOKEN')")
     @PostMapping("/refresh-token")
     @RateLimiter(name = "AuthController")

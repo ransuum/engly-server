@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,23 +40,21 @@ public class EmailVerifyController {
                     **Authorization:** This endpoint is only accessible to users who have not yet verified their email (i.e., those with `SCOPE_NOT_VERIFIED`).
                     """
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "202",
-                    description = "Request accepted. An email will be sent shortly.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = EmailSendInfo.class))
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden. The user is already verified or does not have the 'SCOPE_NOT_VERIFIED'.",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "429",
-                    description = "Too Many Requests. The user has requested emails too frequently.",
-                    content = @Content
-            )
-    })
+    @ApiResponse(
+            responseCode = "202",
+            description = "Request accepted. An email will be sent shortly.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = EmailSendInfo.class))
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden. The user is already verified or does not have the 'SCOPE_NOT_VERIFIED'.",
+            content = @Content
+    )
+    @ApiResponse(
+            responseCode = "429",
+            description = "Too Many Requests. The user has requested emails too frequently.",
+            content = @Content
+    )
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @PostMapping
     @RateLimiter(name = "EmailVerifyController")
@@ -74,23 +71,21 @@ public class EmailVerifyController {
                     Upon successful verification, the user's roles are updated (e.g., `SCOPE_NOT_VERIFIED` is removed and `SCOPE_READ`/`SCOPE_WRITE` are added), and a new set of JWTs is issued.
                     """
     )
-    @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Email successfully verified. Returns new JWT tokens.",
-                    content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AuthResponseDto.class))
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Bad Request. The token is invalid, expired, or does not match the user.",
-                    content = @Content
-            ),
-            @ApiResponse(
-                    responseCode = "403",
-                    description = "Forbidden. The user attempting to use the token is not the one it was issued for.",
-                    content = @Content
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Email successfully verified. Returns new JWT tokens.",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AuthResponseDto.class))
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Bad Request. The token is invalid, expired, or does not match the user.",
+            content = @Content
+    )
+    @ApiResponse(
+            responseCode = "403",
+            description = "Forbidden. The user attempting to use the token is not the one it was issued for.",
+            content = @Content
+    )
     @GetMapping("/check")
     @PreAuthorize("hasAuthority('SCOPE_NOT_VERIFIED')")
     @RateLimiter(name = "EmailVerifyController")
