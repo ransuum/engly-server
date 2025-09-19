@@ -20,7 +20,7 @@ public class JwtAccessTokenGeneralFilter extends JwtGeneralFilter {
 
     @Override
     protected String extractToken(@NonNull HttpServletRequest request) {
-        final var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         return (authHeader != null && authHeader.startsWith("Bearer "))
                 ? authHeader.substring(7) : null;
