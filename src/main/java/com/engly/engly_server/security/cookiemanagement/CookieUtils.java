@@ -25,7 +25,7 @@ public record CookieUtils(Cookie[] cookies) {
     }
 
     public void clearCookies(@NonNull HttpServletResponse response) {
-        final var cookie = ResponseCookie.from("refreshToken", "deleted")
+        var cookie = ResponseCookie.from("refreshToken", "deleted")
                 .maxAge(0)
                 .path("/")
                 .httpOnly(true)
