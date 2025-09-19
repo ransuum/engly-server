@@ -32,14 +32,14 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws IOException {
         try {
-            final String token = extractToken(request);
+            var token = extractToken(request);
 
             if (StringUtils.isBlank(token)) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            final Jwt jwt = jwtTokenUtils.decodeToken(token);
+            var jwt = jwtTokenUtils.decodeToken(token);
             jwtTokenUtils.authenticateToken(jwt, request, isTokenValidInContext(jwt));
 
             filterChain.doFilter(request, response);
