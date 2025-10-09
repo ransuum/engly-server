@@ -72,7 +72,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
 
                                 tokenRepo.delete(verifyToken);
 
-                                final var jwtHolder = jwtAuthenticationService.authentication(user, response);
+                                var jwtHolder = jwtAuthenticationService.authentication(user, response);
 
                                 return new AuthResponseDto(jwtHolder.accessToken(),
                                         12,

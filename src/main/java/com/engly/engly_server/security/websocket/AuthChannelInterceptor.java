@@ -25,7 +25,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         final StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
-            final var authorization = accessor.getNativeHeader(HttpHeaders.AUTHORIZATION);
+            var authorization = accessor.getNativeHeader(HttpHeaders.AUTHORIZATION);
 
             if (authorization == null || authorization.isEmpty())
                 return message;
@@ -34,7 +34,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             if (authToken != null && authToken.startsWith("Bearer ")) {
                 authToken = authToken.substring(7);
                 try {
-                    final var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
+                    var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
 
                     accessor.setUser(authentication);
                 } catch (Exception e) {

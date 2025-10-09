@@ -41,11 +41,11 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public MessagesDto sendMessage(MessageRequest createMessageRequest) {
-        final var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
+        var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
 
         chatParticipantsService.addParticipant(createMessageRequest.roomId(), user, RoomRoles.USER);
 
-        final var savedMessage = messageRepository.save(Message.builder()
+        var savedMessage = messageRepository.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
                 .content(createMessageRequest.content())
@@ -85,14 +85,16 @@ public class MessageServiceImpl implements MessageService {
     @Override
     @Transactional
     public MessagesDto editMessage(MessageRequest editRequest) {
-        return messageRepository.findById(editRequest.messageId())
-                .map(message -> {
-                    message.setContent(editRequest.content());
-                    message.setIsEdited(Boolean.TRUE);
-                    return messageMapper.toMessageDto(
-                            messageRepository.save(message), roomService.findRoomByIdShort(message.getRoomId()));
+        var message = messageRepository.findById(editRequest.messageId())
+                .map(m -> {
+                    m.setContent(editRequest.content());
+                    m.setIsEdited(Boolean.TRUE);
+                    return m;
                 })
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+
+        return messageMapper.toMessageDto(
+                messageRepository.save(message), roomService.findRoomByIdShort(message.getRoomId()));
     }
 
     @Override

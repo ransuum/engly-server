@@ -49,13 +49,13 @@ public class MessageReadServiceImpl implements MessageReadService {
     public CompletableFuture<Void> markMessageAsRead(MessageRequest messageRequest, String userId) {
         if (messageRequest.messageIds() == null || messageRequest.messageIds().isEmpty()) return null;
 
-        final var futures = messageRequest.messageIds().stream()
+        var futures = messageRequest.messageIds().stream()
                 .map(messageId -> CompletableFuture.supplyAsync(() ->
-                                new AbstractMap.SimpleEntry<>(messageId,
-                                        messageReadCache.hasUserReadMessage(messageId, userId))))
+                        new AbstractMap.SimpleEntry<>(messageId,
+                                messageReadCache.hasUserReadMessage(messageId, userId))))
                 .toList();
 
-        final var unreadMessageIds = futures.stream()
+        var unreadMessageIds = futures.stream()
                 .map(CompletableFuture::join)
                 .filter(entry -> !entry.getValue())
                 .map(Map.Entry::getKey)
@@ -63,7 +63,7 @@ public class MessageReadServiceImpl implements MessageReadService {
 
         if (unreadMessageIds.isEmpty()) return null;
 
-        final var newReads = unreadMessageIds.stream()
+        var newReads = unreadMessageIds.stream()
                 .map(messageId -> MessageRead.builder()
                         .messageId(messageId)
                         .user(userService.findEntityById(userId))

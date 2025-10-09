@@ -72,7 +72,7 @@ public class JwtTokenUtils {
                                   boolean isTokenValidInContext) {
         try {
             if (securityContextConfig.isAuthenticationEmpty()) {
-                final UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(token);
+                var userDetails = loadUserDetails().createUserDetailsFromJwtClaims(token);
 
                 if (tokenValidator.validateToken(token, userDetails) && isTokenValidInContext)
                     securityContextConfig.setSecurityContext(token, userDetails, request);
@@ -83,8 +83,8 @@ public class JwtTokenUtils {
     }
 
     public Authentication createSocketAuthentication(@NonNull String token) {
-        final Jwt jwt = this.decodeToken(token);
-        final UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(jwt);
+        var jwt = this.decodeToken(token);
+        var userDetails = loadUserDetails().createUserDetailsFromJwtClaims(jwt);
 
         if (!tokenValidator.validateToken(jwt, userDetails))
             throw new TokenGenerationException("Invalid JWT token");

@@ -35,7 +35,7 @@ public final class EmailRegistration implements RegistrationChooser {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User Already Exist");
             });
 
-            final var users = Users.builder()
+            var users = Users.builder()
                     .roles("ROLE_NOT_VERIFIED")
                     .email(signUpRequestDto.email())
                     .imgUrl(signUpRequestDto.imgUrl())
@@ -46,7 +46,7 @@ public final class EmailRegistration implements RegistrationChooser {
                     .lastLogin(Instant.now())
                     .build();
 
-            final var additionalInfo = AdditionalInfo.builder()
+            var additionalInfo = AdditionalInfo.builder()
                     .user(users)
                     .goal(signUpRequestDto.goals())
                     .englishLevel(signUpRequestDto.englishLevel())

@@ -32,7 +32,7 @@ public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHand
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
-        final var oauth2User = Optional.ofNullable(authentication.getPrincipal())
+        var oauth2User = Optional.ofNullable(authentication.getPrincipal())
                 .map(OAuth2User.class::cast)
                 .orElseThrow(() -> new NotFoundException("Invalid OAuth2 response"));
 
@@ -40,7 +40,7 @@ public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHand
         final String name = oauth2User.getAttribute("name");
         final String providerId = oauth2User.getAttribute("sub");
 
-        if (StringUtils.isBlank(email)|| StringUtils.isBlank(name) || StringUtils.isBlank(providerId))
+        if (StringUtils.isBlank(email) || StringUtils.isBlank(name) || StringUtils.isBlank(providerId))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
 
         authService.processOAuth2PostLogin(email, name, providerId, response);

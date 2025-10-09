@@ -28,10 +28,10 @@ public record EmailSender(
         if (!existsChecker.test(email))
             throw new NotFoundException("User not found exception email " + email);
 
-        final var token = generateSecureToken();
+        var token = generateSecureToken();
         tokenRepo.save(new VerifyToken(token, email, tokenType));
 
-        final var message = messageGenerator.generate(
+        var message = messageGenerator.generate(
                 Map.of("[email]", email, "[link]", urlTemplate.formatted(token)),
                 messageTemplate);
 

@@ -37,7 +37,7 @@ public class CategoryServiceImpl implements CategoriesService {
         if (categoriesRepository.existsByName(categoryRequest.name()))
             throw new EntityAlreadyExistsException("Category with name " + categoryRequest.name() + " already exists");
 
-        final var save = categoriesRepository.save(Categories.builder()
+        var save = categoriesRepository.save(Categories.builder()
                 .description(categoryRequest.description())
                 .name(categoryRequest.name())
                 .build());
@@ -81,7 +81,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Override
     @Transactional(readOnly = true)
     public CategoriesDto getCategoryById(String categoryId) {
-        final var categories = categoriesRepository.findById(categoryId).orElseThrow(()
+        var categories = categoriesRepository.findById(categoryId).orElseThrow(()
                 -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(categoryId)));
         return categoryMapper.toCategoriesDto(categories, categoriesRepository.roomsCount(categories.getId()));
     }

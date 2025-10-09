@@ -28,19 +28,19 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
 
     @Override
     public JwtHolder authentication(Users user, @NonNull HttpServletResponse response) {
-        final var auth = securityContextConfig.createAuthenticationObject(user);
+        var auth = securityContextConfig.createAuthenticationObject(user);
         return generateAndSaveTokens(user, auth, response, true);
     }
 
     @Override
     public void authenticationForGoogle(Users user, @NonNull HttpServletResponse response) {
-        final var auth = securityContextConfig.createAuthenticationObject(user);
+        var auth = securityContextConfig.createAuthenticationObject(user);
         generateAndSaveTokens(user, auth, response, false);
     }
 
     @Override
     public JwtHolder authenticationWithParameters(Users user, @NonNull Authentication authentication, @NonNull HttpServletResponse response) {
-        Authentication properAuth = createProperAuthentication(user, authentication);
+        var properAuth = createProperAuthentication(user, authentication);
         return generateAndSaveTokens(user, properAuth, response, true);
     }
 
@@ -52,7 +52,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
 
     @Override
     public JwtHolder authenticationForVerification(Users user, @NonNull HttpServletResponse response) {
-        final var auth = securityContextConfig.createAndSetAuthenticationAndReturn(user, user.getPassword());
+        var auth = securityContextConfig.createAndSetAuthenticationAndReturn(user, user.getPassword());
         SecurityContextHolder.getContext().setAuthentication(auth);
         return generateAndSaveTokens(user, auth, response, true);
     }
@@ -63,7 +63,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     private Authentication createProperAuthentication(Users user, Authentication originalAuth) {
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        var userDetails = new UserDetailsImpl(user);
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
                 originalAuth.getCredentials(),
@@ -75,8 +75,8 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         log.debug("Generating tokens for user: {} with principal type: {}",
                 user.getEmail(), auth.getPrincipal().getClass().getSimpleName());
 
-        final var refreshToken = jwtTokenService.tokenChooser(auth, TokenType.REFRESH);
-        final var accessToken = includeAccessToken ? jwtTokenService.tokenChooser(auth, TokenType.ACCESS) : null;
+        var refreshToken = jwtTokenService.tokenChooser(auth, TokenType.REFRESH);
+        var accessToken = includeAccessToken ? jwtTokenService.tokenChooser(auth, TokenType.ACCESS) : null;
 
         jwtTokenService.createRefreshTokenCookie(response, refreshToken);
         jwtTokenService.saveRefreshToken(user, refreshToken);

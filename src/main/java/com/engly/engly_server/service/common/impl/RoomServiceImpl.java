@@ -54,7 +54,7 @@ public class RoomServiceImpl implements RoomService {
         if (roomRepository.existsByName(roomCreateRequestDto.name()))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 
-        final var room = roomRepository.save(Rooms.builder()
+        var room = roomRepository.save(Rooms.builder()
                 .creator(userService.findEntityById(id))
                 .createdAt(Instant.now())
                 .categoryId(categoriesService.getCategoryIdByName(name))
