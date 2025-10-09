@@ -22,13 +22,13 @@ public class UserValidationServiceImpl implements UserValidationService {
 
     @Override
     public AvailabilityResponseDto isUsernameAvailable(String username) {
-        final boolean isAvailable = !userRepository.existsByUsername(username);
+        var isAvailable = !userRepository.existsByUsername(username);
         return new AvailabilityResponseDto(isAvailable) ;
     }
 
     @Override
     public AvailabilityResponseDto isEmailAvailable(String email) {
-        final boolean isAvailable = !userRepository.existsByEmail(email);
+        var isAvailable = !userRepository.existsByEmail(email);
         return new AvailabilityResponseDto(isAvailable);
     }
 }

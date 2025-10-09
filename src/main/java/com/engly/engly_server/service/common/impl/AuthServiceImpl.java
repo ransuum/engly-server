@@ -47,13 +47,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto getJwtTokensAfterAuthentication(AuthRequest.SignInRequest signInDto, HttpServletResponse response) {
-        final var authentication = jwtAuthenticationService.authenticateCredentials(signInDto);
+        var authentication = jwtAuthenticationService.authenticateCredentials(signInDto);
         return userRepository.findByEmail(signInDto.email())
                 .map(users -> {
                     users.setLastLogin(Instant.now());
 
-                    final var savedUser = userRepository.save(users);
-                    final var jwtHolder = jwtAuthenticationService.authenticationWithParameters(savedUser, authentication, response);
+                    var savedUser = userRepository.save(users);
+                    var jwtHolder = jwtAuthenticationService.authenticationWithParameters(savedUser, authentication, response);
 
                     log.info("[AuthService:userSignInAuth] Access token for user:{}, has been generated", users.getUsername());
                     return createAuthResponse(savedUser, jwtHolder);
@@ -70,23 +70,23 @@ public class AuthServiceImpl implements AuthService {
         if (refreshToken == null)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
 
-        final var refreshTokenEntity = refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken)
+        var refreshTokenEntity = refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
 
-        final var users = refreshTokenEntity.getUser();
+        var users = refreshTokenEntity.getUser();
 
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        final var jwtHolder = jwtAuthenticationService.authentication(users, response);
+        var jwtHolder = jwtAuthenticationService.authentication(users, response);
 
         return createAuthResponse(users, jwtHolder);
     }
 
     @Override
     public AuthResponseDto registerUser(AuthRequest.SignUpRequest signUpRequestDto, HttpServletResponse httpServletResponse) {
-        final var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
-        final var jwtHolder = jwtAuthenticationService.authentication(user, httpServletResponse);
+        var user = chooserMap.get(Provider.LOCAL).registration(signUpRequestDto);
+        var jwtHolder = jwtAuthenticationService.authentication(user, httpServletResponse);
 
         log.info("[AuthService:registerUser] User:{} Successfully registered", signUpRequestDto.username());
         return createAuthResponse(user, jwtHolder);
@@ -94,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void processOAuth2PostLogin(String email, String name, String providerId, HttpServletResponse response) {
-        final var user = userRepository.findByEmail(email)
+        var user = userRepository.findByEmail(email)
                 .map(existingUser -> {
                     existingUser.setLastLogin(Instant.now());
                     return existingUser;

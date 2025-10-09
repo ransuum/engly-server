@@ -62,7 +62,7 @@ public abstract class JwtTokenService {
     }
 
     protected final Map<String, String> getRoomRolesForUser(@NonNull String email) {
-        final var participants = chatParticipantRepository.findByEmail(email);
+        var participants = chatParticipantRepository.findByEmail(email);
 
         return participants.stream()
                 .collect(Collectors.toMap(
@@ -82,7 +82,7 @@ public abstract class JwtTokenService {
     }
 
     public final void createRefreshTokenCookie(@NonNull HttpServletResponse response, String refreshToken) {
-        final var cookie = ResponseCookie.from(jwtProperties.getCookie().getName(), refreshToken)
+        var cookie = ResponseCookie.from(jwtProperties.getCookie().getName(), refreshToken)
                 .maxAge(Duration.ofDays(jwtProperties.getRefreshTokenValidityDays()))
                 .path(jwtProperties.getCookie().getPath())
                 .httpOnly(jwtProperties.getCookie().isHttpOnly())
@@ -95,6 +95,7 @@ public abstract class JwtTokenService {
 
     /**
      * Generate access token with user permissions and room roles
+     *
      * @param authentication the authentication object
      * @return encoded JWT access token
      */
@@ -102,6 +103,7 @@ public abstract class JwtTokenService {
 
     /**
      * Generate refresh token for token renewal
+     *
      * @param authentication the authentication object
      * @return encoded JWT refresh token
      */

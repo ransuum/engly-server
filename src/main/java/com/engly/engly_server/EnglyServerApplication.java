@@ -10,7 +10,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties(value = {RSAKeyRecord.class, JwtProperties.class})
 public class EnglyServerApplication {
 
-    public static void main(String[] args) {
+    void main(String[] args) {
         SpringApplication.run(EnglyServerApplication.class, args);
     }
 

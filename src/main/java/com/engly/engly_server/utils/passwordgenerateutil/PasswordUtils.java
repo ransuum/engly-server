@@ -23,8 +23,8 @@ public final class PasswordUtils {
     private static String generatePassword(int length, String charset, boolean ensureComplexity) {
         if (length <= 0) throw new IllegalArgumentException("Length must be positive");
 
-        final var random = RANDOM.get();
-        final char[] password = new char[length];
+        var random = RANDOM.get();
+        char[] password = new char[length];
 
         if (ensureComplexity && length >= 4) {
             password[0] = PasswordGenerator.UPPER.charAt(random.nextInt(PasswordGenerator.UPPER.length()));
@@ -36,8 +36,8 @@ public final class PasswordUtils {
                 password[i] = charset.charAt(random.nextInt(charset.length()));
 
             for (int i = length - 1; i > 0; i--) {
-                final int j = random.nextInt(i + 1);
-                final char temp = password[i];
+                var j = random.nextInt(i + 1);
+                var temp = password[i];
                 password[i] = password[j];
                 password[j] = temp;
             }

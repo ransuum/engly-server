@@ -33,7 +33,7 @@ public final class GoogleRegistration implements RegistrationChooser {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this Google email already exists");
         });
 
-        final var user = Users.builder()
+        var user = Users.builder()
                 .roles("ROLE_GOOGLE")
                 .email(signUpRequestDto.email())
                 .emailVerified(Boolean.TRUE)
@@ -44,7 +44,7 @@ public final class GoogleRegistration implements RegistrationChooser {
                 .providerId(signUpRequestDto.providerId())
                 .build();
 
-        final var usersettings = UserSettings.builder()
+        var usersettings = UserSettings.builder()
                 .user(user)
                 .notifications(true)
                 .interfaceLanguage(NativeLanguage.ENGLISH)

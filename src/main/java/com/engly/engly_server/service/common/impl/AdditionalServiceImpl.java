@@ -26,8 +26,7 @@ public class AdditionalServiceImpl implements AdditionalService {
     @Transactional
     public AuthResponseDto additionalRegistration(String id, GoogleUserInfoRequest additionalRequest,
                                                   HttpServletResponse httpServletResponse) {
-        return userRepository.findById(id)
-                .map(user -> {
+        var userById = userRepository.findById(id).map(user -> {
                     user.setRoles(ROLE_USER);
                     user.setImgUrl(additionalRequest.imgUrl());
                     user.setAdditionalInfo(AdditionalInfo.builder()
@@ -36,13 +35,15 @@ public class AdditionalServiceImpl implements AdditionalService {
                             .nativeLanguage(additionalRequest.nativeLanguage())
                             .englishLevel(additionalRequest.englishLevel())
                             .build());
-                    final var savedUser = userRepository.save(user);
-
-                    final var authentication = jwtAuthenticationService.newAuthentication(savedUser);
-                    final var jwtHolder = jwtAuthenticationService.authenticationWithParameters(savedUser, authentication, httpServletResponse);
-
-                    return new AuthResponseDto(jwtHolder.accessToken(), 300, TokenType.BEARER, savedUser.getUsername());
+                    return user;
                 })
                 .orElseThrow(() -> new NotFoundException("Invalid User"));
+
+        var savedUser = userRepository.save(userById);
+
+        var authentication = jwtAuthenticationService.newAuthentication(savedUser);
+        var jwtHolder = jwtAuthenticationService.authenticationWithParameters(savedUser, authentication, httpServletResponse);
+
+        return new AuthResponseDto(jwtHolder.accessToken(), 300, TokenType.BEARER, savedUser.getUsername());
     }
 }
