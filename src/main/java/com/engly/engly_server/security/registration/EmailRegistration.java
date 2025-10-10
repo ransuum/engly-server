@@ -45,14 +45,7 @@ public final class EmailRegistration implements RegistrationChooser {
                     .provider(Provider.LOCAL)
                     .lastLogin(Instant.now())
                     .build();
-
-            var additionalInfo = AdditionalInfo.builder()
-                    .user(users)
-                    .goal(signUpRequestDto.goals())
-                    .englishLevel(signUpRequestDto.englishLevel())
-                    .nativeLanguage(signUpRequestDto.nativeLanguage())
-                    .build();
-
+            var additionalInfo = buildAdditionalInfo(users, signUpRequestDto);
             users.setAdditionalInfo(additionalInfo);
             users.setUserSettings(buildUserSettings(users));
 
@@ -69,6 +62,15 @@ public final class EmailRegistration implements RegistrationChooser {
                 .theme(Theme.BRIGHT)
                 .interfaceLanguage(users.getAdditionalInfo().getNativeLanguage())
                 .notifications(true)
+                .build();
+    }
+
+    private AdditionalInfo buildAdditionalInfo(Users users, AuthRequest.SignUpRequest signUpRequestDto) {
+        return AdditionalInfo.builder()
+                .user(users)
+                .goal(signUpRequestDto.goals())
+                .englishLevel(signUpRequestDto.englishLevel())
+                .nativeLanguage(signUpRequestDto.nativeLanguage())
                 .build();
     }
 

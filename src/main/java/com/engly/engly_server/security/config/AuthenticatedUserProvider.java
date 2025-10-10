@@ -21,8 +21,9 @@ import java.util.stream.Collectors;
 public class AuthenticatedUserProvider {
 
     public String getCurrentUserEmail() {
-        return getAuthenticationOrThrow().orElseThrow(()
-                -> new AuthenticationObjectException("Authentication object was not found in context")).getName();
+        return getAuthenticationOrThrow()
+                .orElseThrow(() -> new AuthenticationObjectException("Authentication object was not found in context"))
+                .getName();
     }
 
     public boolean hasRole(String role) {
@@ -49,7 +50,7 @@ public class AuthenticatedUserProvider {
     }
 
     private Collection<SimpleGrantedAuthority> getCurrentUserRoles() {
-        final var authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+        var authentication = Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
         return authentication.map(authenticationSafe ->
                         authenticationSafe.getAuthorities()
                                 .stream()

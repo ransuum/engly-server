@@ -57,7 +57,8 @@ public class CategoryServiceImpl implements CategoriesService {
         return categoriesRepository.findById(id)
                 .map(category -> {
                     if (categoryRequest.name() != null) category.setName(categoryRequest.name());
-                    if (StringUtils.isNotBlank(categoryRequest.description())) category.setDescription(categoryRequest.description());
+                    if (StringUtils.isNotBlank(categoryRequest.description()))
+                        category.setDescription(categoryRequest.description());
 
                     return categoryMapper.toCategoriesDto(categoriesRepository.save(category));
                 })
@@ -101,7 +102,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()", sync = true)
     public Categories findByName(CategoryType name) {
         return categoriesRepository.findByName(name).orElseThrow(()
-                        -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
+                -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
     }
 
     @Override

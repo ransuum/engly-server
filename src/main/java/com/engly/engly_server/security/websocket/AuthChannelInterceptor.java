@@ -22,13 +22,12 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
     @Override
     public Message<?> preSend(@NotNull Message<?> message, @NotNull MessageChannel channel) {
-        final StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        var accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
             var authorization = accessor.getNativeHeader(HttpHeaders.AUTHORIZATION);
 
-            if (authorization == null || authorization.isEmpty())
-                return message;
+            if (authorization == null || authorization.isEmpty()) return message;
 
             var authToken = authorization.getFirst();
             if (authToken != null && authToken.startsWith("Bearer ")) {

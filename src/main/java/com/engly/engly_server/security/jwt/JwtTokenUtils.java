@@ -83,7 +83,7 @@ public class JwtTokenUtils {
     }
 
     public Authentication createSocketAuthentication(@NonNull String token) {
-        var jwt = this.decodeToken(token);
+        var jwt = decodeToken(token);
         var userDetails = loadUserDetails().createUserDetailsFromJwtClaims(jwt);
 
         if (!tokenValidator.validateToken(jwt, userDetails))
