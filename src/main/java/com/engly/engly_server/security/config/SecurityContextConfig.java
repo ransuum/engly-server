@@ -22,8 +22,8 @@ import java.util.Optional;
 public class SecurityContextConfig {
 
     public Authentication createAndSetAuthenticationAndReturn(Users user, String password) {
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
-        final Authentication auth = new UsernamePasswordAuthenticationToken(
+        var userDetails = new UserDetailsImpl(user);
+        Authentication auth = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 password,
                 userDetails.getAuthorities());
@@ -40,7 +40,7 @@ public class SecurityContextConfig {
                             throw new AuthenticationObjectException("You are not authorized to perform this request.");
                         });
 
-        final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+        var authToken = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,
                 authorities);
@@ -50,7 +50,7 @@ public class SecurityContextConfig {
     }
 
     public Authentication createAuthenticationObject(Users users) {
-        UserDetailsImpl userDetails = new UserDetailsImpl(users);
+        var userDetails = new UserDetailsImpl(users);
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
                 users.getPassword(),
@@ -62,7 +62,7 @@ public class SecurityContextConfig {
     }
 
     private void createAndSetContext(Authentication authentication) {
-        final var securityContext = SecurityContextHolder.createEmptyContext();
+        var securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(authentication);
         SecurityContextHolder.setContext(securityContext);
     }

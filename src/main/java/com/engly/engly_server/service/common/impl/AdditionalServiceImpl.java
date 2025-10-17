@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT_FOUND_BY_ID;
+
 @Service
 @RequiredArgsConstructor
 public class AdditionalServiceImpl implements AdditionalService {
@@ -37,7 +39,7 @@ public class AdditionalServiceImpl implements AdditionalService {
                             .build());
                     return user;
                 })
-                .orElseThrow(() -> new NotFoundException("Invalid User"));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
 
         var savedUser = userRepository.save(userById);
 

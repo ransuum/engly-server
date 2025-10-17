@@ -43,16 +43,19 @@ public final class GoogleRegistration implements RegistrationChooser {
                 .lastLogin(Instant.now())
                 .providerId(signUpRequestDto.providerId())
                 .build();
-
-        var usersettings = UserSettings.builder()
-                .user(user)
-                .notifications(true)
-                .interfaceLanguage(NativeLanguage.ENGLISH)
-                .theme(Theme.BRIGHT)
-                .build();
+        var usersettings = buildUserSettings(user);
         user.setUserSettings(usersettings);
 
         return userRepository.save(user);
+    }
+
+    private UserSettings buildUserSettings(Users users) {
+        return UserSettings.builder()
+                .user(users)
+                .theme(Theme.BRIGHT)
+                .interfaceLanguage(NativeLanguage.ENGLISH)
+                .notifications(true)
+                .build();
     }
 
     @Override

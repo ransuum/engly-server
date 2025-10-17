@@ -35,6 +35,8 @@ public class JwtTokenServiceImpl extends JwtTokenService {
         try {
             var userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
+            log.info("Generating access token for user: {}", userDetails.user().getUsername());
+
             var claims = createBaseClaimsBuilder(authentication)
                     .expiresAt(Instant.now().plus(jwtProperties.getAccessTokenValidityMinutes(), ChronoUnit.MINUTES))
                     .claim("scope", authenticatedUserProvider.getPermissionsFromRoles(authenticatedUserProvider.getRolesOfUser(authentication)))
@@ -53,6 +55,8 @@ public class JwtTokenServiceImpl extends JwtTokenService {
     @Override
     protected String generateRefreshToken(Authentication authentication) {
         try {
+            log.info("Generating refresh token for user: {}", authentication.getName());
+
             var claims = createBaseClaimsBuilder(authentication)
                     .expiresAt(Instant.now().plus(jwtProperties.getRefreshTokenValidityDays(), ChronoUnit.DAYS))
                     .claim("scope", "REFRESH_TOKEN")

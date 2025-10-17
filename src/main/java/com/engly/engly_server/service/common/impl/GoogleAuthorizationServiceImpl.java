@@ -19,6 +19,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 import java.util.Optional;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.INVALID_CREDENTIALS;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -34,18 +36,18 @@ public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHand
                                         Authentication authentication) throws IOException {
         var oauth2User = Optional.ofNullable(authentication.getPrincipal())
                 .map(OAuth2User.class::cast)
-                .orElseThrow(() -> new NotFoundException("Invalid OAuth2 response"));
+                .orElseThrow(() -> new NotFoundException(INVALID_CREDENTIALS));
 
         final String email = oauth2User.getAttribute("email");
         final String name = oauth2User.getAttribute("name");
         final String providerId = oauth2User.getAttribute("sub");
 
         if (StringUtils.isBlank(email) || StringUtils.isBlank(name) || StringUtils.isBlank(providerId))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OAuth2 response");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, INVALID_CREDENTIALS);
 
         authService.processOAuth2PostLogin(email, name, providerId, response);
 
-        final String builderUrl = UriComponentsBuilder.fromUriString(frontendUrl)
+        var builderUrl = UriComponentsBuilder.fromUriString(frontendUrl)
                 .path("/google-auth/callback")
                 .build().toUriString();
         response.sendRedirect(builderUrl);

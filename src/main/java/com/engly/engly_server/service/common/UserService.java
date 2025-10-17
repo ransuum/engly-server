@@ -11,9 +11,6 @@ import java.util.List;
 
 public interface UserService {
 
-    String NOT_FOUND_BY_EMAIL = "User not found with email: %s";
-    String NOT_FOUND_BY_ID = "User not found with id: %s";
-
     ApiResponse delete(String id);
 
     UsersDto findById(String id);

@@ -16,6 +16,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -63,7 +64,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     private Authentication createProperAuthentication(Users user, Authentication originalAuth) {
-        var userDetails = new UserDetailsImpl(user);
+        UserDetails userDetails = new UserDetailsImpl(user);
         return new UsernamePasswordAuthenticationToken(
                 userDetails,
                 originalAuth.getCredentials(),

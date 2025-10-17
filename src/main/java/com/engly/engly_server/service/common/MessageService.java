@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface MessageService {
 
-    String NOT_FOUND_MESSAGE = "Cannot found this message";
-
     MessagesDto sendMessage(MessageRequest createMessageRequest);
 
     void deleteMessage(MessageRequest deleteRequest);

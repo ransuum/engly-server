@@ -22,6 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.CATEGORY_ALREADY_EXISTS;
+import static com.engly.engly_server.exception.handler.ExceptionMessage.CATEGORY_NOT_FOUND_MESSAGE;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @CacheEvict(value = CacheName.ALL_CATEGORIES, allEntries = true)
     public CategoriesDto addCategory(CategoryRequest categoryRequest) {
         if (categoriesRepository.existsByName(categoryRequest.name()))
-            throw new EntityAlreadyExistsException("Category with name " + categoryRequest.name() + " already exists");
+            throw new EntityAlreadyExistsException(CATEGORY_ALREADY_EXISTS.formatted(categoryRequest.name().name()));
 
         var save = categoriesRepository.save(Categories.builder()
                 .description(categoryRequest.description())
@@ -57,7 +60,8 @@ public class CategoryServiceImpl implements CategoriesService {
         return categoriesRepository.findById(id)
                 .map(category -> {
                     if (categoryRequest.name() != null) category.setName(categoryRequest.name());
-                    if (StringUtils.isNotBlank(categoryRequest.description())) category.setDescription(categoryRequest.description());
+                    if (StringUtils.isNotBlank(categoryRequest.description()))
+                        category.setDescription(categoryRequest.description());
 
                     return categoryMapper.toCategoriesDto(categoriesRepository.save(category));
                 })
@@ -101,7 +105,7 @@ public class CategoryServiceImpl implements CategoriesService {
     @Cacheable(value = CacheName.CATEGORY_NAME, key = "#name.toString()", sync = true)
     public Categories findByName(CategoryType name) {
         return categoriesRepository.findByName(name).orElseThrow(()
-                        -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
+                -> new NotFoundException(CATEGORY_NOT_FOUND_MESSAGE.formatted(name)));
     }
 
     @Override

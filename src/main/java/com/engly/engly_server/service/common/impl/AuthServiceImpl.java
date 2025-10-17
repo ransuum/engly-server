@@ -14,6 +14,7 @@ import com.engly.engly_server.security.registration.RegistrationChooser;
 import com.engly.engly_server.service.common.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -67,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseDto getAccessTokenUsingRefreshToken(String refreshToken, HttpServletResponse response) {
-        if (refreshToken == null)
+        if (StringUtils.isBlank(refreshToken))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid token format");
 
         var refreshTokenEntity = refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken)

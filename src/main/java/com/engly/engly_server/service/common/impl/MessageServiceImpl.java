@@ -25,6 +25,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.MESSAGE_NOT_FOUND;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -68,7 +70,7 @@ public class MessageServiceImpl implements MessageService {
         messageRepository.findById(deleteRequest.messageId())
                 .ifPresentOrElse(_ -> messageRepository.deleteById(deleteRequest.messageId()),
                         () -> {
-                            throw new NotFoundException(NOT_FOUND_MESSAGE);
+                            throw new NotFoundException(MESSAGE_NOT_FOUND.formatted(deleteRequest.messageId()));
                         });
     }
 
@@ -79,7 +81,7 @@ public class MessageServiceImpl implements MessageService {
         return messageRepository.findById(id)
                 .map(message -> messageMapper.toMessageDto(
                         message, roomService.findRoomByIdShort(message.getRoomId())))
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new NotFoundException(MESSAGE_NOT_FOUND.formatted(id)));
     }
 
     @Override
@@ -91,7 +93,7 @@ public class MessageServiceImpl implements MessageService {
                     m.setIsEdited(Boolean.TRUE);
                     return m;
                 })
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_MESSAGE));
+                .orElseThrow(() -> new NotFoundException(MESSAGE_NOT_FOUND.formatted(editRequest.messageId())));
 
         return messageMapper.toMessageDto(
                 messageRepository.save(message), roomService.findRoomByIdShort(message.getRoomId()));

@@ -13,6 +13,9 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT_FOUND;
+import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_SETTINGS_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class UserSettingServiceImpl implements UserSettingService {
@@ -25,7 +28,7 @@ public class UserSettingServiceImpl implements UserSettingService {
     public UserSettingsDto getById(String id) {
         return userSettingsRepository.findById(id)
                 .map(UserSettingsMapper.INSTANCE::toUserSettingsDto)
-                .orElseThrow(() -> new NotFoundException("UserSettings not found"));
+                .orElseThrow(() -> new NotFoundException(USER_SETTINGS_NOT_FOUND));
     }
 
     @Override
@@ -37,6 +40,6 @@ public class UserSettingServiceImpl implements UserSettingService {
                     if (theme != null) userSettings.setTheme(theme);
                     if (notifications != null) userSettings.setNotifications(notifications);
                     userSettingsRepository.save(userSettings);
-                }, () -> { throw new NotFoundException("User not found"); });
+                }, () -> { throw new NotFoundException(USER_NOT_FOUND); });
     }
 }

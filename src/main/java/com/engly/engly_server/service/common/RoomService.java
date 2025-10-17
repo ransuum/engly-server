@@ -11,9 +11,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface RoomService {
 
-    String ROOM_NOT_FOUND = "Room not found";
-    String ROOM_ALREADY_EXISTS = "Room with this name already exists";
-
     RoomsDto createRoom(String id, CategoryType name, RoomRequest.RoomCreateRequest roomCreateRequestDto);
 
     Page<RoomsDto> findAllWithCriteria(RoomSearchCriteriaRequest request, Pageable pageable);

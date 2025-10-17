@@ -1,6 +1,7 @@
 package com.engly.engly_server.security.userconfiguration;
 
 import com.engly.engly_server.models.entity.Users;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Arrays;
 import java.util.Collection;
 
-public record UserDetailsImpl(Users user) implements UserDetails {
+public record UserDetailsImpl(@NonNull Users user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
