@@ -8,8 +8,6 @@ import org.springframework.data.domain.Pageable;
 
 public interface ChatParticipantsService {
 
-    String NOT_FOUND_MESSAGE = "Participant with id %s not found";
-
     void addParticipant(String roomId, Users user, RoomRoles role);
 
     void removeParticipant(String participantId);

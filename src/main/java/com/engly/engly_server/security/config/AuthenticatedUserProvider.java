@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.AUTHENTICATION_OBJECT_NOT_FOUND;
+import static com.engly.engly_server.exception.handler.ExceptionMessage.NO_AUTHENTICATED_USER_FOUND;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -22,7 +25,7 @@ public class AuthenticatedUserProvider {
 
     public String getCurrentUserEmail() {
         return getAuthenticationOrThrow()
-                .orElseThrow(() -> new AuthenticationObjectException("Authentication object was not found in context"))
+                .orElseThrow(() -> new AuthenticationObjectException(AUTHENTICATION_OBJECT_NOT_FOUND))
                 .getName();
     }
 
@@ -39,11 +42,11 @@ public class AuthenticatedUserProvider {
     }
 
     public String getPermissionsFromRoles(String roles) {
-        final var roleList = Arrays.stream(roles.split(","))
+        var roleList = Arrays.stream(roles.split(","))
                 .map(String::trim)
                 .toList();
 
-        final var authorities = Roles.getPermissionsForRoles(roleList);
+        var authorities = Roles.getPermissionsForRoles(roleList);
         return authorities.stream()
                 .map(Enum::name)
                 .collect(Collectors.joining(" "));
@@ -57,7 +60,7 @@ public class AuthenticatedUserProvider {
                                 .filter(SimpleGrantedAuthority.class::isInstance)
                                 .map(SimpleGrantedAuthority.class::cast)
                                 .toList())
-                .orElseThrow(() -> new AuthenticationObjectException("No authenticated user found"));
+                .orElseThrow(() -> new AuthenticationObjectException(NO_AUTHENTICATED_USER_FOUND));
     }
 
     public Optional<Authentication> getAuthenticationOrThrow() {

@@ -6,7 +6,6 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.mapper.ChatParticipantMapper;
 import com.engly.engly_server.models.dto.response.ChatParticipantsDto;
 import com.engly.engly_server.models.entity.ChatParticipants;
-import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.ChatParticipantRepository;
@@ -20,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.engly.engly_server.exception.handler.ExceptionMessage.PARTICIPANT_NOT_FOUND;
 
 @Slf4j
 @Service
@@ -65,7 +66,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
                     chatParticipantRepository.deleteById(chatParticipants.getId());
                     log.info("User with email {} removed from room", chatParticipants.getUser().getEmail());
                 }, () -> {
-                    throw new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId));
+                    throw new NotFoundException(PARTICIPANT_NOT_FOUND.formatted(participantId));
                 });
     }
 
@@ -81,7 +82,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
                     chatParticipants.setRole(role);
                     chatParticipantRepository.save(chatParticipants);
                 }, () -> {
-                    throw new NotFoundException(NOT_FOUND_MESSAGE.formatted(participantId));
+                    throw new NotFoundException(PARTICIPANT_NOT_FOUND.formatted(participantId));
                 });
 
     }

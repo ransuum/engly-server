@@ -21,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.util.List;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT_FOUND_BY_EMAIL;
+import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT_FOUND_BY_ID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -43,7 +46,7 @@ public class UserServiceImpl implements UserService {
                     userRepository.delete(users);
                     return new ApiResponse("User deleted successfully");
                 })
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id)));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
     }
 
     @Override
@@ -51,14 +54,14 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = CacheName.USER_ID, key = "#id", sync = true)
     public UsersDto findById(String id) {
         return UserMapper.INSTANCE.toUsersDto(userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id))));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id))));
     }
 
     @Override
     @Cacheable(value = CacheName.USER_ENTITY_ID, key = "#id", sync = true)
     public Users findEntityById(String id) {
         return userRepository.findById(id).orElseThrow(()
-                -> new NotFoundException(NOT_FOUND_BY_ID.formatted(id)));
+                -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
     }
 
     @Caching(evict = {
@@ -88,7 +91,7 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public String getUsernameByEmail(String email) {
         return userRepository.findUsernameByEmail(email)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override
@@ -119,14 +122,14 @@ public class UserServiceImpl implements UserService {
     @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public Users findUserEntityByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override
     @Cacheable(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
     public String getUserIdByEmail(String email) {
         return userRepository.findByEmail(email).map(Users::getId)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_BY_EMAIL.formatted(email)));
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
     @Override

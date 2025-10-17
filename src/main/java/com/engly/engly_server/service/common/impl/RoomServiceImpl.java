@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.ROOM_ALREADY_EXISTS;
+import static com.engly.engly_server.exception.handler.ExceptionMessage.ROOM_NOT_FOUND;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service

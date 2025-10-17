@@ -16,6 +16,8 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.engly.engly_server.exception.handler.ExceptionMessage.PROFILE_NOT_FOUND;
+
 @Service
 @RequiredArgsConstructor
 public class ProfileServiceImpl implements ProfileService {
@@ -28,7 +30,7 @@ public class ProfileServiceImpl implements ProfileService {
     public UsersDto getProfile(String id) {
         return userRepository.findById(id)
                 .map(UserMapper.INSTANCE::toUsersDto)
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
+                .orElseThrow(() -> new NotFoundException(PROFILE_NOT_FOUND));
     }
 
     @Override
@@ -56,6 +58,6 @@ public class ProfileServiceImpl implements ProfileService {
 
                     return UserMapper.INSTANCE.toUsersDto(userRepository.save(user));
                 })
-                .orElseThrow(() -> new NotFoundException(NOT_FOUND_PROFILE));
+                .orElseThrow(() -> new NotFoundException(PROFILE_NOT_FOUND));
     }
 }
