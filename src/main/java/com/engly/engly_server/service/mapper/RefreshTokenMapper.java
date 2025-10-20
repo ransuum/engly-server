@@ -1,4 +1,4 @@
-package com.engly.engly_server.mapper;
+package com.engly.engly_server.service.mapper;
 
 import com.engly.engly_server.models.dto.response.RefreshTokenDto;
 import com.engly.engly_server.models.entity.RefreshToken;

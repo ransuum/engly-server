@@ -2,7 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.googledrive.GoogleDriveService;
-import com.engly.engly_server.mapper.MessageMapper;
+import com.engly.engly_server.service.mapper.MessageMapper;
 import com.engly.engly_server.models.dto.request.MessageRequest;
 import com.engly.engly_server.models.dto.request.MessageSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.MessagesDto;
@@ -14,7 +14,7 @@ import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.MessageService;
 import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.service.common.UserService;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;

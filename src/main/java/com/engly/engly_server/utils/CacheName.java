@@ -1,4 +1,4 @@
-package com.engly.engly_server.utils.cache;
+package com.engly.engly_server.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

@@ -1,12 +1,12 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.mapper.UserMapper;
+import com.engly.engly_server.service.mapper.UserMapper;
 import com.engly.engly_server.models.dto.request.ProfileUpdateRequest;
 import com.engly.engly_server.models.dto.response.UsersDto;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.service.common.ProfileService;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.cache.annotation.CacheEvict;

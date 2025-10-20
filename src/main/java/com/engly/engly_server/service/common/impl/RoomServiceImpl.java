@@ -2,7 +2,7 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.mapper.RoomMapper;
+import com.engly.engly_server.service.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.RoomDtoShort;
@@ -15,7 +15,7 @@ import com.engly.engly_server.service.common.CategoriesService;
 import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.service.common.RoomService;
 import com.engly.engly_server.service.common.UserService;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;

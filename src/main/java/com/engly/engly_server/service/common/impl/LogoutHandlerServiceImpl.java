@@ -35,7 +35,8 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
                 .ifPresent(token -> {
                     token.setRevoked(true);
                     refreshTokenRepository.save(token);
-                    cookieUtil.clearCookies(response);
                 });
+
+        cookieUtil.clearCookies(response);
     }
 }

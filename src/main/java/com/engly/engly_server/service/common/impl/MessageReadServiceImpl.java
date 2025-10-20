@@ -1,15 +1,15 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.cache.CacheCoordinator;
-import com.engly.engly_server.cache.components.MessageReadCache;
-import com.engly.engly_server.mapper.UserMapper;
+import com.engly.engly_server.service.helper.MessageReadHelper;
+import com.engly.engly_server.service.mapper.UserMapper;
 import com.engly.engly_server.models.dto.request.MessageRequest;
 import com.engly.engly_server.models.dto.response.UserWhoReadsMessageDto;
 import com.engly.engly_server.models.entity.MessageRead;
 import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.service.common.MessageReadService;
 import com.engly.engly_server.service.common.UserService;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -26,18 +26,12 @@ import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class MessageReadServiceImpl implements MessageReadService {
 
     private final MessageReadRepository messageReadRepository;
-    private final MessageReadCache messageReadCache;
+    private final MessageReadHelper messageReadHelper;
     private final UserService userService;
-
-    public MessageReadServiceImpl(MessageReadRepository messageReadRepository,
-                                  CacheCoordinator messageReadCache, UserService userService) {
-        this.messageReadRepository = messageReadRepository;
-        this.messageReadCache = messageReadCache.getMessageReadCache();
-        this.userService = userService;
-    }
 
     @Override
     @Async
@@ -52,7 +46,7 @@ public class MessageReadServiceImpl implements MessageReadService {
         var futures = messageRequest.messageIds().stream()
                 .map(messageId -> CompletableFuture.supplyAsync(() ->
                         new AbstractMap.SimpleEntry<>(messageId,
-                                messageReadCache.hasUserReadMessage(messageId, userId))))
+                                messageReadHelper.hasUserReadMessage(messageId, userId))))
                 .toList();
 
         var unreadMessageIds = futures.stream()
@@ -70,7 +64,7 @@ public class MessageReadServiceImpl implements MessageReadService {
                         .build())
                 .toList();
 
-        return messageReadCache.batchSaveMessageReads(newReads);
+        return messageReadHelper.batchSaveMessageReads(newReads);
     }
 
     @Override
