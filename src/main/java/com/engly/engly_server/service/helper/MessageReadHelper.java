@@ -1,4 +1,4 @@
-package com.engly.engly_server.cache.components;
+package com.engly.engly_server.service.helper;
 
 import com.engly.engly_server.models.entity.MessageRead;
 import org.springframework.scheduling.annotation.Async;
@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Async;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public interface MessageReadCache {
+public interface MessageReadHelper {
     boolean hasUserReadMessage(String messageId, String userId);
 
     @Async

@@ -1,15 +1,15 @@
-package com.engly.engly_server.cache.components.impl;
+package com.engly.engly_server.service.helper.impl;
 
-import com.engly.engly_server.cache.components.ChatParticipantCache;
+import com.engly.engly_server.service.helper.ChatParticipantHelper;
 import com.engly.engly_server.repository.ChatParticipantRepository;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class ChatParticipantCacheImpl implements ChatParticipantCache {
+public class ChatParticipantHelperImpl implements ChatParticipantHelper {
     private final ChatParticipantRepository chatParticipantRepository;
 
     @Override

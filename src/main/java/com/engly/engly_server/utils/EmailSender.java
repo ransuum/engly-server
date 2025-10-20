@@ -1,4 +1,4 @@
-package com.engly.engly_server.utils.emailsenderscript;
+package com.engly.engly_server.utils;
 
 import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.models.dto.response.EmailSendInfo;

@@ -1,12 +1,12 @@
 package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.mapper.UserSettingsMapper;
+import com.engly.engly_server.service.mapper.UserSettingsMapper;
 import com.engly.engly_server.models.dto.response.UserSettingsDto;
 import com.engly.engly_server.models.enums.Theme;
 import com.engly.engly_server.repository.UserSettingsRepository;
 import com.engly.engly_server.service.common.UserSettingService;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;

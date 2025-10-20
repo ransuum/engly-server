@@ -1,6 +1,5 @@
 package com.engly.engly_server.config;
 
-import com.engly.engly_server.utils.cache.CacheName;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
@@ -15,7 +14,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.engly.engly_server.utils.cache.CacheName.*;
+import static com.engly.engly_server.utils.CacheName.*;
 
 @Slf4j
 @EnableCaching

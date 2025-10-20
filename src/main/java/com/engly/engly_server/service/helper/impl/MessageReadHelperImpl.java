@@ -1,10 +1,10 @@
-package com.engly.engly_server.cache.components.impl;
+package com.engly.engly_server.service.helper.impl;
 
-import com.engly.engly_server.cache.components.MessageReadCache;
+import com.engly.engly_server.service.helper.MessageReadHelper;
 import com.engly.engly_server.exception.RepositoryException;
 import com.engly.engly_server.models.entity.MessageRead;
 import com.engly.engly_server.repository.MessageReadRepository;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class MessageReadCacheImpl implements MessageReadCache {
+public class MessageReadHelperImpl implements MessageReadHelper {
 
     private final MessageReadRepository messageReadRepository;
     private final CacheManager cacheManager;

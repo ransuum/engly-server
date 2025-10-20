@@ -1,16 +1,16 @@
 package com.engly.engly_server.service.common.impl;
 
-import com.engly.engly_server.cache.CacheCoordinator;
-import com.engly.engly_server.cache.components.ChatParticipantCache;
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.mapper.ChatParticipantMapper;
+import com.engly.engly_server.service.helper.ChatParticipantHelper;
+import com.engly.engly_server.service.mapper.ChatParticipantMapper;
 import com.engly.engly_server.models.dto.response.ChatParticipantsDto;
 import com.engly.engly_server.models.entity.ChatParticipants;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.service.common.ChatParticipantsService;
-import com.engly.engly_server.utils.cache.CacheName;
+import com.engly.engly_server.utils.CacheName;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -24,16 +24,11 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.PARTICIP
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class ChatParticipantsServiceImpl implements ChatParticipantsService {
 
     private final ChatParticipantRepository chatParticipantRepository;
-    private final ChatParticipantCache chatParticipantCache;
-
-    public ChatParticipantsServiceImpl(ChatParticipantRepository chatParticipantRepository,
-                                       CacheCoordinator chatParticipantCache) {
-        this.chatParticipantRepository = chatParticipantRepository;
-        this.chatParticipantCache = chatParticipantCache.getChatParticipantCache();
-    }
+    private final ChatParticipantHelper chatParticipantHelper;
 
     @Override
     @Transactional
@@ -42,7 +37,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, key = "#roomId + '-' + #user.id")
     })
     public void addParticipant(String roomId, Users user, RoomRoles role) {
-        if (!chatParticipantCache.isParticipantExists(roomId, user.getId())) {
+        if (!chatParticipantHelper.isParticipantExists(roomId, user.getId())) {
             final var chatParticipant = ChatParticipants.builder()
                     .roomId(roomId)
                     .user(user)

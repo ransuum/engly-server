@@ -12,7 +12,7 @@ import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import com.engly.engly_server.service.notification.PasswordResetService;
-import com.engly.engly_server.utils.emailsenderscript.EmailSender;
+import com.engly.engly_server.utils.EmailSender;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
