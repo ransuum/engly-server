@@ -24,12 +24,12 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
     @Override
     public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
         var cookieUtil = new CookieUtils(request.getCookies());
-        var authCookie = cookieUtil.getRefreshTokenCookie();
+        final String authCookie = cookieUtil.getRefreshTokenCookie();
 
         if (StringUtils.isBlank(authCookie) &&
                 !Objects.requireNonNull(authCookie).startsWith(TokenType.BEARER.name())) return;
 
-        var refreshToken = Objects.requireNonNull(authCookie).substring(7);
+        final String refreshToken = Objects.requireNonNull(authCookie).substring(7);
 
         refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken)
                 .ifPresent(token -> {

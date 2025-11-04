@@ -13,6 +13,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -27,7 +28,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
             var authorization = accessor.getNativeHeader(HttpHeaders.AUTHORIZATION);
 
-            if (authorization == null || authorization.isEmpty()) return message;
+            if (CollectionUtils.isEmpty(authorization)) return message;
 
             var authToken = authorization.getFirst();
             if (authToken != null && authToken.startsWith("Bearer ")) {

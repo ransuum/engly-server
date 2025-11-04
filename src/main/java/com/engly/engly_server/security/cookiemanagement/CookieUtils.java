@@ -2,6 +2,7 @@ package com.engly.engly_server.security.cookiemanagement;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
@@ -16,7 +17,7 @@ public record CookieUtils(Cookie[] cookies) {
     }
 
     public @Nullable String getRefreshTokenCookie() {
-        if (cookies == null) return null;
+        if (ArrayUtils.isEmpty(cookies)) return null;
         return Arrays.stream(cookies)
                 .filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()

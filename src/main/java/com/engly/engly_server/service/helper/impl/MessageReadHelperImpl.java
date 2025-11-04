@@ -7,11 +7,13 @@ import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -38,8 +40,8 @@ public class MessageReadHelperImpl implements MessageReadHelper {
     @Override
     @Async
     @Transactional
-    public CompletableFuture<Void> batchSaveMessageReads(List<MessageRead> messageReads) {
-        if (messageReads == null || messageReads.isEmpty()) {
+    public @Nullable CompletableFuture<Void> batchSaveMessageReads(List<MessageRead> messageReads) {
+        if (CollectionUtils.isEmpty(messageReads)) {
             log.debug("No message reads to save");
             return null;
         }
@@ -52,7 +54,7 @@ public class MessageReadHelperImpl implements MessageReadHelper {
                 .values()
                 .stream()
                 .map(indices -> CompletableFuture.supplyAsync(() -> {
-                    final var batch = indices.stream()
+                    List<MessageRead> batch = indices.stream()
                             .map(messageReads::get)
                             .toList();
 
@@ -61,12 +63,12 @@ public class MessageReadHelperImpl implements MessageReadHelper {
                         log.debug("Saved batch of {} message reads", batch.size());
                         return saved;
                     } catch (Exception e) {
-                        throw new RepositoryException("Batch save failed", e);
+                        throw new RepositoryException("Batch save failed: " +  e.getMessage());
                     }
                 }))
                 .toList();
 
-        final var savedReads = futures.stream()
+        final List<MessageRead> savedReads = futures.stream()
                 .map(CompletableFuture::join)
                 .flatMap(List::stream)
                 .toList();

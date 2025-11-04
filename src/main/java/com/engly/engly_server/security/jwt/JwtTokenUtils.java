@@ -84,7 +84,7 @@ public class JwtTokenUtils {
 
     public Authentication createSocketAuthentication(@NonNull String token) {
         var jwt = decodeToken(token);
-        var userDetails = loadUserDetails().createUserDetailsFromJwtClaims(jwt);
+        UserDetails userDetails = loadUserDetails().createUserDetailsFromJwtClaims(jwt);
 
         if (!tokenValidator.validateToken(jwt, userDetails))
             throw new TokenGenerationException("Invalid JWT token");
