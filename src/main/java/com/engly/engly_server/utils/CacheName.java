@@ -1,10 +1,11 @@
 package com.engly.engly_server.utils;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CacheName {
+
+    private CacheName() {
+        // Private constructor to prevent instantiation
+    }
+
     public static final String USER_ID = "user-by-id";
     public static final String ALL_USER = "all-users";
     public static final String USER_BY_EMAIL = "user-by-email";

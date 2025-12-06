@@ -7,11 +7,13 @@ import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -38,13 +40,13 @@ public class MessageReadHelperImpl implements MessageReadHelper {
     @Override
     @Async
     @Transactional
-    public CompletableFuture<Void> batchSaveMessageReads(List<MessageRead> messageReads) {
-        if (messageReads == null || messageReads.isEmpty()) {
-            log.debug("No message reads to save");
+    public @Nullable CompletableFuture<Void> batchSaveMessageReads(List<MessageRead> messageReads) {
+        if (CollectionUtils.isEmpty(messageReads)) {
+            log.info("No message reads to save");
             return null;
         }
 
-        log.debug("Batch saving {} message reads", messageReads.size());
+        log.info("Batch saving {} message reads", messageReads.size());
 
         final List<CompletableFuture<List<MessageRead>>> futures = IntStream.range(0, messageReads.size())
                 .boxed()
@@ -52,21 +54,21 @@ public class MessageReadHelperImpl implements MessageReadHelper {
                 .values()
                 .stream()
                 .map(indices -> CompletableFuture.supplyAsync(() -> {
-                    final var batch = indices.stream()
+                    List<MessageRead> batch = indices.stream()
                             .map(messageReads::get)
                             .toList();
 
                     try {
                         var saved = messageReadRepository.saveAll(batch);
-                        log.debug("Saved batch of {} message reads", batch.size());
+                        log.info("Saved batch of {} message reads", batch.size());
                         return saved;
                     } catch (Exception e) {
-                        throw new RepositoryException("Batch save failed", e);
+                        throw new RepositoryException("Batch save failed: " +  e.getMessage());
                     }
                 }))
                 .toList();
 
-        final var savedReads = futures.stream()
+        final List<MessageRead> savedReads = futures.stream()
                 .map(CompletableFuture::join)
                 .flatMap(List::stream)
                 .toList();

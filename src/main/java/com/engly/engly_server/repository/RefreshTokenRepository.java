@@ -1,13 +1,16 @@
 package com.engly.engly_server.repository;
 
 import com.engly.engly_server.models.entity.RefreshToken;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+@NullMarked
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
 
     @Query("SELECT rt FROM RefreshToken rt JOIN FETCH rt.user WHERE rt.token = :token AND rt.revoked = false")
@@ -16,4 +19,8 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long
     boolean existsByTokenAndRevokedIsFalse(String token);
 
     List<RefreshToken> findAllByExpiresAtBeforeOrRevokedIsTrue(Instant now);
+
+    @Modifying
+    @Query("UPDATE RefreshToken rt SET rt.revoked = true WHERE rt.token = :token AND rt.revoked = false")
+    void updateRevokeByToken(String token);
 }

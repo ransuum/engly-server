@@ -8,6 +8,7 @@ import com.engly.engly_server.repository.UserSettingsRepository;
 import com.engly.engly_server.service.common.UserSettingService;
 import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class UserSettingServiceImpl implements UserSettingService {
     @Override
     @Transactional
     @CacheEvict(value = CacheName.USER_SETTINGS, key = "#id")
-    public void update(String id, Boolean notifications, Theme theme) {
+    public void update(String id, @Nullable Boolean notifications, @Nullable Theme theme) {
         userSettingsRepository.findById(id)
                 .ifPresentOrElse(userSettings -> {
                     if (theme != null) userSettings.setTheme(theme);

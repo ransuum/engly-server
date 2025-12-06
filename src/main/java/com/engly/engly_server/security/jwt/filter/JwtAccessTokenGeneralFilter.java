@@ -13,7 +13,8 @@ import org.springframework.stereotype.Component;
 public class JwtAccessTokenGeneralFilter extends JwtGeneralFilter {
     private final UserService  userService;
 
-    protected JwtAccessTokenGeneralFilter(JwtTokenUtils jwtTokenUtils, ObjectMapper objectMapper, UserService userService) {
+    protected JwtAccessTokenGeneralFilter(JwtTokenUtils jwtTokenUtils, ObjectMapper objectMapper,
+                                          UserService userService) {
         super(jwtTokenUtils, objectMapper);
         this.userService = userService;
     }

@@ -1,6 +1,8 @@
 package com.engly.engly_server.specs;
 
 import com.engly.engly_server.models.entity.Message;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -9,6 +11,7 @@ import static com.engly.engly_server.specs.DateSpecificationConverter.toInstantP
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@NullMarked
 public final class MessageSpecification {
     private static final String CREATED_AT_FIELD = "createdAt";
     private static final String UPDATED_AT_FIELD = "updatedAt";
@@ -34,31 +37,31 @@ public final class MessageSpecification {
         };
     }
 
-    public static Specification<Message> createdAfter(LocalDate date) {
+    public static Specification<Message> createdAfter(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
                 ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
-    public static Specification<Message> updatedAfter(LocalDate date) {
+    public static Specification<Message> updatedAfter(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
                 ? cb.greaterThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
-    public static Specification<Message> createdBefore(LocalDate date) {
+    public static Specification<Message> createdBefore(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
                 ? cb.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
-    public static Specification<Message> updatedBefore(LocalDate date) {
+    public static Specification<Message> updatedBefore(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
                 ? cb.lessThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
-    public static Specification<Message> between(LocalDate min, LocalDate max) {
+    public static Specification<Message> between(@Nullable LocalDate min, @Nullable LocalDate max) {
         return (root, _, cb) -> min != null && max != null
                 ? cb.between(
                 root.get(CREATED_AT_FIELD),
@@ -67,25 +70,25 @@ public final class MessageSpecification {
                 : cb.conjunction();
     }
 
-    public static Specification<Message> contentLike(String content) {
+    public static Specification<Message> contentLike(@Nullable String content) {
         return (root, _, cb) -> isNotBlank(content)
                 ? cb.like(cb.lower(root.get(CONTENT_FIELD)), "%" + content.toLowerCase() + "%")
                 : cb.conjunction();
     }
 
-    public static Specification<Message> usernameLike(String username) {
+    public static Specification<Message> usernameLike(@Nullable String username) {
         return (root, _, cb) -> isNotBlank(username)
                 ? cb.like(cb.lower(root.join(USER_FIELD).get(USERNAME_FIELD)), "%" + username.toLowerCase() + "%")
                 : cb.conjunction();
     }
 
-    public static Specification<Message> userIdEquals(String userId) {
+    public static Specification<Message> userIdEquals(@Nullable String userId) {
         return (root, _, cb) -> isNotBlank(userId)
                 ? cb.equal(root.join(USER_FIELD).get(ID_FIELD), userId)
                 : cb.conjunction();
     }
 
-    public static Specification<Message> roomIdEquals(String roomId) {
+    public static Specification<Message> roomIdEquals(@Nullable String roomId) {
         return (root, _, cb) -> isNotBlank(roomId)
                 ? cb.equal(root.get(ROOM_FIELD), roomId)
                 : cb.conjunction();

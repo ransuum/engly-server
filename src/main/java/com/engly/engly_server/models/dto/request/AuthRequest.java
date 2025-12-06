@@ -9,12 +9,14 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
+import org.jspecify.annotations.NullMarked;
 
 @JsonSubTypes({
         @JsonSubTypes.Type(value = AuthRequest.SignUpRequest.class, name = "signup"),
         @JsonSubTypes.Type(value = AuthRequest.SignInRequest.class, name = "signin")
 })
-public sealed interface     AuthRequest {
+@NullMarked
+public sealed interface AuthRequest {
 
     @Builder
     @JsonIgnoreProperties(ignoreUnknown = true)

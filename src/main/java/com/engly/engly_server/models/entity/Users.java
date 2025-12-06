@@ -95,7 +95,6 @@ public class Users implements Serializable {
     private List<Message> messages;
 
     public boolean checkRolesForBan() {
-        if (roles == null) return false;
         return Arrays.stream(this.roles.split(" "))
                 .map(String::trim)
                 .anyMatch("ROLE_BAN"::equals);

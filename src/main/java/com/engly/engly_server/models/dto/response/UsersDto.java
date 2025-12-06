@@ -1,16 +1,17 @@
 package com.engly.engly_server.models.dto.response;
 
 import com.engly.engly_server.models.enums.Provider;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
 public record UsersDto(String id,
                        String username,
                        String email,
-                       String providerId,
+                       @Nullable String providerId,
                        Instant createdAt,
                        String roles,
-                       String imgUrl,
+                       @Nullable String imgUrl,
                        Boolean emailVerified,
                        Instant updatedAt,
                        Instant lastLogin,

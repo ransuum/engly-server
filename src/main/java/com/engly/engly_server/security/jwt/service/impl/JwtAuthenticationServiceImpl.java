@@ -11,7 +11,8 @@ import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -19,30 +20,34 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@NullMarked
 public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
+
     private final SecurityContextConfig securityContextConfig;
     private final JwtTokenService jwtTokenService;
     private final AuthenticationManager authenticationManager;
 
     @Override
-    public JwtHolder authentication(Users user, @NonNull HttpServletResponse response) {
+    public JwtHolder authentication(Users user, HttpServletResponse response) {
         var auth = securityContextConfig.createAuthenticationObject(user);
-        return generateAndSaveTokens(user, auth, response, true);
+        return Objects.requireNonNull(generateAndSaveTokens(user, auth, response, true));
     }
 
     @Override
-    public void authenticationForGoogle(Users user, @NonNull HttpServletResponse response) {
+    public void authenticationForGoogle(Users user, HttpServletResponse response) {
         var auth = securityContextConfig.createAuthenticationObject(user);
         generateAndSaveTokens(user, auth, response, false);
     }
 
     @Override
-    public JwtHolder authenticationWithParameters(Users user, @NonNull Authentication authentication, @NonNull HttpServletResponse response) {
+    public JwtHolder authenticationWithParameters(Users user, Authentication authentication, HttpServletResponse response) {
         var properAuth = createProperAuthentication(user, authentication);
-        return generateAndSaveTokens(user, properAuth, response, true);
+        return Objects.requireNonNull(generateAndSaveTokens(user, properAuth, response, true));
     }
 
     @Override
@@ -52,10 +57,10 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
     }
 
     @Override
-    public JwtHolder authenticationForVerification(Users user, @NonNull HttpServletResponse response) {
+    public JwtHolder authenticationForVerification(Users user, HttpServletResponse response) {
         var auth = securityContextConfig.createAndSetAuthenticationAndReturn(user, user.getPassword());
         SecurityContextHolder.getContext().setAuthentication(auth);
-        return generateAndSaveTokens(user, auth, response, true);
+        return Objects.requireNonNull(generateAndSaveTokens(user, auth, response, true));
     }
 
     @Override
@@ -72,9 +77,10 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         );
     }
 
-    private JwtHolder generateAndSaveTokens(Users user, Authentication auth, HttpServletResponse response, boolean includeAccessToken) {
+    private @Nullable JwtHolder generateAndSaveTokens(Users user, Authentication auth,
+                                                      HttpServletResponse response, boolean includeAccessToken) {
         log.debug("Generating tokens for user: {} with principal type: {}",
-                user.getEmail(), auth.getPrincipal().getClass().getSimpleName());
+                user.getEmail(), Objects.requireNonNull(auth.getPrincipal()).getClass().getSimpleName());
 
         var refreshToken = jwtTokenService.tokenChooser(auth, TokenType.REFRESH);
         var accessToken = includeAccessToken ? jwtTokenService.tokenChooser(auth, TokenType.ACCESS) : null;

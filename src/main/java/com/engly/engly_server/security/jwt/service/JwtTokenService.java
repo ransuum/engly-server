@@ -10,7 +10,7 @@ import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.jwt.JwtProperties;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@NullMarked
 public abstract class JwtTokenService {
     private final ChatParticipantRepository chatParticipantRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -53,7 +54,7 @@ public abstract class JwtTokenService {
                 .subject(authentication.getName());
     }
 
-    protected final String encodeToken(@NonNull JwtClaimsSet claims, @NonNull JwtEncoder jwtEncoder) {
+    protected final String encodeToken(JwtClaimsSet claims, JwtEncoder jwtEncoder) {
         try {
             return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
         } catch (Exception e) {
@@ -61,7 +62,7 @@ public abstract class JwtTokenService {
         }
     }
 
-    protected final Map<String, String> getRoomRolesForUser(@NonNull String email) {
+    protected final Map<String, String> getRoomRolesForUser(String email) {
         var participants = chatParticipantRepository.findByEmail(email);
 
         return participants.stream()
@@ -81,7 +82,7 @@ public abstract class JwtTokenService {
                 .build());
     }
 
-    public final void createRefreshTokenCookie(@NonNull HttpServletResponse response, String refreshToken) {
+    public final void createRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         var cookie = ResponseCookie.from(jwtProperties.getCookie().getName(), refreshToken)
                 .maxAge(Duration.ofDays(jwtProperties.getRefreshTokenValidityDays()))
                 .path(jwtProperties.getCookie().getPath())

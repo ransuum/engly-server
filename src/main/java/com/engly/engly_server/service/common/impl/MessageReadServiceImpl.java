@@ -11,6 +11,7 @@ import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.Nullable;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -40,8 +42,8 @@ public class MessageReadServiceImpl implements MessageReadService {
             @CacheEvict(value = CacheName.USERS_WHO_READ_MESSAGE, allEntries = true),
             @CacheEvict(value = CacheName.MESSAGE_READ_STATUS, allEntries = true)
     })
-    public CompletableFuture<Void> markMessageAsRead(MessageRequest messageRequest, String userId) {
-        if (messageRequest.messageIds() == null || messageRequest.messageIds().isEmpty()) return null;
+    public @Nullable CompletableFuture<Void> markMessageAsRead(MessageRequest messageRequest, String userId) {
+        if (CollectionUtils.isEmpty(messageRequest.messageIds())) return null;
 
         var futures = messageRequest.messageIds().stream()
                 .map(messageId -> CompletableFuture.supplyAsync(() ->

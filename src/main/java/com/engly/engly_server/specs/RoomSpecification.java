@@ -2,6 +2,8 @@ package com.engly.engly_server.specs;
 
 import com.engly.engly_server.models.entity.Rooms;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDate;
@@ -10,6 +12,7 @@ import static com.engly.engly_server.specs.DateSpecificationConverter.toInstantP
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@NullMarked
 public final class RoomSpecification {
     private static final String CREATED_AT_FIELD = "createdAt";
     private static final String NAME_FIELD = "name";
@@ -33,19 +36,19 @@ public final class RoomSpecification {
         };
     }
 
-    public static Specification<Rooms> createdAfter(LocalDate date) {
+    public static Specification<Rooms> createdAfter(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
                 ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : cb.conjunction();
     }
 
-    public static Specification<Rooms> createdBefore(LocalDate date) {
+    public static Specification<Rooms> createdBefore(@Nullable LocalDate date) {
         return ((root, _, criteriaBuilder) -> date != null
                 ? criteriaBuilder.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
                 : criteriaBuilder.conjunction());
     }
 
-    public static Specification<Rooms> between(LocalDate min, LocalDate max) {
+    public static Specification<Rooms> between(@Nullable LocalDate min, @Nullable LocalDate max) {
         return ((root, _, criteriaBuilder) -> min != null && max != null
                 ? criteriaBuilder.between(
                 root.get(CREATED_AT_FIELD),
@@ -53,25 +56,25 @@ public final class RoomSpecification {
                 : criteriaBuilder.conjunction());
     }
 
-    public static Specification<Rooms> nameLike(String name) {
+    public static Specification<Rooms> nameLike(@Nullable String name) {
         return ((root, _, criteriaBuilder) -> isNotBlank(name)
                 ? criteriaBuilder.like(criteriaBuilder.lower(root.get(NAME_FIELD)), "%" + name.toLowerCase() + "%")
                 : criteriaBuilder.conjunction());
     }
 
-    public static Specification<Rooms> descriptionLike(String description) {
+    public static Specification<Rooms> descriptionLike(@Nullable String description) {
         return ((root, _, criteriaBuilder) -> isNotBlank(description)
                 ? criteriaBuilder.like(criteriaBuilder.lower(root.get(DESCRIPTION_FIELD)), "%" + description.toLowerCase() + "%")
                 : criteriaBuilder.conjunction());
     }
 
-    public static Specification<Rooms> categoryEquals(String categoryId) {
+    public static Specification<Rooms> categoryEquals(@Nullable String categoryId) {
         return ((root, _, criteriaBuilder) -> StringUtils.isNotBlank(categoryId)
                 ? criteriaBuilder.equal(root.get(CATEGORY_FIELD), categoryId)
                 : criteriaBuilder.conjunction());
     }
 
-    public static Specification<Rooms> creatorUsernameLike(String creatorUsername) {
+    public static Specification<Rooms> creatorUsernameLike(@Nullable String creatorUsername) {
         return ((root, _, criteriaBuilder) -> isNotBlank(creatorUsername)
                 ? criteriaBuilder.like(root.join(CREATOR_FIELD).get("username"), "%" + creatorUsername.toLowerCase() + "%")
                 : criteriaBuilder.conjunction());

@@ -7,10 +7,12 @@ import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -62,11 +64,11 @@ public class RoomAuthorizationService {
         }
     }
 
-    private boolean hasGlobalAdminRights(Authentication auth) {
+    private boolean hasGlobalAdminRights(@NonNull Authentication auth) {
         return auth.getAuthorities().stream()
                 .anyMatch(authority ->
-                        authority.getAuthority().equals("ROLE_ADMIN") ||
-                                authority.getAuthority().equals("ROLE_SYSADMIN"));
+                        Objects.equals(authority.getAuthority(), "ROLE_ADMIN") ||
+                                Objects.equals(authority.getAuthority(), "ROLE_SYSADMIN"));
     }
 
     private boolean isHigherRole(RoomRoles userRole, RoomRoles requiredRole) {

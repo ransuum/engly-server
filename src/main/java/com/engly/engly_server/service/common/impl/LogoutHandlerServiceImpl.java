@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
@@ -22,20 +23,16 @@ public class LogoutHandlerServiceImpl implements LogoutHandler {
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
-    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
+    public void logout(HttpServletRequest request, HttpServletResponse response, @Nullable Authentication authentication) {
         var cookieUtil = new CookieUtils(request.getCookies());
-        var authCookie = cookieUtil.getRefreshTokenCookie();
+        final String authCookie = cookieUtil.getRefreshTokenCookie();
 
         if (StringUtils.isBlank(authCookie) &&
                 !Objects.requireNonNull(authCookie).startsWith(TokenType.BEARER.name())) return;
 
-        var refreshToken = Objects.requireNonNull(authCookie).substring(7);
+        final String refreshToken = Objects.requireNonNull(authCookie).substring(7);
 
-        refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken)
-                .ifPresent(token -> {
-                    token.setRevoked(true);
-                    refreshTokenRepository.save(token);
-                });
+        refreshTokenRepository.updateRevokeByToken(refreshToken);
 
         cookieUtil.clearCookies(response);
     }

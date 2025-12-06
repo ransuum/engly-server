@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.List;
@@ -42,7 +43,7 @@ public class UserServiceImpl implements UserService {
     public ApiResponse delete(String id) {
         return userRepository.findById(id)
                 .map(users -> {
-                    this.clearUserSpecificCaches(users.getEmail(), users.getUsername());
+                    clearUserSpecificCaches(users.getEmail(), users.getUsername());
                     userRepository.delete(users);
                     return new ApiResponse("User deleted successfully");
                 })
@@ -60,8 +61,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Cacheable(value = CacheName.USER_ENTITY_ID, key = "#id", sync = true)
     public Users findEntityById(String id) {
-        return userRepository.findById(id).orElseThrow(()
-                -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
+        return userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
     }
 
     @Caching(evict = {
@@ -113,7 +114,7 @@ public class UserServiceImpl implements UserService {
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
     })
     public Integer deleteSomeUsers(List<String> ids) {
-        if (ids == null || ids.isEmpty()) return 0;
+        if (CollectionUtils.isEmpty(ids)) return 0;
         return userRepository.deleteAllByIdIn(ids);
     }
 
@@ -140,6 +141,6 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void deleteAll(List<Users> users) {
-        if (users != null) userRepository.deleteAll(users);
+        if (!CollectionUtils.isEmpty(users)) userRepository.deleteAll(users);
     }
 }

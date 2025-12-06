@@ -9,15 +9,18 @@ import com.engly.engly_server.security.jwt.JwtProperties;
 import com.engly.engly_server.security.jwt.service.JwtTokenService;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 @Service
 @Slf4j
+@NullMarked
 public class JwtTokenServiceImpl extends JwtTokenService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final JwtEncoder jwtEncoder;
@@ -35,7 +38,7 @@ public class JwtTokenServiceImpl extends JwtTokenService {
         try {
             var userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-            log.info("Generating access token for user: {}", userDetails.user().getUsername());
+            log.info("Generating access token for user: {}", Objects.requireNonNull(userDetails).user().getUsername());
 
             var claims = createBaseClaimsBuilder(authentication)
                     .expiresAt(Instant.now().plus(jwtProperties.getAccessTokenValidityMinutes(), ChronoUnit.MINUTES))
