@@ -4,6 +4,7 @@ import com.engly.engly_server.models.enums.CategoryType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+import org.jspecify.annotations.Nullable;
 
 @JsonSubTypes({
         @JsonSubTypes.Type(value = RoomRequest.RoomCreateRequest.class, name = "roomCreate"),
@@ -11,9 +12,9 @@ import jakarta.validation.constraints.Pattern;
 })
 public sealed interface RoomRequest permits RoomRequest.RoomCreateRequest, RoomRequest.RoomUpdateRequest {
     record RoomUpdateRequest(String name,
-                             String description,
-                             CategoryType newCategory,
-                             String updateCreatorByEmail) implements RoomRequest { }
+                             @Nullable String description,
+                             @Nullable CategoryType newCategory,
+                             @Nullable String updateCreatorByEmail) implements RoomRequest { }
 
     record RoomCreateRequest(
             @NotBlank(message = "Name of room is blank")

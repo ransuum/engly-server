@@ -9,6 +9,7 @@ import com.engly.engly_server.service.common.EmailService;
 import com.engly.engly_server.service.common.impl.EmailMessageGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.io.Resource;
 
 import java.security.SecureRandom;
@@ -24,7 +25,7 @@ public record EmailSender(
         String urlTemplate,
         String logTag) {
 
-    public EmailSendInfo sendTokenEmail(String email, Predicate<String> existsChecker, TokenType tokenType) {
+    public EmailSendInfo sendTokenEmail(@NonNull String email, Predicate<String> existsChecker, TokenType tokenType) {
         if (!existsChecker.test(email))
             throw new NotFoundException("User not found exception email " + email);
 

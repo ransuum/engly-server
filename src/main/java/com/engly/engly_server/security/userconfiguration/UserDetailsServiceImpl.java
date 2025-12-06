@@ -1,12 +1,14 @@
 package com.engly.engly_server.security.userconfiguration;
 
 import com.engly.engly_server.repository.UserRepository;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@NullMarked
 public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 

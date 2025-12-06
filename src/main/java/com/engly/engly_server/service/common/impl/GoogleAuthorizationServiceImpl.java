@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -17,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.engly.engly_server.exception.handler.ExceptionMessage.INVALID_CREDENTIALS;
@@ -32,9 +34,10 @@ public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHand
     private String frontendUrl;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
-                                        Authentication authentication) throws IOException {
-        var oauth2User = Optional.ofNullable(authentication.getPrincipal())
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        @Nullable Authentication authentication) throws IOException {
+        var oauth2User = Optional.ofNullable(Objects.requireNonNull(authentication).getPrincipal())
                 .map(OAuth2User.class::cast)
                 .orElseThrow(() -> new NotFoundException(INVALID_CREDENTIALS));
 

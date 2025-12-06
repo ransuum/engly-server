@@ -42,11 +42,11 @@ public class MessageReadHelperImpl implements MessageReadHelper {
     @Transactional
     public @Nullable CompletableFuture<Void> batchSaveMessageReads(List<MessageRead> messageReads) {
         if (CollectionUtils.isEmpty(messageReads)) {
-            log.debug("No message reads to save");
+            log.info("No message reads to save");
             return null;
         }
 
-        log.debug("Batch saving {} message reads", messageReads.size());
+        log.info("Batch saving {} message reads", messageReads.size());
 
         final List<CompletableFuture<List<MessageRead>>> futures = IntStream.range(0, messageReads.size())
                 .boxed()
@@ -60,7 +60,7 @@ public class MessageReadHelperImpl implements MessageReadHelper {
 
                     try {
                         var saved = messageReadRepository.saveAll(batch);
-                        log.debug("Saved batch of {} message reads", batch.size());
+                        log.info("Saved batch of {} message reads", batch.size());
                         return saved;
                     } catch (Exception e) {
                         throw new RepositoryException("Batch save failed: " +  e.getMessage());

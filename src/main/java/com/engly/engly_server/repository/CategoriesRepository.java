@@ -2,11 +2,13 @@ package com.engly.engly_server.repository;
 
 import com.engly.engly_server.models.entity.Categories;
 import com.engly.engly_server.models.enums.CategoryType;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
+@NullMarked
 public interface CategoriesRepository extends JpaRepository<Categories, String> {
     boolean existsByName(CategoryType name);
 

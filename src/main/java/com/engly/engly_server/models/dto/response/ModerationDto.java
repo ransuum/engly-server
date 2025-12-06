@@ -1,6 +1,7 @@
 package com.engly.engly_server.models.dto.response;
 
 import com.engly.engly_server.models.enums.ModAction;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Instant;
 
@@ -9,6 +10,6 @@ public record ModerationDto(String id,
                             UsersDto moder,
                             UsersDto user,
                             ModAction action,
-                            String reason,
+                            @Nullable String reason,
                             Instant createdAt) {
 }

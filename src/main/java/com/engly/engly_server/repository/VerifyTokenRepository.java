@@ -1,14 +1,14 @@
 package com.engly.engly_server.repository;
 
 import com.engly.engly_server.models.entity.VerifyToken;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
+@NullMarked
 public interface VerifyTokenRepository extends JpaRepository<VerifyToken, String> {
     Optional<VerifyToken> findByTokenAndEmail(String token, String email);
 

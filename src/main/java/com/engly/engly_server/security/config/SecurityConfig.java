@@ -51,7 +51,7 @@ public class SecurityConfig {
 
     @Order(0)
     @Bean
-    SecurityFilterChain wsHandshakeSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain wsHandshakeSecurityFilterChain(HttpSecurity http) {
         return http
                 .securityMatcher("/chat")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
@@ -61,7 +61,7 @@ public class SecurityConfig {
 
     @Order(1)
     @Bean
-    SecurityFilterChain signInSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain signInSecurityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .securityMatcher("/sign-in/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -74,7 +74,7 @@ public class SecurityConfig {
 
     @Order(2)
     @Bean
-    SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .securityMatcher("/api/**", "/valid/**", "/chat/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -99,7 +99,7 @@ public class SecurityConfig {
 
     @Order(3)
     @Bean
-    SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, GoogleAuthorizationServiceImpl oauth2SuccessHandler) throws Exception {
+    SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, GoogleAuthorizationServiceImpl oauth2SuccessHandler) {
         return http
                 .securityMatcher("/oauth2/**", "/login/oauth2/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -114,7 +114,7 @@ public class SecurityConfig {
 
     @Order(4)
     @Bean
-    SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain refreshTokenSecurityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .securityMatcher("/refresh-token/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -134,7 +134,7 @@ public class SecurityConfig {
 
     @Order(5)
     @Bean
-    SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain logoutSecurityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .securityMatcher("/logout/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -161,7 +161,7 @@ public class SecurityConfig {
 
     @Order(6)
     @Bean
-    SecurityFilterChain registerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain registerSecurityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .securityMatcher("/sign-up/**", "/public/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -174,7 +174,7 @@ public class SecurityConfig {
 
     @Order(7)
     @Bean
-    SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .securityMatcher("/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**", "/swagger-ui.html")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -188,7 +188,7 @@ public class SecurityConfig {
 
     @Order(8)
     @Bean
-    SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
+    SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity httpSecurity) {
         return httpSecurity
                 .securityMatcher("/actuator/**")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -232,7 +232,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
