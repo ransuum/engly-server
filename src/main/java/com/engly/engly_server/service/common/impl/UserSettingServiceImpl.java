@@ -22,13 +22,14 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_SET
 public class UserSettingServiceImpl implements UserSettingService {
 
     private final UserSettingsRepository userSettingsRepository;
+    private final UserSettingsMapper userSettingsMapper;
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.USER_SETTINGS, key = "#id", sync = true)
     public UserSettingsDto getById(String id) {
         return userSettingsRepository.findById(id)
-                .map(UserSettingsMapper.INSTANCE::toUserSettingsDto)
+                .map(userSettingsMapper::toUserSettingsDto)
                 .orElseThrow(() -> new NotFoundException(USER_SETTINGS_NOT_FOUND));
     }
 

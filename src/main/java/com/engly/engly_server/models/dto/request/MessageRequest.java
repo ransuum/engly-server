@@ -3,6 +3,7 @@ package com.engly.engly_server.models.dto.request;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.jspecify.annotations.Nullable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
@@ -36,7 +37,7 @@ public sealed interface MessageRequest permits
 
     record MarkAsReadRequest(String roomId, List<String> messageIds) implements MessageRequest { }
 
-    record MessageReadersRequest(String roomId, String messageId, Pageable pageable)
+    record MessageReadersRequest(String roomId, String messageId, @Nullable Pageable pageable)
             implements MessageRequest { }
 
     record TypingRequest(String roomId, boolean isTyping) implements MessageRequest { }

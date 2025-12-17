@@ -12,8 +12,6 @@ import com.engly.engly_server.service.common.ChatParticipantsService;
 import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.NullMarked;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -31,6 +29,7 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
 
     private final ChatParticipantRepository chatParticipantRepository;
     private final ChatParticipantHelper chatParticipantHelper;
+    private final ChatParticipantMapper chatParticipantMapper;
 
     @Override
     @Transactional
@@ -100,6 +99,6 @@ public class ChatParticipantsServiceImpl implements ChatParticipantsService {
     )
     public Page<ChatParticipantsDto> getParticipantsByRoomId(String roomId, Pageable pageable) {
         return chatParticipantRepository.findAllByRoomId(roomId, pageable)
-                .map(ChatParticipantMapper.INSTANCE::toDtoForRooms);
+                .map(chatParticipantMapper::toDtoForRooms);
     }
 }

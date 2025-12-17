@@ -23,13 +23,14 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.PROFILE_
 public class ProfileServiceImpl implements ProfileService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.USER_PROFILES, key = "#id")
     public UsersDto getProfile(String id) {
         return userRepository.findById(id)
-                .map(UserMapper.INSTANCE::toUsersDto)
+                .map(userMapper::toUsersDto)
                 .orElseThrow(() -> new NotFoundException(PROFILE_NOT_FOUND));
     }
 
@@ -56,7 +57,7 @@ public class ProfileServiceImpl implements ProfileService {
                     if (profileUpdateData.nativeLanguage() != null)
                         user.getAdditionalInfo().setNativeLanguage(profileUpdateData.nativeLanguage());
 
-                    return UserMapper.INSTANCE.toUsersDto(userRepository.save(user));
+                    return userMapper.toUsersDto(userRepository.save(user));
                 })
                 .orElseThrow(() -> new NotFoundException(PROFILE_NOT_FOUND));
     }

@@ -2,12 +2,10 @@ package com.engly.engly_server.service.mapper;
 
 import com.engly.engly_server.models.dto.response.UserSettingsDto;
 import com.engly.engly_server.models.entity.UserSettings;
+import org.jspecify.annotations.NonNull;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = UserMapper.class)
+@Mapper(uses = UserMapper.class, componentModel = "spring")
 public interface UserSettingsMapper {
-    UserSettingsMapper INSTANCE = Mappers.getMapper(UserSettingsMapper.class);
-
-    UserSettingsDto toUserSettingsDto(UserSettings userSettings);
+    @NonNull UserSettingsDto toUserSettingsDto(@NonNull UserSettings userSettings);
 }

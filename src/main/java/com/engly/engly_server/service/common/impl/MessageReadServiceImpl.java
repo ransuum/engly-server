@@ -34,6 +34,7 @@ public class MessageReadServiceImpl implements MessageReadService {
     private final MessageReadRepository messageReadRepository;
     private final MessageReadHelper messageReadHelper;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @Override
     @Async
@@ -79,6 +80,6 @@ public class MessageReadServiceImpl implements MessageReadService {
     )
     public Page<UserWhoReadsMessageDto> getUsersWhoReadMessage(String messageId, Pageable pageable) {
         return messageReadRepository.findAllByMessageId(messageId, pageable)
-                .map(mr -> UserMapper.INSTANCE.toWhoReadMessage(mr.getUser()));
+                .map(mr -> userMapper.toWhoReadMessage(mr.getUser()));
     }
 }

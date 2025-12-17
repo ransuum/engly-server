@@ -2,12 +2,10 @@ package com.engly.engly_server.service.mapper;
 
 import com.engly.engly_server.models.dto.response.NotificationsDto;
 import com.engly.engly_server.models.entity.Notifications;
+import org.jspecify.annotations.NonNull;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = UserMapper.class)
+@Mapper(uses = UserMapper.class, componentModel = "spring")
 public interface NotificationMapper {
-    NotificationMapper INSTANCE = Mappers.getMapper(NotificationMapper.class);
-
-    NotificationsDto toNotificationsDto(Notifications notification);
+    @NonNull NotificationsDto toNotificationsDto(@NonNull Notifications notification);
 }
