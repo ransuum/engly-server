@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -77,7 +76,7 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         );
     }
 
-    private @Nullable JwtHolder generateAndSaveTokens(Users user, Authentication auth,
+    private JwtHolder generateAndSaveTokens(Users user, Authentication auth,
                                                       HttpServletResponse response, boolean includeAccessToken) {
         log.debug("Generating tokens for user: {} with principal type: {}",
                 user.getEmail(), Objects.requireNonNull(auth.getPrincipal()).getClass().getSimpleName());
@@ -88,6 +87,6 @@ public class JwtAuthenticationServiceImpl implements JwtAuthenticationService {
         jwtTokenService.createRefreshTokenCookie(response, refreshToken);
         jwtTokenService.saveRefreshToken(user, refreshToken);
 
-        return includeAccessToken ? new JwtHolder(refreshToken, accessToken) : null;
+        return new JwtHolder(refreshToken, accessToken);
     }
 }

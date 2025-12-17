@@ -31,6 +31,7 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional
@@ -54,7 +55,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.USER_ID, key = "#id", sync = true)
     public UsersDto findById(String id) {
-        return UserMapper.INSTANCE.toUsersDto(userRepository.findById(id)
+        return userMapper.toUsersDto(userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id))));
     }
 
@@ -84,7 +85,7 @@ public class UserServiceImpl implements UserService {
             condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20"
     )
     public Page<UsersDto> allUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(UserMapper.INSTANCE::toUsersDto);
+        return userRepository.findAll(pageable).map(userMapper::toUsersDto);
     }
 
     @Override

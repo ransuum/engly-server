@@ -7,6 +7,7 @@ import com.engly.engly_server.repository.MessageReadRepository;
 import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
@@ -23,6 +24,7 @@ import java.util.stream.IntStream;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@NullMarked
 public class MessageReadHelperImpl implements MessageReadHelper {
 
     private final MessageReadRepository messageReadRepository;
@@ -40,7 +42,7 @@ public class MessageReadHelperImpl implements MessageReadHelper {
     @Override
     @Async
     @Transactional
-    public @Nullable CompletableFuture<Void> batchSaveMessageReads(List<MessageRead> messageReads) {
+    public @Nullable CompletableFuture<Void> batchSaveMessageReads(@Nullable List<MessageRead> messageReads) {
         if (CollectionUtils.isEmpty(messageReads)) {
             log.info("No message reads to save");
             return null;

@@ -4,8 +4,9 @@ import com.engly.engly_server.models.dto.response.RoomDtoShort;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.service.common.ChatParticipantsService;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.mapstruct.*;
-import org.mapstruct.factory.Mappers;
 
 @Mapper(uses = {
         CategoryMapper.class,
@@ -15,18 +16,17 @@ import org.mapstruct.factory.Mappers;
         MessageMapper.class},
         componentModel = "spring")
 public interface RoomMapper {
-    RoomMapper INSTANCE = Mappers.getMapper(RoomMapper.class);
 
     @Mapping(target = "members", expression = "java(getMemberCount(rooms.getId(), chatParticipantsService))")
-    RoomsDto roomToDto(Rooms rooms, @Context ChatParticipantsService chatParticipantsService);
+    @NonNull RoomsDto roomToDto(@NonNull Rooms rooms, @NonNull @Context ChatParticipantsService chatParticipantsService);
 
     @Mapping(target = "members", ignore = true)
     @Mapping(target = "lastMessage", ignore = true)
-    RoomsDto roomToDto(Rooms rooms);
+    @NonNull RoomsDto roomToDto(@NonNull Rooms rooms);
 
-    RoomDtoShort roomToDtoShort(Rooms rooms);
+    @NonNull RoomDtoShort roomToDtoShort(@NonNull Rooms rooms);
 
-    default int getMemberCount(String roomId, ChatParticipantsService chatParticipantsService) {
+    default int getMemberCount(@Nullable String roomId, @NonNull ChatParticipantsService chatParticipantsService) {
         if (roomId == null) return 0;
         return chatParticipantsService.countActiveParticipants(roomId);
     }

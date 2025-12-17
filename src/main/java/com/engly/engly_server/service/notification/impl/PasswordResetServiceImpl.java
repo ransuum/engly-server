@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -64,7 +66,7 @@ public class PasswordResetServiceImpl implements PasswordResetService {
                         throw new TokenNotFoundException("Invalid token for password reset");
 
                     return userRepository.findByEmail(verifyToken.getEmail()).map(user -> {
-                                user.setPassword(passwordEncoder.encode(data.newPassword()));
+                                user.setPassword(Objects.requireNonNull(passwordEncoder.encode(data.newPassword())));
                                 if (Boolean.FALSE.equals(user.getEmailVerified())) {
                                     user.setEmailVerified(true);
                                     user.setRoles("ROLE_USER");

@@ -15,14 +15,17 @@ import com.engly.engly_server.service.common.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +82,7 @@ public class AuthServiceImpl implements AuthService {
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        var jwtHolder = jwtAuthenticationService.authentication(users, response);
+        JwtHolder jwtHolder = jwtAuthenticationService.authentication(users, response);
 
         return createAuthResponse(users, jwtHolder);
     }
@@ -110,9 +113,10 @@ public class AuthServiceImpl implements AuthService {
         jwtAuthenticationService.authenticationForGoogle(user, response);
     }
 
+
     private AuthResponseDto createAuthResponse(Users user, JwtHolder jwtHolder) {
         return AuthResponseDto.builder()
-                .accessToken(jwtHolder.accessToken())
+                .accessToken(Objects.requireNonNull(jwtHolder.accessToken()))
                 .accessTokenExpiry(tokenExpiryMinutes * 60)
                 .username(user.getUsername())
                 .tokenType(TokenType.BEARER)
