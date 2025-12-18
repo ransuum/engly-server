@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.common.impl;
+package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.RefreshTokenRepository;
@@ -18,7 +18,7 @@ import java.util.Objects;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class LogoutHandlerServiceImpl implements LogoutHandler {
+public class LogoutHandlerService implements LogoutHandler {
 
     private final RefreshTokenRepository refreshTokenRepository;
 

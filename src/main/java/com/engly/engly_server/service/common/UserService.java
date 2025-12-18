@@ -1,35 +1,136 @@
 package com.engly.engly_server.service.common;
 
+import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.service.mapper.UserMapper;
 import com.engly.engly_server.models.dto.response.ApiResponse;
 import com.engly.engly_server.models.dto.response.UsersDto;
 import com.engly.engly_server.models.entity.Users;
+import com.engly.engly_server.repository.UserRepository;
+import com.engly.engly_server.utils.CacheName;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.List;
 
-public interface UserService {
+import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT_FOUND_BY_EMAIL;
+import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT_FOUND_BY_ID;
 
-    ApiResponse delete(String id);
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class UserService {
 
-    UsersDto findById(String id);
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    Users findEntityById(String id);
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.USER_ID, key = "#id"),
+            @CacheEvict(value = CacheName.USER_ENTITY_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
+            @CacheEvict(value = CacheName.USER_EXISTS_BY_ID, key = "#id")
+    })
+    public ApiResponse delete(String id) {
+        return userRepository.findById(id)
+                .map(users -> {
+                    clearUserSpecificCaches(users.getEmail(), users.getUsername());
+                    userRepository.delete(users);
+                    return new ApiResponse("User deleted successfully");
+                })
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
+    }
 
-    Page<UsersDto> allUsers(Pageable pageable);
 
-    String getUsernameByEmail(String email);
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.USER_ID, key = "#id", sync = true)
+    public UsersDto findById(String id) {
+        return userMapper.toUsersDto(userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id))));
+    }
 
-    boolean existsById(String id);
+    @Cacheable(value = CacheName.USER_ENTITY_ID, key = "#id", sync = true)
+    public Users findEntityById(String id) {
+        return userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
+    }
 
-    Integer deleteSomeUsers(List<String> ids);
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_EXISTS_BY_ID, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()"),
+            @CacheEvict(value = CacheName.USER_PROFILES, key = "#username")
+    })
+    public void clearUserSpecificCaches(String email, String username) {
+        log.debug("Cleared user-specific caches for email: {}, username: {}", email, username);
+    }
 
-    Users findUserEntityByEmail(String email);
+    @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ALL_USER,
+            key = "'page:' + #pageable.pageNumber + ':' + #pageable.pageSize",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20"
+    )
+    public Page<UsersDto> allUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(userMapper::toUsersDto);
+    }
 
-    String getUserIdByEmail(String email);
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.USERNAME_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    public String getUsernameByEmail(String email) {
+        return userRepository.findUsernameByEmail(email)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
+    }
 
-    List<Users> findAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore);
+    @Cacheable(value = CacheName.USER_EXISTS_BY_ID, key = "#id", sync = true)
+    public boolean existsById(String id) {
+        return userRepository.existsById(id);
+    }
 
-    void deleteAll(List<Users> users);
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.USER_ID, allEntries = true),
+            @CacheEvict(value = CacheName.USER_ENTITY_ID, allEntries = true),
+            @CacheEvict(value = CacheName.USER_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USER_ID_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USER_EXISTS_BY_ID, allEntries = true),
+            @CacheEvict(value = CacheName.USERNAME_BY_EMAIL, allEntries = true),
+            @CacheEvict(value = CacheName.USER_PROFILES, allEntries = true),
+            @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
+    })
+    public Integer deleteSomeUsers(List<String> ids) {
+        if (CollectionUtils.isEmpty(ids)) return 0;
+        return userRepository.deleteAllByIdIn(ids);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    public Users findUserEntityByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
+    }
+
+    @Cacheable(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    public String getUserIdByEmail(String email) {
+        return userRepository.findByEmail(email).map(Users::getId)
+                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
+    }
+
+    public List<Users> findAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore) {
+        return userRepository.findAllByRolesAndCreatedAtBefore(roles, expireBefore);
+    }
+
+    @Transactional
+    public void deleteAll(List<Users> users) {
+        if (!CollectionUtils.isEmpty(users)) userRepository.deleteAll(users);
+    }
 }

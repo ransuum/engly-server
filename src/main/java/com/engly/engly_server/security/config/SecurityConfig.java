@@ -2,7 +2,7 @@ package com.engly.engly_server.security.config;
 
 import com.engly.engly_server.security.jwt.filter.JwtAccessTokenGeneralFilter;
 import com.engly.engly_server.security.jwt.filter.JwtRefreshTokenGeneralFilter;
-import com.engly.engly_server.service.common.impl.GoogleAuthorizationServiceImpl;
+import com.engly.engly_server.service.common.GoogleAuthorizationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -99,7 +99,7 @@ public class SecurityConfig {
 
     @Order(3)
     @Bean
-    SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, GoogleAuthorizationServiceImpl oauth2SuccessHandler) {
+    SecurityFilterChain oauth2SecurityFilterChain(HttpSecurity http, GoogleAuthorizationService oauth2SuccessHandler) {
         return http
                 .securityMatcher("/oauth2/**", "/login/oauth2/**")
                 .csrf(AbstractHttpConfigurer::disable)

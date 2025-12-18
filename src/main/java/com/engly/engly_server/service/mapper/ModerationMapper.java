@@ -10,5 +10,5 @@ import org.mapstruct.Mapping;
         componentModel = "spring")
 public interface ModerationMapper {
     @Mapping(target = "room", ignore = true)
-    @NonNull ModerationDto toDtoForRoom(@NonNull Moderation moderation);
+    ModerationDto toDtoForRoom(Moderation moderation);
 }

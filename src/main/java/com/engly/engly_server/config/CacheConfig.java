@@ -29,7 +29,7 @@ public class CacheConfig {
                 USER_SETTINGS, ROOMS_BY_CATEGORY, ROOM_ENTITY_ID, ROOMS_BY_CRITERIA, COUNT_PARTICIPANTS,
                 CATEGORY_ENTITY_ID, CATEGORY_NAME, ALL_CATEGORIES, MESSAGE_ID, CATEGORY_ID_BY_NAME, ROOM_SHORT_ID,
                 MESSAGES_BY_ROOM_NATIVE, MESSAGE_COUNT_BY_ROOM, MESSAGES_BY_CRITERIA, PARTICIPANTS_BY_ROOM,
-                PARTICIPANT_EXISTS, MESSAGE_READ_STATUS, USERS_WHO_READ_MESSAGE, USER_EXISTS_BY_ID, USER_ENTITY_ID
+                PARTICIPANT_EXISTS, MESSAGE_READ_STATUS, USER_EXISTS_BY_ID, USER_ENTITY_ID
         );
         var cacheManager = new SimpleCacheManager();
 
@@ -70,7 +70,7 @@ public class CacheConfig {
             case PARTICIPANTS_BY_ROOM, PARTICIPANT_EXISTS ->
                     new CacheSpec(5, Duration.ofMinutes(1), Duration.ofSeconds(30));
 
-            case MESSAGE_READ_STATUS, USERS_WHO_READ_MESSAGE ->
+            case MESSAGE_READ_STATUS ->
                     new CacheSpec(5, Duration.ofSeconds(45), Duration.ofSeconds(20));
 
             case ALL_CATEGORIES -> new CacheSpec(1, Duration.ofMinutes(10), Duration.ofMinutes(5));

@@ -4,6 +4,7 @@ import com.engly.engly_server.exception.AuthenticationObjectException;
 import com.engly.engly_server.models.enums.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,6 +22,7 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.NO_AUTHE
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@NullMarked
 public class AuthenticatedUserProvider {
 
     public String getCurrentUserEmail() {
