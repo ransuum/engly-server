@@ -2,6 +2,8 @@ package com.engly.engly_server.service.common.impl;
 
 import com.engly.engly_server.exception.EntityAlreadyExistsException;
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.models.dto.response.RoomProjection;
+import com.engly.engly_server.service.common.*;
 import com.engly.engly_server.service.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
@@ -11,10 +13,6 @@ import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.RoomRepository;
-import com.engly.engly_server.service.common.CategoriesService;
-import com.engly.engly_server.service.common.ChatParticipantsService;
-import com.engly.engly_server.service.common.RoomService;
-import com.engly.engly_server.service.common.UserService;
 import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +61,7 @@ public class RoomServiceImpl implements RoomService {
                 .description(roomCreateRequestDto.description())
                 .name(roomCreateRequestDto.name())
                 .build());
+        log.info("Room with id {} created by user with id {}", room.getId(), id);
 
         chatParticipantsService.addParticipant(room.getId(), room.getCreator(), RoomRoles.ADMIN);
         return roomMapper.roomToDto(room);
@@ -127,9 +126,8 @@ public class RoomServiceImpl implements RoomService {
             condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
             unless = "#result.content.isEmpty()"
     )
-    public Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
-        return roomRepository.findByCategoryId(categoriesService.getCategoryIdByName(category), pageable)
-                .map(rooms -> roomMapper.roomToDto(rooms, chatParticipantsService));
+    public Page<RoomProjection> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
+        return roomRepository.findRoomsWithLastMessage(categoriesService.getCategoryIdByName(category), pageable);
     }
 
     @Override

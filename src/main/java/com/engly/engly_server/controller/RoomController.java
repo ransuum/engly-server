@@ -2,6 +2,7 @@ package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
+import com.engly.engly_server.models.dto.response.RoomProjection;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.enums.CategoryType;
 import com.engly.engly_server.service.common.RoomService;
@@ -71,7 +72,7 @@ public class RoomController {
     @ApiResponse(responseCode = "403", description = "Forbidden. User does not have 'SCOPE_READ'.", content = @Content)
     @GetMapping("/by-category")
     @PreAuthorize("hasAuthority('SCOPE_READ')")
-    public ResponseEntity<Page<RoomsDto>> getRoomsByCategory(
+    public ResponseEntity<Page<RoomProjection>> getRoomsByCategory(
             @Parameter(description = "Filter rooms by a specific category.")
             @RequestParam(defaultValue = "NEWS") CategoryType category,
             @ParameterObject @PageableDefault(size = 8, sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {

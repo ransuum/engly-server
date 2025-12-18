@@ -7,6 +7,5 @@ import org.jspecify.annotations.Nullable;
 public record RoomsDto(String id,
                        String name,
                        @Nullable String description,
-                       MessagesDto lastMessage,
                        int members) {
 }

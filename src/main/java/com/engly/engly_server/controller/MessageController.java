@@ -76,7 +76,7 @@ public class MessageController {
     @PreAuthorize("hasAuthority('SCOPE_READ')")
     public Page<MessagesDto> findRoomsByCriteria(@ModelAttribute MessageSearchCriteriaRequest request,
                                                  @ParameterObject @PageableDefault(size = 8,
-                                                         sort = {"name"}, direction = Sort.Direction.ASC) Pageable pageable) {
+                                                         sort = {"createdAt"}, direction = Sort.Direction.ASC) Pageable pageable) {
         return messageService.findMessagesByCriteria(request, pageable);
     }
 }

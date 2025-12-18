@@ -12,6 +12,7 @@ import com.engly.engly_server.utils.CacheName;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -23,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.AbstractMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -33,32 +36,26 @@ public class MessageReadServiceImpl implements MessageReadService {
 
     private final MessageReadRepository messageReadRepository;
     private final MessageReadHelper messageReadHelper;
+    private final CacheManager cacheManager;
     private final UserService userService;
     private final UserMapper userMapper;
 
     @Override
     @Async
     @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = CacheName.USERS_WHO_READ_MESSAGE, allEntries = true),
-            @CacheEvict(value = CacheName.MESSAGE_READ_STATUS, allEntries = true)
-    })
-    public @Nullable CompletableFuture<Void> markMessageAsRead(MessageRequest messageRequest, String userId) {
-        if (CollectionUtils.isEmpty(messageRequest.messageIds())) return null;
+    public CompletableFuture<Void> markMessageAsRead(MessageRequest messageRequest, String userId) {
+        if (CollectionUtils.isEmpty(messageRequest.messageIds())) {
+            return CompletableFuture.completedFuture(null);
+        }
 
-        var futures = messageRequest.messageIds().stream()
-                .map(messageId -> CompletableFuture.supplyAsync(() ->
-                        new AbstractMap.SimpleEntry<>(messageId,
-                                messageReadHelper.hasUserReadMessage(messageId, userId))))
+        var unreadMessageIds = messageRequest.messageIds().stream()
+                .filter(messageId -> !messageReadRepository.existsByMessageIdAndUserId(messageId, userId))
                 .toList();
+        log.info("User {} has {} unread messages to mark as read", userId, unreadMessageIds.size());
 
-        var unreadMessageIds = futures.stream()
-                .map(CompletableFuture::join)
-                .filter(entry -> !entry.getValue())
-                .map(Map.Entry::getKey)
-                .toList();
-
-        if (unreadMessageIds.isEmpty()) return null;
+        if (unreadMessageIds.isEmpty()) {
+            return CompletableFuture.completedFuture(null);
+        }
 
         var newReads = unreadMessageIds.stream()
                 .map(messageId -> MessageRead.builder()
@@ -66,8 +63,22 @@ public class MessageReadServiceImpl implements MessageReadService {
                         .user(userService.findEntityById(userId))
                         .build())
                 .toList();
+        log.info("Created {} new MessageRead entities for user {}", newReads.size(), userId);
 
-        return messageReadHelper.batchSaveMessageReads(newReads);
+        return Objects.requireNonNull(messageReadHelper.batchSaveMessageReads(newReads))
+                .thenRun(() -> evictReadStatusCache(messageRequest.messageIds(), userId));
+    }
+
+    private void evictReadStatusCache(List<String> messageIds, String userId) {
+        var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
+        if (cache != null) {
+            messageIds.forEach(messageId -> cache.evict(messageId + "_" + userId));
+        }
+
+        var usersCache = cacheManager.getCache(CacheName.USERS_WHO_READ_MESSAGE);
+        if (usersCache != null) {
+            usersCache.clear();
+        }
     }
 
     @Override
