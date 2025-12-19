@@ -61,9 +61,7 @@ public class ChatController {
     @MessageMapping("/chat/message.readers")
     @RequireRoomPermission(permission = "ROOM_READ")
     public void getReaders(@Payload MessageRequest.MessageReadersRequest messageReadersRequest) {
-        final var pageable = messageReadersRequest.pageable() != null
-                ? messageReadersRequest.pageable()
-                : PageRequest.of(0, 8);
+        final var pageable = PageRequest.of(messageReadersRequest.page(), messageReadersRequest.size());
 
         final var message = messageReadService.getUsersWhoReadMessage(messageReadersRequest.messageId(), pageable);
         messagingTemplate.convertAndSend(

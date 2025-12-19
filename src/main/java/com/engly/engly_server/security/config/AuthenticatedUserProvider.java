@@ -26,9 +26,7 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.NO_AUTHE
 public class AuthenticatedUserProvider {
 
     public String getCurrentUserEmail() {
-        return getAuthenticationOrThrow()
-                .orElseThrow(() -> new AuthenticationObjectException(AUTHENTICATION_OBJECT_NOT_FOUND))
-                .getName();
+        return getAuthenticationOrThrow().getName();
     }
 
     public boolean hasRole(String role) {
@@ -65,8 +63,9 @@ public class AuthenticatedUserProvider {
                 .orElseThrow(() -> new AuthenticationObjectException(NO_AUTHENTICATED_USER_FOUND));
     }
 
-    public Optional<Authentication> getAuthenticationOrThrow() {
-        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+    public Authentication getAuthenticationOrThrow() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .orElseThrow(() -> new AuthenticationObjectException(AUTHENTICATION_OBJECT_NOT_FOUND));
     }
 
 }

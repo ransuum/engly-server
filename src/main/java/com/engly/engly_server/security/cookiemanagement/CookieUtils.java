@@ -3,29 +3,31 @@ package com.engly.engly_server.security.cookiemanagement;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import java.util.Arrays;
+import java.util.Objects;
 
-public record CookieUtils(Cookie[] cookies) {
+@NullMarked
+public record CookieUtils(@Nullable Cookie[] cookies) {
 
-    public CookieUtils(Cookie[] cookies) {
+    public CookieUtils(@Nullable Cookie[] cookies) {
         this.cookies = cookies == null ? null : cookies.clone();
     }
 
     public @Nullable String getRefreshTokenCookie() {
         if (ArrayUtils.isEmpty(cookies)) return null;
         return Arrays.stream(cookies)
-                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+                .filter(cookie -> "refreshToken".equals(Objects.requireNonNull(cookie).getName()))
                 .findFirst()
                 .map(Cookie::getValue)
                 .orElse(null);
     }
 
-    public void clearCookies(@NonNull HttpServletResponse response) {
+    public void clearCookies(HttpServletResponse response) {
         var cookie = ResponseCookie.from("refreshToken", "deleted")
                 .maxAge(0)
                 .path("/")
@@ -50,7 +52,7 @@ public record CookieUtils(Cookie[] cookies) {
     }
 
     @Override
-    public @NonNull String toString() {
+    public String toString() {
         return "CookieUtils{" +
                 "cookies=" + Arrays.toString(cookies) +
                 '}';

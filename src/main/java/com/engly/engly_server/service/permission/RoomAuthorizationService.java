@@ -21,8 +21,6 @@ public class RoomAuthorizationService {
     private final ChatParticipantRepository chatParticipantsRepository;
     private final AuthenticatedUserProvider authenticatedUserProvider;
 
-    private static final String AUTH_NOT_FOUND = "Authentication object not found";
-
     public boolean hasRoomPermission(String roomId, RoomAuthority authority) {
         var userEmail = authenticatedUserProvider.getCurrentUserEmail();
         return hasRoomPermission(userEmail, roomId, authority);
@@ -30,8 +28,7 @@ public class RoomAuthorizationService {
 
     public boolean hasRoomPermission(String email, String roomId, RoomAuthority authority) {
         try {
-            var auth = authenticatedUserProvider.getAuthenticationOrThrow()
-                    .orElseThrow(() -> new AuthenticationObjectException(AUTH_NOT_FOUND));
+            var auth = authenticatedUserProvider.getAuthenticationOrThrow();
             if (hasGlobalAdminRights(auth)) return true;
 
             return chatParticipantsRepository.findByEmailAndRoom(email, roomId)
@@ -85,8 +82,7 @@ public class RoomAuthorizationService {
     }
 
     public boolean canAccessRoom(String roomId) {
-        var auth = authenticatedUserProvider.getAuthenticationOrThrow()
-                .orElseThrow(() -> new AuthenticationObjectException(AUTH_NOT_FOUND));
+        var auth = authenticatedUserProvider.getAuthenticationOrThrow();
 
         if (hasGlobalAdminRights(auth)) return true;
 

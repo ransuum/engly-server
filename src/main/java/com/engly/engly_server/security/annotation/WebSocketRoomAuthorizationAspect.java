@@ -10,6 +10,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -28,7 +29,7 @@ public class WebSocketRoomAuthorizationAspect {
     private static final ScopedValue<Map<String, RoomAuthority>> ROOM_AUTHORITY_CACHE = ScopedValue.newInstance();
 
     @Around("@annotation(requireRoomPermission)")
-    public Object checkRoomPermission(ProceedingJoinPoint joinPoint, RequireRoomPermission requireRoomPermission) throws Throwable {
+    public @Nullable Object checkRoomPermission(ProceedingJoinPoint joinPoint, RequireRoomPermission requireRoomPermission) throws Throwable {
         var request = Arrays.stream(joinPoint.getArgs())
                 .filter(MessageRequest.class::isInstance)
                 .map(MessageRequest.class::cast)
@@ -52,7 +53,9 @@ public class WebSocketRoomAuthorizationAspect {
                     );
 
                     if (!roomAuthorizationService.hasRoomPermission(roomId, authority)) {
-                        throw new RoomAccessException("Access denied for room: " + roomId);
+                        log.info("You can't mark messages as read from room: {} with authority: {}", roomId, authority);
+//                        throw new RoomAccessException("Access denied for room: " + roomId);
+                        return null;
                     }
 
                     return joinPoint.proceed();
