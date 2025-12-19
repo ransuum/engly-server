@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import module java.base;
 
 @Service
 @Slf4j

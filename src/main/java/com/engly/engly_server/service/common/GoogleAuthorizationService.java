@@ -16,9 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
-import java.util.Objects;
-import java.util.Optional;
+import module java.base;
 
 import static com.engly.engly_server.exception.handler.ExceptionMessage.INVALID_CREDENTIALS;
 
