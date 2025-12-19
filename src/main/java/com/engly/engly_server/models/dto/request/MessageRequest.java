@@ -37,7 +37,7 @@ public sealed interface MessageRequest permits
 
     record MarkAsReadRequest(String roomId, List<String> messageIds) implements MessageRequest { }
 
-    record MessageReadersRequest(String roomId, String messageId, @Nullable Pageable pageable)
+    record MessageReadersRequest(String roomId, String messageId, int page, int size)
             implements MessageRequest { }
 
     record TypingRequest(String roomId, boolean isTyping) implements MessageRequest { }

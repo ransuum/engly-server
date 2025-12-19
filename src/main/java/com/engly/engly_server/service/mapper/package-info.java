@@ -1,4 +1,4 @@
 @NullMarked
-package com.engly.engly_server.service.common.impl;
+package com.engly.engly_server.service.mapper;
 
 import org.jspecify.annotations.NullMarked;

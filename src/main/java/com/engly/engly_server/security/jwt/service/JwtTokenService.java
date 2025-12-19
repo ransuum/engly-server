@@ -26,7 +26,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @NullMarked
-public abstract class JwtTokenService {
+public abstract sealed class JwtTokenService permits JwtTokenServiceImpl {
     private final ChatParticipantRepository chatParticipantRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     protected final JwtProperties jwtProperties;

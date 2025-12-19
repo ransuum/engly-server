@@ -1,4 +1,4 @@
-package com.engly.engly_server.security.jwt.service.impl;
+package com.engly.engly_server.security.jwt.service;
 
 import com.engly.engly_server.exception.TokenGenerationException;
 import com.engly.engly_server.models.enums.TokenType;
@@ -6,7 +6,6 @@ import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.repository.RefreshTokenRepository;
 import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import com.engly.engly_server.security.jwt.JwtProperties;
-import com.engly.engly_server.security.jwt.service.JwtTokenService;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
@@ -21,7 +20,7 @@ import java.util.Objects;
 @Service
 @Slf4j
 @NullMarked
-public class JwtTokenServiceImpl extends JwtTokenService {
+public final class JwtTokenServiceImpl extends JwtTokenService {
     private final AuthenticatedUserProvider authenticatedUserProvider;
     private final JwtEncoder jwtEncoder;
 

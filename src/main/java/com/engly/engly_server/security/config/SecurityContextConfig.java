@@ -4,6 +4,8 @@ import com.engly.engly_server.exception.AuthenticationObjectException;
 import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,9 +21,10 @@ import java.util.LinkedList;
 import java.util.Optional;
 
 @Component
+@NullMarked
 public class SecurityContextConfig {
 
-    public Authentication createAndSetAuthenticationAndReturn(Users user, String password) {
+    public Authentication createAndSetAuthenticationAndReturn(Users user, @Nullable String password) {
         var userDetails = new UserDetailsImpl(user);
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 userDetails,

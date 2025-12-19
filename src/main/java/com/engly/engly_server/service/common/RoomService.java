@@ -1,27 +1,141 @@
 package com.engly.engly_server.service.common;
 
+import com.engly.engly_server.exception.EntityAlreadyExistsException;
+import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.models.dto.response.RoomProjection;
+import com.engly.engly_server.service.mapper.RoomMapper;
 import com.engly.engly_server.models.dto.request.RoomRequest;
 import com.engly.engly_server.models.dto.request.RoomSearchCriteriaRequest;
 import com.engly.engly_server.models.dto.response.RoomDtoShort;
 import com.engly.engly_server.models.dto.response.RoomsDto;
 import com.engly.engly_server.models.entity.Rooms;
 import com.engly.engly_server.models.enums.CategoryType;
+import com.engly.engly_server.models.enums.RoomRoles;
+import com.engly.engly_server.repository.RoomRepository;
+import com.engly.engly_server.utils.CacheName;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface RoomService {
+import java.time.Instant;
 
-    RoomsDto createRoom(String id, CategoryType name, RoomRequest.RoomCreateRequest roomCreateRequestDto);
+import static com.engly.engly_server.exception.handler.ExceptionMessage.ROOM_ALREADY_EXISTS;
+import static com.engly.engly_server.exception.handler.ExceptionMessage.ROOM_NOT_FOUND;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-    Page<RoomsDto> findAllWithCriteria(RoomSearchCriteriaRequest request, Pageable pageable);
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class RoomService {
 
-    void deleteRoomById(String id);
+    private final RoomRepository roomRepository;
+    private final UserService userService;
+    private final CategoriesService categoriesService;
+    private final ChatParticipantsService chatParticipantsService;
+    private final RoomMapper roomMapper;
 
-    RoomsDto updateRoom(String id, RoomRequest.RoomUpdateRequest request);
+    @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
+            }
+    )
+    public RoomsDto createRoom(String id, CategoryType name, RoomRequest.RoomCreateRequest roomCreateRequestDto) {
+        if (roomRepository.existsByName(roomCreateRequestDto.name()))
+            throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 
-    Page<RoomsDto> findAllRoomsByCategoryType(CategoryType category, Pageable pageable);
+        var room = roomRepository.save(Rooms.builder()
+                .creator(userService.findEntityById(id))
+                .createdAt(Instant.now())
+                .categoryId(categoriesService.getCategoryIdByName(name))
+                .description(roomCreateRequestDto.description())
+                .name(roomCreateRequestDto.name())
+                .build());
+        log.info("Room with id {} created by user with id {}", room.getId(), id);
 
-    Rooms findRoomEntityById(String id);
+        chatParticipantsService.addParticipant(room.getId(), room.getCreator(), RoomRoles.ADMIN);
+        return roomMapper.roomToDto(room);
+    }
 
-    RoomDtoShort findRoomByIdShort(String id);
+    @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ROOMS_BY_CRITERIA,
+            key = "#request.hashCode() + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
+            unless = "#result.content.isEmpty()"
+    )
+    public Page<RoomsDto> findAllWithCriteria(RoomSearchCriteriaRequest request, Pageable pageable) {
+        return roomRepository.findAll(request.buildSpecification(), pageable)
+                .map(roomMapper::roomToDto);
+    }
+
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
+            @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+            @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
+    })
+    public void deleteRoomById(String id) {
+        roomRepository.findById(id).ifPresentOrElse(room -> roomRepository.deleteById(room.getId()),
+                () -> {
+                    throw new NotFoundException(ROOM_NOT_FOUND);
+                });
+    }
+
+    @Caching(
+            put = {@CachePut(value = CacheName.ROOM_DTO_ID, key = "#id")},
+            evict = {
+                    @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
+                    @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
+            }
+    )
+    public RoomsDto updateRoom(String id, RoomRequest.RoomUpdateRequest request) {
+        return roomRepository.findById(id)
+                .map(room -> {
+                    if (request.newCategory() != null)
+                        room.setCategoryId(categoriesService.getCategoryIdByName(CategoryType.valueOf(request.name())));
+
+                    if (isNotBlank(request.updateCreatorByEmail()))
+                        room.setCreator(userService.findUserEntityByEmail(request.updateCreatorByEmail()));
+
+                    if (isNotBlank(request.description())) room.setDescription(request.description());
+                    if (isNotBlank(request.name())) room.setName(request.name());
+                    return roomMapper.roomToDto(roomRepository.save(room));
+                })
+                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheName.ROOMS_BY_CATEGORY,
+            key = "#category.name() + ':native:' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()",
+            condition = "#pageable.pageNumber < 3 && #pageable.pageSize <= 20",
+            unless = "#result.content.isEmpty()"
+    )
+    public Page<RoomProjection> findAllRoomsByCategoryType(CategoryType category, Pageable pageable) {
+        return roomRepository.findRoomsWithLastMessage(categoriesService.getCategoryIdByName(category), pageable);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(value = CacheName.ROOM_ENTITY_ID, key = "#id", sync = true)
+    public Rooms findRoomEntityById(String id) {
+        return roomRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
+    }
+
+    @Transactional
+    @Cacheable(value = CacheName.ROOM_SHORT_ID, key = "#id", sync = true)
+    public RoomDtoShort findRoomByIdShort(String id) {
+        return roomRepository.findById(id)
+                .map(roomMapper::roomToDtoShort)
+                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
+    }
 }

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -48,7 +49,7 @@ public abstract class JwtGeneralFilter extends OncePerRequestFilter {
         }
     }
 
-    protected abstract String extractToken(@NonNull HttpServletRequest request);
+    protected abstract @Nullable String extractToken(@NonNull HttpServletRequest request);
 
     protected abstract boolean isTokenValidInContext(@NonNull Jwt jwt);
 

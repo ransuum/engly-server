@@ -5,13 +5,14 @@ import com.engly.engly_server.service.common.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtAccessTokenGeneralFilter extends JwtGeneralFilter {
-    private final UserService  userService;
+    private final UserService userService;
 
     protected JwtAccessTokenGeneralFilter(JwtTokenUtils jwtTokenUtils, ObjectMapper objectMapper,
                                           UserService userService) {
@@ -20,7 +21,7 @@ public class JwtAccessTokenGeneralFilter extends JwtGeneralFilter {
     }
 
     @Override
-    protected String extractToken(@NonNull HttpServletRequest request) {
+    protected @Nullable String extractToken(@NonNull HttpServletRequest request) {
         var authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         return (authHeader != null && authHeader.startsWith("Bearer "))

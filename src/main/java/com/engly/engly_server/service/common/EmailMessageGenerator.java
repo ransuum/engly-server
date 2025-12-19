@@ -1,4 +1,4 @@
-package com.engly.engly_server.service.common.impl;
+package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.exception.GenerateTokenException;
 import lombok.extern.slf4j.Slf4j;

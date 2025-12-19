@@ -1,7 +1,6 @@
-package com.engly.engly_server.service.common.impl;
+package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.exception.NotFoundException;
-import com.engly.engly_server.service.common.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,7 +25,7 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.INVALID_
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GoogleAuthorizationServiceImpl implements AuthenticationSuccessHandler {
+public class GoogleAuthorizationService implements AuthenticationSuccessHandler {
 
     private final AuthService authService;
 

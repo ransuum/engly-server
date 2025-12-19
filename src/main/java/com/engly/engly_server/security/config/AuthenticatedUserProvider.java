@@ -4,6 +4,7 @@ import com.engly.engly_server.exception.AuthenticationObjectException;
 import com.engly.engly_server.models.enums.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,12 +22,11 @@ import static com.engly.engly_server.exception.handler.ExceptionMessage.NO_AUTHE
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@NullMarked
 public class AuthenticatedUserProvider {
 
     public String getCurrentUserEmail() {
-        return getAuthenticationOrThrow()
-                .orElseThrow(() -> new AuthenticationObjectException(AUTHENTICATION_OBJECT_NOT_FOUND))
-                .getName();
+        return getAuthenticationOrThrow().getName();
     }
 
     public boolean hasRole(String role) {
@@ -63,8 +63,9 @@ public class AuthenticatedUserProvider {
                 .orElseThrow(() -> new AuthenticationObjectException(NO_AUTHENTICATED_USER_FOUND));
     }
 
-    public Optional<Authentication> getAuthenticationOrThrow() {
-        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication());
+    public Authentication getAuthenticationOrThrow() {
+        return Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+                .orElseThrow(() -> new AuthenticationObjectException(AUTHENTICATION_OBJECT_NOT_FOUND));
     }
 
 }

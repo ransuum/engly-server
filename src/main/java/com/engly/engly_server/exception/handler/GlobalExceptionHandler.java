@@ -3,7 +3,8 @@ package com.engly.engly_server.exception.handler;
 import com.engly.engly_server.exception.*;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -20,6 +21,7 @@ import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestControllerAdvice
+@NullMarked
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({
@@ -27,7 +29,7 @@ public class GlobalExceptionHandler {
             RepositoryException.class,
             TokenGenerationException.class
     })
-    public ResponseEntity<@NonNull ExceptionResponse> handleGeneralExceptions(Exception ex) {
+    public ResponseEntity<ExceptionResponse> handleGeneralExceptions(Exception ex) {
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
 
@@ -39,7 +41,7 @@ public class GlobalExceptionHandler {
             MaxUploadSizeExceededException.class,
             SpecificationException.class
     })
-    public ResponseEntity<@NonNull ExceptionResponse> handleBadRequestExceptions(Exception ex) {
+    public ResponseEntity<ExceptionResponse> handleBadRequestExceptions(Exception ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex);
     }
 
@@ -50,12 +52,12 @@ public class GlobalExceptionHandler {
             InvalidTokenTypeException.class,
             AuthenticationObjectException.class
     })
-    public ResponseEntity<@NonNull ExceptionResponse> handleUnauthorizedExceptions(Exception ex) {
+    public ResponseEntity<ExceptionResponse> handleUnauthorizedExceptions(Exception ex) {
         return buildResponse(HttpStatus.UNAUTHORIZED, ex);
     }
 
     @ExceptionHandler({AccessDeniedException.class, RoomAccessException.class})
-    public ResponseEntity<@NonNull ExceptionResponse> handleForbiddenExceptions(Exception ex) {
+    public ResponseEntity<ExceptionResponse> handleForbiddenExceptions(Exception ex) {
         return buildResponse(HttpStatus.FORBIDDEN, ex);
     }
 
@@ -63,7 +65,7 @@ public class GlobalExceptionHandler {
             EntityAlreadyExistsException.class,
             DataIntegrityViolationException.class
     })
-    public ResponseEntity<@NonNull ExceptionResponse> handleConflictExceptions(Exception ex) {
+    public ResponseEntity<ExceptionResponse> handleConflictExceptions(Exception ex) {
         return buildResponse(HttpStatus.CONFLICT, ex);
     }
 
@@ -72,18 +74,18 @@ public class GlobalExceptionHandler {
             GenerateTokenException.class,
             GoogleDriveException.class
     })
-    public ResponseEntity<@NonNull ExceptionResponse> handleInternalServerErrorExceptions(Exception ex) {
+    public ResponseEntity<ExceptionResponse> handleInternalServerErrorExceptions(Exception ex) {
         HttpStatus status = ex instanceof NotFoundException ? HttpStatus.NOT_FOUND : HttpStatus.INTERNAL_SERVER_ERROR;
         return buildResponse(status, ex);
     }
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<@NonNull ExceptionResponse> handleResponseStatusException(ResponseStatusException ex) {
+    public ResponseEntity<ExceptionResponse> handleResponseStatusException(ResponseStatusException ex) {
         return buildResponse((HttpStatus) ex.getStatusCode(), ex);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<@NonNull ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         var errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -94,7 +96,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<@NonNull ExceptionResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+    public ResponseEntity<ExceptionResponse> handleConstraintViolationException(ConstraintViolationException ex) {
         var errors = ex.getConstraintViolations()
                 .stream()
                 .map(ConstraintViolation::getMessage)
@@ -103,18 +105,18 @@ public class GlobalExceptionHandler {
         return buildValidationResponse("Constraint violation", errors);
     }
 
-    private ResponseEntity<@NonNull ExceptionResponse> buildResponse(HttpStatus status, Exception ex) {
+    private ResponseEntity<ExceptionResponse> buildResponse(HttpStatus status, Exception ex) {
         String message = getMessageForException(ex);
         return ResponseEntity.status(status)
                 .body(ExceptionResponse.of(message, status.value(), ex.getMessage()));
     }
 
-    private ResponseEntity<@NonNull ExceptionResponse> buildValidationResponse(String message, List<String> errors) {
+    private ResponseEntity<ExceptionResponse> buildValidationResponse(String message, List<String> errors) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ExceptionResponse.of(message, HttpStatus.BAD_REQUEST.value(), String.join(", ", errors)));
     }
 
-    private String getMessageForException(Exception ex) {
+    private @Nullable String getMessageForException(Exception ex) {
         return switch (ex) {
             case TypeMismatchException e -> "Invalid data type for field: " + e.getPropertyName();
             case EntityAlreadyExistsException _ -> "Entity already exists";
@@ -130,7 +132,7 @@ public class GlobalExceptionHandler {
             case TokenNotFoundException _ -> "Invalid or expired token";
             case FieldValidationException _ -> "Field validation error";
             case MaxUploadSizeExceededException _ -> "File size exceeds maximum allowed size";
-            case ResponseStatusException e -> e.getReason() != null ? e.getReason() : "Request processing error";
+            case ResponseStatusException e -> e.getReason();
             case AuthenticationObjectException _ -> "Cannot parse authentication object";
             case TokenGenerationException _  -> "Token creation failed";
             default -> "An unexpected error occurred";

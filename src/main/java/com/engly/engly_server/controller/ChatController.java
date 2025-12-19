@@ -12,6 +12,7 @@ import com.engly.engly_server.service.common.MessageService;
 import com.engly.engly_server.service.common.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -23,6 +24,7 @@ import java.time.Instant;
 
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 @PreAuthorize("hasAuthority('SCOPE_WRITE')")
 public class ChatController {
 
@@ -46,6 +48,7 @@ public class ChatController {
     @RequireRoomPermission(permission = "ROOM_READ")
     public void markMessagesAsRead(@Payload MessageRequest.MarkAsReadRequest request) {
         final var userId = userService.getUserIdByEmail(authenticatedUserProvider.getCurrentUserEmail());
+        log.info("Marking messages as read for user {}", userId);
         messageReadService.markMessageAsRead(request, userId).join();
 
         messagingTemplate.convertAndSend(
@@ -58,9 +61,7 @@ public class ChatController {
     @MessageMapping("/chat/message.readers")
     @RequireRoomPermission(permission = "ROOM_READ")
     public void getReaders(@Payload MessageRequest.MessageReadersRequest messageReadersRequest) {
-        final var pageable = messageReadersRequest.pageable() != null
-                ? messageReadersRequest.pageable()
-                : PageRequest.of(0, 8);
+        final var pageable = PageRequest.of(messageReadersRequest.page(), messageReadersRequest.size());
 
         final var message = messageReadService.getUsersWhoReadMessage(messageReadersRequest.messageId(), pageable);
         messagingTemplate.convertAndSend(

@@ -17,16 +17,12 @@ import org.mapstruct.*;
         componentModel = "spring")
 public interface RoomMapper {
 
-    @Mapping(target = "members", expression = "java(getMemberCount(rooms.getId(), chatParticipantsService))")
-    @NonNull RoomsDto roomToDto(@NonNull Rooms rooms, @NonNull @Context ChatParticipantsService chatParticipantsService);
-
     @Mapping(target = "members", ignore = true)
-    @Mapping(target = "lastMessage", ignore = true)
-    @NonNull RoomsDto roomToDto(@NonNull Rooms rooms);
+    RoomsDto roomToDto(Rooms rooms);
 
-    @NonNull RoomDtoShort roomToDtoShort(@NonNull Rooms rooms);
+    RoomDtoShort roomToDtoShort(Rooms rooms);
 
-    default int getMemberCount(@Nullable String roomId, @NonNull ChatParticipantsService chatParticipantsService) {
+    default int getMemberCount(String roomId, ChatParticipantsService chatParticipantsService) {
         if (roomId == null) return 0;
         return chatParticipantsService.countActiveParticipants(roomId);
     }

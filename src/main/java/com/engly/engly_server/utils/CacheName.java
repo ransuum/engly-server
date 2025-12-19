@@ -36,6 +36,5 @@ public class CacheName {
     public static final String COUNT_PARTICIPANTS = "participant-count";
 
     public static final String MESSAGE_READ_STATUS = "message-read-status";
-    public static final String USERS_WHO_READ_MESSAGE = "users-who-read-message";
     public static final String USERNAME_BY_EMAIL = "username-by-email";
 }
