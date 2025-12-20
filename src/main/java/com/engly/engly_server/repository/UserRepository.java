@@ -6,9 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
+import module java.base;
 
 public interface UserRepository extends JpaRepository<Users, String> {
     Optional<Users> findByEmail(String email);

@@ -96,6 +96,13 @@
 			<artifactId>google-api-services-drive</artifactId>
 			<version>${com.google.apis.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>33.5.0-jre</version>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.google.api-client</groupId>
 			<artifactId>google-api-client</artifactId>

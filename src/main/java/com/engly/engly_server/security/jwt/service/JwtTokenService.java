@@ -18,12 +18,7 @@ import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import module java.base;
 
 @NullMarked
 public abstract sealed class JwtTokenService permits JwtTokenServiceImpl {

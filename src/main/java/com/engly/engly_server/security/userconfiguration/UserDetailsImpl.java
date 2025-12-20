@@ -5,18 +5,20 @@ import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 @NullMarked
 public record UserDetailsImpl(Users user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(user.getRoles().split(","))
+        return StringUtils.commaDelimitedListToSet(user.getRoles())
+                .stream()
                 .map(SimpleGrantedAuthority::new)
-                .toList();
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -6,9 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
+import module java.base;
 
 @Data
 @Entity

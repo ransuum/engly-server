@@ -1,13 +1,12 @@
 package com.engly.engly_server.service.permission;
 
-import com.engly.engly_server.exception.AuthenticationObjectException;
 import com.engly.engly_server.models.enums.RoomAuthority;
 import com.engly.engly_server.models.enums.RoomRoles;
 import com.engly.engly_server.repository.ChatParticipantRepository;
 import com.engly.engly_server.security.config.AuthenticatedUserProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +16,7 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@NullMarked
 public class RoomAuthorizationService {
     private final ChatParticipantRepository chatParticipantsRepository;
     private final AuthenticatedUserProvider authenticatedUserProvider;
@@ -61,7 +61,7 @@ public class RoomAuthorizationService {
         }
     }
 
-    private boolean hasGlobalAdminRights(@NonNull Authentication auth) {
+    private boolean hasGlobalAdminRights(Authentication auth) {
         return auth.getAuthorities().stream()
                 .anyMatch(authority ->
                         Objects.equals(authority.getAuthority(), "ROLE_ADMIN") ||

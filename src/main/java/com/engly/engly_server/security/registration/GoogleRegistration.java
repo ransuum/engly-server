@@ -7,7 +7,6 @@ import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.utils.passwordgenerateutil.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
