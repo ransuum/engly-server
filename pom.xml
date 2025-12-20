@@ -101,6 +101,7 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 			<version>33.5.0-jre</version>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.api-client</groupId>

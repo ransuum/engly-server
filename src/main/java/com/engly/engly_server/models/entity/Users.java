@@ -2,17 +2,13 @@ package com.engly.engly_server.models.entity;
 
 import com.engly.engly_server.models.enums.Provider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Splitter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.util.StringUtils;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
+import module java.base;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -96,9 +92,7 @@ public class Users implements Serializable {
     private List<Message> messages;
 
     public boolean checkRolesForBan() {
-        return Splitter.on(",").trimResults()
-                .omitEmptyStrings()
-                .splitToStream(this.roles)
-                .anyMatch("ROLE_BAN"::equals);
+        return StringUtils.commaDelimitedListToSet(this.roles)
+                .contains("ROLE_BAN");
     }
 }

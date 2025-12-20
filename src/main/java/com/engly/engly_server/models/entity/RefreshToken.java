@@ -3,9 +3,7 @@ package com.engly.engly_server.models.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.Instant;
+import module java.base;
 
 @Entity
 @Data

@@ -4,7 +4,7 @@ import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.Provider;
 import com.engly.engly_server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,7 +22,7 @@ public class DataInitializer implements CommandLineRunner {
     private String password;
 
     @Override
-    public void run(@NotNull String... args) {
+    public void run(String @NonNull ... args) {
         if (!userRepository.existsByEmail("admin@admin.com")) {
             final var adminUser = Users.builder()
                     .username("admin")

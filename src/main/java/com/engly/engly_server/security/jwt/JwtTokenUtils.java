@@ -6,12 +6,10 @@ import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.security.config.SecurityContextConfig;
 import com.engly.engly_server.security.jwt.validation.CompositeTokenValidator;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
-import com.google.common.base.Splitter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,9 +20,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
+import module java.base;
 
 @Component
 @RequiredArgsConstructor
@@ -35,10 +31,6 @@ public class JwtTokenUtils {
     private final JwtDecoder jwtDecoder;
     private final CompositeTokenValidator tokenValidator;
     private final SecurityContextConfig securityContextConfig;
-
-    public @Nullable String getUsername(Jwt jwtToken) {
-        return jwtToken.getSubject();
-    }
 
     public Jwt decodeToken(String token) {
         try {
@@ -61,9 +53,7 @@ public class JwtTokenUtils {
         Optional.ofNullable(jwt.getClaim("scope"))
                 .filter(String.class::isInstance)
                 .map(String.class::cast)
-                .ifPresent(scopeStr -> Splitter.on(" ").trimResults()
-                        .omitEmptyStrings()
-                        .splitToStream(scopeStr)
+                .ifPresent(scopeStr -> Arrays.stream(scopeStr.split("\\s+"))
                         .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
                         .forEach(authorities::add));
 

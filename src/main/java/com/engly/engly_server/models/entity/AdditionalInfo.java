@@ -6,8 +6,7 @@ import com.engly.engly_server.models.enums.NativeLanguage;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.io.Serial;
-import java.io.Serializable;
+import module java.base;
 
 @AllArgsConstructor
 @NoArgsConstructor

@@ -10,11 +10,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import module java.base;
 
 import static com.engly.engly_server.exception.handler.ExceptionMessage.AUTHENTICATION_OBJECT_NOT_FOUND;
 import static com.engly.engly_server.exception.handler.ExceptionMessage.NO_AUTHENTICATED_USER_FOUND;
@@ -42,9 +40,7 @@ public class AuthenticatedUserProvider {
     }
 
     public String getPermissionsFromRoles(String roles) {
-        var roleList = Arrays.stream(roles.split(","))
-                .map(String::trim)
-                .toList();
+        var roleList = StringUtils.commaDelimitedListToSet(roles);
 
         var authorities = Roles.getPermissionsForRoles(roleList);
         return authorities.stream()
