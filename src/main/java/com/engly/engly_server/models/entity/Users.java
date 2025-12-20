@@ -2,6 +2,7 @@ package com.engly.engly_server.models.entity;
 
 import com.engly.engly_server.models.enums.Provider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Splitter;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -95,8 +96,9 @@ public class Users implements Serializable {
     private List<Message> messages;
 
     public boolean checkRolesForBan() {
-        return Arrays.stream(this.roles.split(" "))
-                .map(String::trim)
+        return Splitter.on(",").trimResults()
+                .omitEmptyStrings()
+                .splitToStream(this.roles)
                 .anyMatch("ROLE_BAN"::equals);
     }
 }

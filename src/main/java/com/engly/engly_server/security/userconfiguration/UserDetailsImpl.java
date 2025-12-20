@@ -1,6 +1,7 @@
 package com.engly.engly_server.security.userconfiguration;
 
 import com.engly.engly_server.models.entity.Users;
+import com.google.common.base.Splitter;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,7 +15,9 @@ public record UserDetailsImpl(Users user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Arrays.stream(user.getRoles().split(","))
+        return Splitter.on(",").trimResults()
+                .omitEmptyStrings()
+                .splitToStream(user.getRoles())
                 .map(SimpleGrantedAuthority::new)
                 .toList();
     }

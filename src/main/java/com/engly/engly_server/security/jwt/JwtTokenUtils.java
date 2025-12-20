@@ -6,6 +6,7 @@ import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.security.config.SecurityContextConfig;
 import com.engly.engly_server.security.jwt.validation.CompositeTokenValidator;
 import com.engly.engly_server.security.userconfiguration.UserDetailsImpl;
+import com.google.common.base.Splitter;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,6 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -61,7 +61,9 @@ public class JwtTokenUtils {
         Optional.ofNullable(jwt.getClaim("scope"))
                 .filter(String.class::isInstance)
                 .map(String.class::cast)
-                .ifPresent(scopeStr -> Arrays.stream(scopeStr.split(" "))
+                .ifPresent(scopeStr -> Splitter.on(" ").trimResults()
+                        .omitEmptyStrings()
+                        .splitToStream(scopeStr)
                         .map(scope -> new SimpleGrantedAuthority("SCOPE_" + scope))
                         .forEach(authorities::add));
 
