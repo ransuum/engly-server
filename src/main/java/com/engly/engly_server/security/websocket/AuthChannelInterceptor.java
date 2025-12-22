@@ -4,6 +4,7 @@ import com.engly.engly_server.exception.WebSocketException;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
@@ -32,18 +33,20 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
             if (CollectionUtils.isEmpty(authorization)) return message;
 
-            var authToken = authorization.getFirst();
-            if (authToken.startsWith("Bearer ")) {
-                authToken = authToken.substring(7);
-                try {
-                    var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
+            authorization.stream()
+                    .filter(token -> token.startsWith("Bearer "))
+                    .map(authToken -> authToken.substring(7))
+                    .findFirst()
+                    .ifPresent(authToken -> {
+                        try {
+                            var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
 
-                    accessor.setUser(authentication);
-                    log.info("Successfully set Authentication with name: {}", authentication.getName());
-                } catch (Exception e) {
-                    throw new WebSocketException("Authentication failed: " + e.getMessage());
-                }
-            }
+                            accessor.setUser(authentication);
+                            log.info("Successfully set Authentication with name: {}", authentication.getName());
+                        } catch (Exception e) {
+                            throw new WebSocketException("Authentication failed: " + e.getMessage());
+                        }
+                    });
         }
         return message;
     }
