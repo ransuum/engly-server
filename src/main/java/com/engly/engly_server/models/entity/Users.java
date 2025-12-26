@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.StringUtils;
 
 import module java.base;
@@ -61,6 +62,7 @@ public class Users implements Serializable {
     private String providerId;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @Nullable
     private AdditionalInfo additionalInfo;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
