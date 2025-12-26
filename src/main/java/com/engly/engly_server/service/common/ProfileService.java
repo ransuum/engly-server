@@ -25,7 +25,6 @@ public class ProfileService {
     private final UserMapper userMapper;
 
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.USER_PROFILES, key = "#id")
     public UsersDto getProfile(String id) {
         return userRepository.findById(id)
                 .map(userMapper::toUsersDto)
@@ -33,10 +32,6 @@ public class ProfileService {
     }
 
     @Caching(
-            put = {
-                    @CachePut(value = CacheName.USER_PROFILES, key = "#id"),
-                    @CachePut(value = CacheName.USER_ID, key = "#result.id")
-            },
             evict = {
                     @CacheEvict(value = CacheName.ALL_USER, allEntries = true)
             }
@@ -48,11 +43,11 @@ public class ProfileService {
                     if (StringUtils.isNotBlank(profileUpdateData.username()))
                         user.setUsername(profileUpdateData.username());
                     if (profileUpdateData.goal() != null)
-                        user.getAdditionalInfo().setGoal(profileUpdateData.goal());
+                        user.getAdditionalInfoNonNull().setGoal(profileUpdateData.goal());
                     if (profileUpdateData.englishLevel() != null)
-                        user.getAdditionalInfo().setEnglishLevel(profileUpdateData.englishLevel());
+                        user.getAdditionalInfoNonNull().setEnglishLevel(profileUpdateData.englishLevel());
                     if (profileUpdateData.nativeLanguage() != null)
-                        user.getAdditionalInfo().setNativeLanguage(profileUpdateData.nativeLanguage());
+                        user.getAdditionalInfoNonNull().setNativeLanguage(profileUpdateData.nativeLanguage());
 
                     return userMapper.toUsersDto(userRepository.save(user));
                 })
