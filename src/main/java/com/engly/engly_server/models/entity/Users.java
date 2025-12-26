@@ -1,5 +1,6 @@
 package com.engly.engly_server.models.entity;
 
+import com.engly.engly_server.models.enums.NativeLanguage;
 import com.engly.engly_server.models.enums.Provider;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -93,8 +94,17 @@ public class Users implements Serializable {
     @JsonIgnore
     private List<Message> messages;
 
+    public AdditionalInfo getAdditionalInfoNonNull() {
+        return Objects.requireNonNull(this.additionalInfo, "AdditionalInfo must not be null");
+    }
+
     public boolean checkRolesForBan() {
         return StringUtils.commaDelimitedListToSet(this.roles)
                 .contains("ROLE_BAN");
+    }
+
+    public AdditionalInfo getOrCreateAdditionalInfo() {
+        return Optional.ofNullable(this.additionalInfo).orElseGet(
+                () -> AdditionalInfo.builder().nativeLanguage(NativeLanguage.ENGLISH).build());
     }
 }

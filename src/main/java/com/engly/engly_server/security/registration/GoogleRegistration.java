@@ -8,6 +8,7 @@ import com.engly.engly_server.utils.passwordgenerateutil.PasswordUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -19,13 +20,14 @@ import java.util.Objects;
 @Component
 @Slf4j
 @RequiredArgsConstructor
+@NullMarked
 public final class GoogleRegistration implements RegistrationChooser {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Users registration(AuthRequest.@NonNull SignUpRequest signUpRequestDto) {
+    public Users registration(AuthRequest.SignUpRequest signUpRequestDto) {
         log.info("Registering Google user with email: {}", signUpRequestDto.email());
         if (userRepository.existsByEmail(signUpRequestDto.email())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User with this email already exists");
