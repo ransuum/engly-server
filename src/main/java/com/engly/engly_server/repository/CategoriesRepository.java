@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
-@NullMarked
 public interface CategoriesRepository extends JpaRepository<Categories, String> {
     boolean existsByName(CategoryType name);
 

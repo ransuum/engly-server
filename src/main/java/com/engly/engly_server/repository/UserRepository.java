@@ -17,9 +17,11 @@ public interface UserRepository extends JpaRepository<Users, String> {
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
-    List<Users> findAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore);
+    @Modifying
+    @Query(value = "DELETE FROM Users WHERE id IN :ids", nativeQuery = true)
+    int deleteAllByIdIn(List<String> ids);
 
     @Modifying
-    @Query("DELETE FROM Users u WHERE u.id IN :ids")
-    int deleteAllByIdIn(List<String> ids);
+    @Query(value = "DELETE FROM users WHERE roles = :roles AND created_at < :expireBefore", nativeQuery = true)
+    void deleteAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore);
 }

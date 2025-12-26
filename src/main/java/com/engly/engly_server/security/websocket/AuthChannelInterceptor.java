@@ -27,23 +27,25 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     public @Nullable Message<?> preSend(Message<?> message, MessageChannel channel) {
         var accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+        if (accessor != null && StompCommand.CONNECT == accessor.getCommand()) {
             var authorization = accessor.getNativeHeader(HttpHeaders.AUTHORIZATION);
 
             if (CollectionUtils.isEmpty(authorization)) return message;
 
-            var authToken = authorization.getFirst();
-            if (authToken.startsWith("Bearer ")) {
-                authToken = authToken.substring(7);
-                try {
-                    var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
+            authorization.stream()
+                    .filter(token -> token.startsWith("Bearer "))
+                    .findFirst()
+                    .map(authToken -> authToken.substring(7))
+                    .ifPresent(authToken -> {
+                        try {
+                            var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
 
-                    accessor.setUser(authentication);
-                    log.info("Successfully set Authentication with name: {}", authentication.getName());
-                } catch (Exception e) {
-                    throw new WebSocketException("Authentication failed: " + e.getMessage());
-                }
-            }
+                            accessor.setUser(authentication);
+                            log.info("Successfully set Authentication with name: {}", authentication.getName());
+                        } catch (Exception e) {
+                            throw new WebSocketException("Authentication failed: " + e.getMessage());
+                        }
+                    });
         }
         return message;
     }

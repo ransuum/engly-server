@@ -21,6 +21,8 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
     @Value("${app.backend.url}")
     private String url;
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Bean
     OpenAPI customOpenAPI() {
@@ -33,7 +35,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                                 "It provides endpoints for managing users, chat rooms, messages, and authentication.")
                         .contact(new Contact()
                                 .name("Engly Support")
-                                .url("https://engly-client-blmg.vercel.app/")
+                                .url(frontendUrl)
                                 .email("englychat@gmail.com"))
                         .license(new License()
                                 .name("Apache 2.0")

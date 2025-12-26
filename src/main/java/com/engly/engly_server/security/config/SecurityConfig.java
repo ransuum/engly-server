@@ -6,6 +6,7 @@ import com.engly.engly_server.service.common.GoogleAuthorizationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -47,6 +48,9 @@ public class SecurityConfig {
     private final JwtRefreshTokenGeneralFilter jwtRefreshTokenFilter;
 
     private static final String GLOBAL_RIGHTS = "GLOBAL_READ";
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Order(0)
     @Bean
@@ -240,9 +244,8 @@ public class SecurityConfig {
         var configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:8000",
                 "http://localhost:3000",
-                "https://engly-client-blmg.vercel.app")
+                frontendUrl)
         );
 
         configuration.setAllowedMethods(Arrays.asList(

@@ -16,8 +16,7 @@ public record UserDetailsImpl(Users user) implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return StringUtils.commaDelimitedListToSet(user.getRoles())
-                .stream()
-                .map(SimpleGrantedAuthority::new)
+                .stream().map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toSet());
     }
 

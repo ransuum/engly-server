@@ -1,5 +1,6 @@
 package com.engly.engly_server.controller;
 
+import com.engly.engly_server.models.dto.request.UserSettingsUpdateReq;
 import com.engly.engly_server.models.enums.Theme;
 import com.engly.engly_server.service.common.UserSettingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,12 +18,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserSettingController {
     private final UserSettingService userSettingService;
 
-    @PatchMapping
+    @PutMapping
     @PreAuthorize("hasAuthority('SCOPE_AUTHORIZE')")
-    public ResponseEntity<Void> update(@RequestParam(required = false) Boolean notifications,
-                                       @RequestParam(required = false) Theme theme,
+    public ResponseEntity<Void> update(@RequestBody(required = false) UserSettingsUpdateReq userSettingsUpdateReq,
                                        @AuthenticationPrincipal Jwt jwt) {
-        userSettingService.update(jwt.getClaim("userId"), notifications, theme);
+        userSettingService.update(jwt.getClaim("userId"), userSettingsUpdateReq);
         return ResponseEntity.noContent().build();
     }
 }

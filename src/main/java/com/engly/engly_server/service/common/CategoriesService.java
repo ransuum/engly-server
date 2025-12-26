@@ -56,7 +56,7 @@ public class CategoriesService {
     public CategoriesDto updateCategory(String id, CategoryRequest categoryRequest) {
         return categoriesRepository.findById(id)
                 .map(category -> {
-                    if (categoryRequest.name() != null) category.setName(categoryRequest.name());
+                    category.setName(categoryRequest.name());
                     if (StringUtils.isNotBlank(categoryRequest.description()))
                         category.setDescription(categoryRequest.description());
 

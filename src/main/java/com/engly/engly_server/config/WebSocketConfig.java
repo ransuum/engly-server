@@ -4,6 +4,7 @@ import com.engly.engly_server.exception.handler.CustomExceptionWebSocketHandlerD
 import com.engly.engly_server.security.websocket.AuthChannelInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -23,6 +24,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     private final AuthChannelInterceptor authChannelInterceptor;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
         config.enableSimpleBroker("/topic")
@@ -34,7 +38,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/chat")
-                .setAllowedOriginPatterns("https://engly-client-blmg.vercel.app", "http://localhost:3000");
+                .setAllowedOriginPatterns(frontendUrl, "http://localhost:3000");
     }
 
     @Override

@@ -10,8 +10,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RoomRepository extends JpaRepository<Rooms, String>, JpaSpecificationExecutor<Rooms> {
-    Page<Rooms> findByCategoryId(String categoryId, Pageable pageable);
-
     @Query(
             value = "SELECT * FROM get_rooms_with_last_message(:categoryId)",
             countQuery = "SELECT count(*) FROM rooms WHERE :categoryId IS NULL OR category_id = :categoryId",

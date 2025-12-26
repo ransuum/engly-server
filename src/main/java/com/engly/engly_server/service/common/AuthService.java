@@ -104,7 +104,7 @@ public class AuthService {
 
     private AuthResponseDto createAuthResponse(Users user, JwtHolder jwtHolder) {
         return AuthResponseDto.builder()
-                .accessToken(Objects.requireNonNull(jwtHolder.accessToken()))
+                .accessToken(jwtHolder.accessToken())
                 .accessTokenExpiry(tokenExpiryMinutes * 60)
                 .username(user.getUsername())
                 .tokenType(TokenType.BEARER)
