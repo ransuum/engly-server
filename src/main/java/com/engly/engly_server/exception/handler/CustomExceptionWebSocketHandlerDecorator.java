@@ -23,7 +23,7 @@ public class CustomExceptionWebSocketHandlerDecorator extends ExceptionWebSocket
     public void handleTransportError(WebSocketSession session, @NotNull Throwable exception) {
         log.error("WebSocket transport error: {}", exception.getMessage(), exception);
         try {
-            final var status = mapExceptionToStatus(exception);
+            CloseStatus status = mapExceptionToStatus(exception);
             if (session.isOpen()) session.close(status);
         } catch (IOException e) {
             log.error("Failed to close WebSocket session: {}", e.getMessage());

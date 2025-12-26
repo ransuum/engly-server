@@ -1,8 +1,11 @@
 package com.engly.engly_server.exception.handler;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@NullMarked
 public record ExceptionResponse(String message,
                                 int code,
                                 String details,

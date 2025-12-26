@@ -113,24 +113,19 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    @Cacheable(value = CacheName.USER_BY_EMAIL, key = "#email", sync = true)
     public Users findUserEntityByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
-    @Cacheable(value = CacheName.USER_ID_BY_EMAIL, key = "#email.toLowerCase()", sync = true)
+    @Cacheable(value = CacheName.USER_ID_BY_EMAIL, key = "#email", sync = true)
     public String getUserIdByEmail(String email) {
         return userRepository.findByEmail(email).map(Users::getId)
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_EMAIL.formatted(email)));
     }
 
-    public List<Users> findAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore) {
-        return userRepository.findAllByRolesAndCreatedAtBefore(roles, expireBefore);
-    }
-
-    @Transactional
-    public void deleteAll(List<Users> users) {
-        if (!CollectionUtils.isEmpty(users)) userRepository.deleteAll(users);
+    public void deleteAllByRolesAndCreatedAtBefore(String roles, Instant expireBefore) {
+        userRepository.deleteAllByRolesAndCreatedAtBefore(roles, expireBefore);
     }
 }

@@ -87,7 +87,7 @@ public class ProfileController {
             description = "Forbidden. User does not have the required 'SCOPE_WRITE' scope.",
             content = @Content
     )
-    @PatchMapping
+    @PutMapping
     @PreAuthorize("hasAuthority('SCOPE_WRITE')")
     @RateLimiter(name = "ProfileController")
     public ResponseEntity<UsersDto> updateProfile(@AuthenticationPrincipal Jwt jwt,

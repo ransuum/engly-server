@@ -15,8 +15,7 @@ public sealed interface RegistrationChooser permits EmailRegistration, GoogleReg
     Provider getProvider();
 
     default UserSettings buildUserSettings(Users users) {
-        NativeLanguage nativeLanguage = users.getAdditionalInfo() != null ?
-                users.getAdditionalInfo().getNativeLanguage() : NativeLanguage.ENGLISH;
+        NativeLanguage nativeLanguage = users.getAdditionalInfo().getNativeLanguage();
         return UserSettings.builder()
                 .user(users)
                 .theme(Theme.BRIGHT)

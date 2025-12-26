@@ -1,6 +1,7 @@
 package com.engly.engly_server.service.common;
 
 import com.engly.engly_server.exception.NotFoundException;
+import com.engly.engly_server.models.dto.request.UserSettingsUpdateReq;
 import com.engly.engly_server.service.mapper.UserSettingsMapper;
 import com.engly.engly_server.models.dto.response.UserSettingsDto;
 import com.engly.engly_server.models.enums.Theme;
@@ -33,11 +34,14 @@ public class UserSettingService {
 
     @Transactional
     @CacheEvict(value = CacheName.USER_SETTINGS, key = "#id")
-    public void update(String id, @Nullable Boolean notifications, @Nullable Theme theme) {
+    public void update(String id, UserSettingsUpdateReq userSettingsUpdateReq) {
         userSettingsRepository.findById(id)
                 .ifPresentOrElse(userSettings -> {
-                    if (theme != null) userSettings.setTheme(theme);
-                    if (notifications != null) userSettings.setNotifications(notifications);
+                    if (userSettingsUpdateReq.theme() != null) userSettings.setTheme(userSettingsUpdateReq.theme());
+                    if (userSettingsUpdateReq.notifications() != null)
+                        userSettings.setNotifications(userSettingsUpdateReq.notifications());
+                    if (userSettingsUpdateReq.nativeLanguage() != null)
+                        userSettings.setInterfaceLanguage(userSettingsUpdateReq.nativeLanguage());
                     userSettingsRepository.save(userSettings);
                 }, () -> { throw new NotFoundException(USER_NOT_FOUND); });
     }

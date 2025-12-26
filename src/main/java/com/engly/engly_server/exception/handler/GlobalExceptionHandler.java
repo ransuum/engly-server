@@ -4,7 +4,6 @@ import com.engly.engly_server.exception.*;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -19,6 +18,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Objects;
 
 @RestControllerAdvice
 @NullMarked
@@ -116,7 +116,7 @@ public class GlobalExceptionHandler {
                 .body(ExceptionResponse.of(message, HttpStatus.BAD_REQUEST.value(), String.join(", ", errors)));
     }
 
-    private @Nullable String getMessageForException(Exception ex) {
+    private String getMessageForException(Exception ex) {
         return switch (ex) {
             case TypeMismatchException e -> "Invalid data type for field: " + e.getPropertyName();
             case EntityAlreadyExistsException _ -> "Entity already exists";
@@ -132,7 +132,7 @@ public class GlobalExceptionHandler {
             case TokenNotFoundException _ -> "Invalid or expired token";
             case FieldValidationException _ -> "Field validation error";
             case MaxUploadSizeExceededException _ -> "File size exceeds maximum allowed size";
-            case ResponseStatusException e -> e.getReason();
+            case ResponseStatusException e -> Objects.requireNonNull(e.getReason());
             case AuthenticationObjectException _ -> "Cannot parse authentication object";
             case TokenGenerationException _  -> "Token creation failed";
             default -> "An unexpected error occurred";

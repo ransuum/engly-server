@@ -15,8 +15,7 @@ public class IncompleteGoogleUserService {
 
     @Scheduled(cron = "0 */25 0 * * *")
     public void deleteUsers() {
-        final Instant expireBefore = Instant.now().minus(Duration.ofMinutes(15));
-        final List<Users> incomplete = userService.findAllByRolesAndCreatedAtBefore("ROLE_GOOGLE", expireBefore);
-        userService.deleteAll(incomplete);
+        var expireBefore = Instant.now().minus(Duration.ofMinutes(15));
+        userService.deleteAllByRolesAndCreatedAtBefore("ROLE_GOOGLE", expireBefore);
     }
 }

@@ -4,7 +4,6 @@ import com.engly.engly_server.exception.WebSocketException;
 import com.engly.engly_server.security.jwt.JwtTokenUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
@@ -28,15 +27,15 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     public @Nullable Message<?> preSend(Message<?> message, MessageChannel channel) {
         var accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-        if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+        if (accessor != null && StompCommand.CONNECT == accessor.getCommand()) {
             var authorization = accessor.getNativeHeader(HttpHeaders.AUTHORIZATION);
 
             if (CollectionUtils.isEmpty(authorization)) return message;
 
             authorization.stream()
                     .filter(token -> token.startsWith("Bearer "))
-                    .map(authToken -> authToken.substring(7))
                     .findFirst()
+                    .map(authToken -> authToken.substring(7))
                     .ifPresent(authToken -> {
                         try {
                             var authentication = jwtTokenUtils.createSocketAuthentication(authToken);
