@@ -104,7 +104,7 @@ public class Users implements Serializable {
     }
 
     public AdditionalInfo getOrCreateAdditionalInfo() {
-        return Optional.ofNullable(this.additionalInfo).orElseGet(
-                () -> AdditionalInfo.builder().nativeLanguage(NativeLanguage.ENGLISH).build());
+        return Objects.requireNonNullElse(this.additionalInfo,
+                AdditionalInfo.builder().nativeLanguage(NativeLanguage.ENGLISH).build());
     }
 }

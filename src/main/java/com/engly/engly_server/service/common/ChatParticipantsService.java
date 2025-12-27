@@ -50,8 +50,7 @@ public class ChatParticipantsService {
     @Transactional(timeout = 30)
     @Caching(evict = {
             @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true),
-            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true),
-            @CacheEvict(value = CacheName.COUNT_PARTICIPANTS, allEntries = true)
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
     })
     public void removeParticipant(String participantId) {
         chatParticipantRepository.findById(participantId)
@@ -77,11 +76,6 @@ public class ChatParticipantsService {
                     throw new NotFoundException(PARTICIPANT_NOT_FOUND.formatted(participantId));
                 });
 
-    }
-
-    @Cacheable(value = CacheName.COUNT_PARTICIPANTS, key = "#roomId")
-    public int countActiveParticipants(String roomId) {
-        return chatParticipantRepository.countChatParticipantsByRoomId(roomId);
     }
 
     @Transactional(readOnly = true)

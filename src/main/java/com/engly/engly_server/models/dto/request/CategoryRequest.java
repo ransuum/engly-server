@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import org.jspecify.annotations.Nullable;
 
 public record CategoryRequest(@NotNull(message = "Name is required")
                               CategoryType name,

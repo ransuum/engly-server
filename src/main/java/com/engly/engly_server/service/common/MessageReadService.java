@@ -52,9 +52,8 @@ public class MessageReadService {
         }
 
         var user = userService.findEntityById(userId);
-        var messages = messageRepository.findAllById(unreadMessageIds);
-        var messageMap = messages.stream()
-                .collect(Collectors.toMap(Message::getId, Function.identity()));
+        var messageMap = messageRepository.findAllById(unreadMessageIds)
+                .stream().collect(Collectors.toMap(Message::getId, Function.identity()));
 
         var newReads = unreadMessageIds.stream()
                 .map(messageId -> {
