@@ -47,9 +47,8 @@ public class MessageReadService {
                 .toList();
         log.info("User {} has {} unread messages to mark as read", userId, unreadMessageIds.size());
 
-        if (unreadMessageIds.isEmpty()) {
+        if (unreadMessageIds.isEmpty())
             return CompletableFuture.completedFuture(null);
-        }
 
         var user = userService.findEntityById(userId);
         var messageMap = messageRepository.findAllById(unreadMessageIds)
@@ -73,9 +72,8 @@ public class MessageReadService {
 
     private void evictReadStatusCache(List<String> messageIds, String userId) {
         Cache messageReadStatusCache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
-        if (messageReadStatusCache != null) {
+        if (messageReadStatusCache != null)
             messageIds.forEach(messageId -> messageReadStatusCache.evict(messageId + "_" + userId));
-        }
     }
 
     @Transactional(readOnly = true)

@@ -23,8 +23,7 @@ import module java.base;
 public class WebSocketRoomAuthorizationAspect {
 
     private final RoomAuthorizationService roomAuthorizationService;
-
-    private static final ScopedValue<Map<String, RoomAuthority>> ROOM_AUTHORITY_CACHE = ScopedValue.newInstance();
+    private static final Map<String, RoomAuthority> authorityCache = new ConcurrentHashMap<>();
 
     @Around("@annotation(requireRoomPermission)")
     public @Nullable Object checkRoomPermission(ProceedingJoinPoint joinPoint, RequireRoomPermission requireRoomPermission) throws Throwable {
@@ -34,29 +33,22 @@ public class WebSocketRoomAuthorizationAspect {
                 .findFirst()
                 .orElseThrow(() -> new RoomAccessException("No payload provided"));
 
-        var roomId = request.roomId();
-
-        return ScopedValue.where(ROOM_AUTHORITY_CACHE, new ConcurrentHashMap<>())
-                .call(() -> {
-                    var authority = ROOM_AUTHORITY_CACHE.get().computeIfAbsent(
-                            requireRoomPermission.permission().toUpperCase(),
-                            permission -> {
-                                try {
-                                    log.debug("Computing RoomAuthority for permission: {}", permission);
-                                    return RoomAuthority.valueOf(permission);
-                                } catch (IllegalArgumentException _) {
-                                    throw new RoomAccessException("Invalid permission: " + requireRoomPermission.permission());
-                                }
-                            }
-                    );
-
-                    if (!roomAuthorizationService.hasRoomPermission(roomId, authority)) {
-                        log.info("You can't mark messages as read from room: {} with authority: {}", roomId, authority);
-//                        throw new RoomAccessException("Access denied for room: " + roomId);
-                        return null;
+        var authority = authorityCache.computeIfAbsent(
+                requireRoomPermission.permission().toUpperCase(),
+                permission -> {
+                    try {
+                        return RoomAuthority.valueOf(permission);
+                    } catch (IllegalArgumentException _) {
+                        throw new RoomAccessException("Invalid permission: " + permission);
                     }
+                }
+        );
 
-                    return joinPoint.proceed();
-                });
+        if (!roomAuthorizationService.hasRoomPermission(request.roomId(), authority)) {
+            log.info("Access denied for room: {} with authority: {}", request.roomId(), authority);
+            return null;
+        }
+
+        return joinPoint.proceed();
     }
 }

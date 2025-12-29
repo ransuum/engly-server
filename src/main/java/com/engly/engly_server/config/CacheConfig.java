@@ -26,7 +26,7 @@ public class CacheConfig {
     CacheManager cacheManager() {
         final List<String> caches = Arrays.asList(
                 USER_ID, ALL_USER, USER_BY_EMAIL, USER_PROFILES, USER_ID_BY_EMAIL, USERNAME_BY_EMAIL,ROOM_DTO_ID,
-                USER_SETTINGS, ROOMS_BY_CATEGORY, ROOM_ENTITY_ID, ROOMS_BY_CRITERIA, CATEGORY_ENTITY_ID,
+                USER_SETTINGS, ROOMS_BY_CATEGORY, ROOMS_BY_CRITERIA, CATEGORY_ENTITY_ID,
                 CATEGORY_NAME, ALL_CATEGORIES, MESSAGE_ID, CATEGORY_ID_BY_NAME, ROOM_SHORT_ID,
                 MESSAGES_BY_ROOM_NATIVE, MESSAGE_COUNT_BY_ROOM, MESSAGES_BY_CRITERIA, PARTICIPANTS_BY_ROOM,
                 PARTICIPANT_EXISTS, MESSAGE_READ_STATUS, USER_EXISTS_BY_ID, USER_ENTITY_ID
@@ -62,7 +62,7 @@ public class CacheConfig {
 
             case ALL_USER -> new CacheSpec(1, Duration.ofMinutes(2), Duration.ofMinutes(1));
 
-            case ROOM_DTO_ID, ROOM_ENTITY_ID, ROOMS_BY_CATEGORY, ROOMS_BY_CRITERIA, ROOM_SHORT_ID ->
+            case ROOM_DTO_ID, ROOMS_BY_CATEGORY, ROOMS_BY_CRITERIA, ROOM_SHORT_ID ->
                     new CacheSpec(5, Duration.ofMinutes(2), Duration.ofMinutes(1));
 
             case MESSAGE_ID, MESSAGE_COUNT_BY_ROOM -> new CacheSpec(10, Duration.ofMinutes(2), Duration.ofMinutes(1));

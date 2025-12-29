@@ -28,8 +28,7 @@ public class ProfileService {
     @Transactional(readOnly = true)
     @Cacheable(value = CacheName.USER_PROFILES, key = "#id", sync = true)
     public UsersDto getProfile(String id) {
-        return userRepository.findById(id)
-                .map(userMapper::toUsersDto)
+        return userRepository.findById(id).map(userMapper::toUsersDto)
                 .orElseThrow(() -> new NotFoundException(PROFILE_NOT_FOUND));
     }
 
