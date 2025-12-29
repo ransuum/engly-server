@@ -9,10 +9,12 @@ import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.security.jwt.service.JwtAuthenticationService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.engly.engly_server.exception.handler.ExceptionMessage.USER_NOT_FOUND_BY_ID;
+import static com.engly.engly_server.utils.CacheName.*;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class AdditionalService {
     private static final String ROLE_USER = "ROLE_USER";
 
     @Transactional
+    @CacheEvict(value = {USER_ID, ALL_USER, USER_BY_EMAIL, USER_PROFILES, USER_ENTITY_ID}, allEntries = true)
     public AuthResponseDto additionalRegistration(String id, GoogleUserInfoRequest additionalRequest,
                                                   HttpServletResponse httpServletResponse) {
         var userById = userRepository.findById(id).map(user -> {
@@ -40,7 +43,6 @@ public class AdditionalService {
                 .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
 
         var savedUser = userRepository.save(userById);
-
         var authentication = jwtAuthenticationService.newAuthentication(savedUser);
         var jwtHolder = jwtAuthenticationService.authenticationWithParameters(savedUser, authentication, httpServletResponse);
 

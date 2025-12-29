@@ -18,7 +18,6 @@ public class CacheName {
     public static final String ROOM_DTO_ID = "room-dto-by-id";
     public static final String ROOMS_BY_CATEGORY = "rooms-by-category";
     public static final String ROOMS_BY_CRITERIA = "rooms-by-criteria";
-    public static final String ROOM_ENTITY_ID = "room-entity-by-id";
     public static final String ROOM_SHORT_ID = "room-short-by-id";
 
     public static final String CATEGORY_ENTITY_ID = "category-entity-by-id";
@@ -33,7 +32,6 @@ public class CacheName {
 
     public static final String PARTICIPANTS_BY_ROOM = "participants-by-room";
     public static final String PARTICIPANT_EXISTS = "participant-exists";
-    public static final String COUNT_PARTICIPANTS = "participant-count";
 
     public static final String MESSAGE_READ_STATUS = "message-read-status";
     public static final String USERNAME_BY_EMAIL = "username-by-email";

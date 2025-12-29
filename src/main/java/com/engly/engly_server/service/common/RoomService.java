@@ -49,13 +49,14 @@ public class RoomService {
             }
     )
     public RoomsDto createRoom(String id, CategoryType name, RoomRequest.RoomCreateRequest roomCreateRequestDto) {
-        if (roomRepository.existsByName(roomCreateRequestDto.name()))
+        String categoryId = categoriesService.getCategoryIdByName(name);
+        if (roomRepository.existsByNameAndCategoryId(roomCreateRequestDto.name(), categoryId))
             throw new EntityAlreadyExistsException(ROOM_ALREADY_EXISTS);
 
         var room = roomRepository.save(Rooms.builder()
                 .creator(userService.findEntityById(id))
                 .createdAt(Instant.now())
-                .categoryId(categoriesService.getCategoryIdByName(name))
+                .categoryId(categoryId)
                 .description(roomCreateRequestDto.description())
                 .name(roomCreateRequestDto.name())
                 .build());
@@ -79,15 +80,12 @@ public class RoomService {
 
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = CacheName.ROOM_ENTITY_ID, key = "#id"),
             @CacheEvict(value = CacheName.ROOMS_BY_CATEGORY, allEntries = true),
             @CacheEvict(value = CacheName.ROOMS_BY_CRITERIA, allEntries = true)
     })
     public void deleteRoomById(String id) {
         roomRepository.findById(id).ifPresentOrElse(room -> roomRepository.deleteById(room.getId()),
-                () -> {
-                    throw new NotFoundException(ROOM_NOT_FOUND);
-                });
+                () -> {throw new NotFoundException(ROOM_NOT_FOUND);});
     }
 
     @Caching(
@@ -124,18 +122,10 @@ public class RoomService {
         return roomRepository.findRoomsWithLastMessage(categoriesService.getCategoryIdByName(category), pageable);
     }
 
-    @Transactional(readOnly = true)
-    @Cacheable(value = CacheName.ROOM_ENTITY_ID, key = "#id", sync = true)
-    public Rooms findRoomEntityById(String id) {
-        return roomRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
-    }
-
     @Transactional
     @Cacheable(value = CacheName.ROOM_SHORT_ID, key = "#id", sync = true)
     public RoomDtoShort findRoomByIdShort(String id) {
-        return roomRepository.findById(id)
-                .map(roomMapper::roomToDtoShort)
+        return roomRepository.findById(id).map(roomMapper::roomToDtoShort)
                 .orElseThrow(() -> new NotFoundException(ROOM_NOT_FOUND));
     }
 }

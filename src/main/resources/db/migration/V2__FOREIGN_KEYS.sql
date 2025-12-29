@@ -14,10 +14,6 @@ DO $$
             ALTER TABLE moderation ADD CONSTRAINT uc_moderation_user UNIQUE (user_id);
         END IF;
 
-        IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uc_rooms_name') THEN
-            ALTER TABLE rooms ADD CONSTRAINT uc_rooms_name UNIQUE (name);
-        END IF;
-
         IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'uc_users_email') THEN
             ALTER TABLE users ADD CONSTRAINT uc_users_email UNIQUE (email_id);
         END IF;

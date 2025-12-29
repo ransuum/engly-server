@@ -28,7 +28,7 @@ public class Rooms implements Serializable {
     @Column(name = "category_id", nullable = false)
     private String categoryId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     private String description;

@@ -1,7 +1,6 @@
 package com.engly.engly_server.controller;
 
 import com.engly.engly_server.models.dto.request.UserSettingsUpdateReq;
-import com.engly.engly_server.models.enums.Theme;
 import com.engly.engly_server.service.common.UserSettingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

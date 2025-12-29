@@ -32,10 +32,8 @@ public class RoomAuthorizationService {
             if (hasGlobalAdminRights(auth)) return true;
 
             return chatParticipantsRepository.findByEmailAndRoom(email, roomId)
-                    .map(chatParticipants -> {
-                        RoomRoles roomRole = chatParticipants.getRole();
-                        return roomRole.getPermissions().contains(authority);
-                    }).orElse(false);
+                    .map(chatParticipants -> chatParticipants.getRole().getPermissions().contains(authority))
+                    .orElse(false);
         } catch (Exception e) {
             log.error("Error checking room permission for user {} in room {}: {}", email, roomId, e.getMessage());
             return false;
@@ -83,11 +81,9 @@ public class RoomAuthorizationService {
 
     public boolean canAccessRoom(String roomId) {
         var auth = authenticatedUserProvider.getAuthenticationOrThrow();
-
         if (hasGlobalAdminRights(auth)) return true;
 
         var participation = chatParticipantsRepository.findByEmailAndRoom(auth.getName(), roomId);
-
         return participation.isPresent() && participation.get().getRole() != RoomRoles.BANNED;
     }
 }

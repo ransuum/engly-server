@@ -3,8 +3,6 @@ package com.engly.engly_server.models.dto.request;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import org.jspecify.annotations.Nullable;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.server.ResponseStatusException;
 

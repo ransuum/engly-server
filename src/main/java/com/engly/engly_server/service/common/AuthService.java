@@ -66,13 +66,12 @@ public class AuthService {
 
         var refreshTokenEntity = refreshTokenRepository.findByTokenAndRevokedIsFalse(refreshToken)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
-
         var users = refreshTokenEntity.getUser();
 
         refreshTokenEntity.setRevoked(true);
         refreshTokenRepository.save(refreshTokenEntity);
 
-        JwtHolder jwtHolder = jwtAuthenticationService.authentication(users, response);
+        var jwtHolder = jwtAuthenticationService.authentication(users, response);
 
         return createAuthResponse(users, jwtHolder);
     }
@@ -100,7 +99,6 @@ public class AuthService {
 
         jwtAuthenticationService.authenticationForGoogle(user, response);
     }
-
 
     private AuthResponseDto createAuthResponse(Users user, JwtHolder jwtHolder) {
         return AuthResponseDto.builder()

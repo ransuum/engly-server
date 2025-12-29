@@ -39,14 +39,14 @@ public class MessageService {
     @Transactional
     public MessagesDto sendMessage(MessageRequest createMessageRequest) {
         var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
-
+        var imageThumbnailLink = driveService.getImageThumbnailLink(createMessageRequest.imageId());
         chatParticipantsService.addParticipant(createMessageRequest.roomId(), user, RoomRoles.USER);
 
         var savedMessage = messageRepository.save(Message.builder()
                 .isEdited(Boolean.FALSE)
                 .isDeleted(Boolean.FALSE)
                 .content(createMessageRequest.content())
-                .imageUrl(driveService.getImageThumbnailLink(createMessageRequest.imageId()))
+                .imageUrl(imageThumbnailLink)
                 .user(user)
                 .roomId(createMessageRequest.roomId())
                 .build());

@@ -37,7 +37,7 @@ public class ChatParticipantsService {
     })
     public void addParticipant(String roomId, Users user, RoomRoles role) {
         if (!chatParticipantHelper.isParticipantExists(roomId, user.getId())) {
-            final var chatParticipant = ChatParticipants.builder()
+            var chatParticipant = ChatParticipants.builder()
                     .roomId(roomId)
                     .user(user)
                     .role(role)
@@ -50,17 +50,14 @@ public class ChatParticipantsService {
     @Transactional(timeout = 30)
     @Caching(evict = {
             @CacheEvict(value = CacheName.PARTICIPANTS_BY_ROOM, allEntries = true),
-            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true),
-            @CacheEvict(value = CacheName.COUNT_PARTICIPANTS, allEntries = true)
+            @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
     })
     public void removeParticipant(String participantId) {
-        chatParticipantRepository.findById(participantId)
-                .ifPresentOrElse(chatParticipants -> {
-                    chatParticipantRepository.deleteById(chatParticipants.getId());
-                    log.info("User with email {} removed from room", chatParticipants.getUser().getEmail());
-                }, () -> {
-                    throw new NotFoundException(PARTICIPANT_NOT_FOUND.formatted(participantId));
-                });
+        ChatParticipants chatParticipants = chatParticipantRepository.findById(participantId)
+                .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND.formatted(participantId)));
+        chatParticipantRepository.deleteById(chatParticipants.getId());
+        log.info("User with email {} removed from room", chatParticipants.getUser().getEmail());
+
     }
 
     @Transactional
@@ -77,11 +74,6 @@ public class ChatParticipantsService {
                     throw new NotFoundException(PARTICIPANT_NOT_FOUND.formatted(participantId));
                 });
 
-    }
-
-    @Cacheable(value = CacheName.COUNT_PARTICIPANTS, key = "#roomId")
-    public int countActiveParticipants(String roomId) {
-        return chatParticipantRepository.countChatParticipantsByRoomId(roomId);
     }
 
     @Transactional(readOnly = true)

@@ -17,6 +17,5 @@ public interface RoomRepository extends JpaRepository<Rooms, String>, JpaSpecifi
     )
     Page<RoomProjection> findRoomsWithLastMessage(@Param("categoryId") String categoryId, Pageable pageable);
 
-
-    boolean existsByName(String name);
+    boolean existsByNameAndCategoryId(String name, String categoryId);
 }

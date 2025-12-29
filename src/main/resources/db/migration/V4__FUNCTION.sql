@@ -13,7 +13,6 @@ BEGIN
             r.id,
             r.name,
             r.description,
-            -- No quotes needed, Postgres defaults to lowercase
             msg.content::VARCHAR(255) as last_message,
             msg.created_at as last_message_created_at,
             COALESCE(p.member_count, 0) as members
