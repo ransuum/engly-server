@@ -39,7 +39,7 @@ public class MessageService {
     @Transactional
     public MessagesDto sendMessage(MessageRequest createMessageRequest) {
         var user = userService.findUserEntityByEmail(service.getCurrentUserEmail());
-        var imageThumbnailLink = driveService.getImageThumbnailLink(createMessageRequest.imageId());
+        String imageThumbnailLink = driveService.getImageThumbnailLink(createMessageRequest.imageId());
         chatParticipantsService.addParticipant(createMessageRequest.roomId(), user, RoomRoles.USER);
 
         var savedMessage = messageRepository.save(Message.builder()

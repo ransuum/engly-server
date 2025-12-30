@@ -29,7 +29,7 @@ public final class MessageSpecification {
     public static Specification<Message> search(String keyword) {
         return (root, _, cb) -> {
             if (isBlank(keyword)) return cb.conjunction();
-            final var pattern = "%" + keyword.toLowerCase() + "%";
+            var pattern = "%" + keyword.toLowerCase() + "%";
             return cb.or(
                     cb.like(cb.lower(root.get(CONTENT_FIELD)), pattern),
                     cb.like(cb.lower(root.join(USER_FIELD).get(USERNAME_FIELD)), pattern)
@@ -39,26 +39,22 @@ public final class MessageSpecification {
 
     public static Specification<Message> createdAfter(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
-                ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
-                : cb.conjunction();
+                ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date)) : cb.conjunction();
     }
 
     public static Specification<Message> updatedAfter(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
-                ? cb.greaterThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
-                : cb.conjunction();
+                ? cb.greaterThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date)) : cb.conjunction();
     }
 
     public static Specification<Message> createdBefore(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
-                ? cb.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
-                : cb.conjunction();
+                ? cb.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date)) : cb.conjunction();
     }
 
     public static Specification<Message> updatedBefore(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
-                ? cb.lessThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date))
-                : cb.conjunction();
+                ? cb.lessThan(root.get(UPDATED_AT_FIELD), toInstantPlusOneDay(date)) : cb.conjunction();
     }
 
     public static Specification<Message> between(@Nullable LocalDate min, @Nullable LocalDate max) {
@@ -72,26 +68,22 @@ public final class MessageSpecification {
 
     public static Specification<Message> contentLike(@Nullable String content) {
         return (root, _, cb) -> isNotBlank(content)
-                ? cb.like(cb.lower(root.get(CONTENT_FIELD)), "%" + content.toLowerCase() + "%")
-                : cb.conjunction();
+                ? cb.like(cb.lower(root.get(CONTENT_FIELD)), "%" + content.toLowerCase() + "%") : cb.conjunction();
     }
 
     public static Specification<Message> usernameLike(@Nullable String username) {
         return (root, _, cb) -> isNotBlank(username)
-                ? cb.like(cb.lower(root.join(USER_FIELD).get(USERNAME_FIELD)), "%" + username.toLowerCase() + "%")
-                : cb.conjunction();
+                ? cb.like(cb.lower(root.join(USER_FIELD).get(USERNAME_FIELD)), "%" + username.toLowerCase() + "%") : cb.conjunction();
     }
 
     public static Specification<Message> userIdEquals(@Nullable String userId) {
         return (root, _, cb) -> isNotBlank(userId)
-                ? cb.equal(root.join(USER_FIELD).get(ID_FIELD), userId)
-                : cb.conjunction();
+                ? cb.equal(root.join(USER_FIELD).get(ID_FIELD), userId) : cb.conjunction();
     }
 
     public static Specification<Message> roomIdEquals(@Nullable String roomId) {
         return (root, _, cb) -> isNotBlank(roomId)
-                ? cb.equal(root.get(ROOM_FIELD), roomId)
-                : cb.conjunction();
+                ? cb.equal(root.get(ROOM_FIELD), roomId) : cb.conjunction();
     }
 
     public static Specification<Message> isEmpty() {

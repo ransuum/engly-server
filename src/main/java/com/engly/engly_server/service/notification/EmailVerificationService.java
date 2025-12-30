@@ -4,7 +4,6 @@ import com.engly.engly_server.exception.NotFoundException;
 import com.engly.engly_server.exception.TokenNotFoundException;
 import com.engly.engly_server.models.dto.response.AuthResponseDto;
 import com.engly.engly_server.models.dto.response.EmailSendInfo;
-import com.engly.engly_server.models.entity.Users;
 import com.engly.engly_server.models.enums.TokenType;
 import com.engly.engly_server.repository.UserRepository;
 import com.engly.engly_server.repository.VerifyTokenRepository;
@@ -72,10 +71,10 @@ public class EmailVerificationService {
 
                                 tokenRepo.delete(verifyToken);
 
-                                Users userSaved = userRepository.save(user);
-                                JwtHolder jwtHolder = jwtAuthenticationService.authenticationForVerification(userSaved, response);
+                                var savedUser = userRepository.save(user);
+                                var jwtHolder = jwtAuthenticationService.authenticationForVerification(savedUser, response);
                                 return new AuthResponseDto(jwtHolder.accessToken(), 12, TokenType.BEARER,
-                                                           userSaved.getUsername());
+                                                           savedUser.getUsername());
                             })
                             .orElseThrow(() -> new NotFoundException("Invalid User"));
                 })

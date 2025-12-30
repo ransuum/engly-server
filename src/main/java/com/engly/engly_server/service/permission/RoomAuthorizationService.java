@@ -41,7 +41,7 @@ public class RoomAuthorizationService {
     }
 
     public boolean hasRoomRole(String roomId, RoomRoles requiredRole) {
-        var userEmail = authenticatedUserProvider.getCurrentUserEmail();
+        String userEmail = authenticatedUserProvider.getCurrentUserEmail();
         return hasRoomRole(userEmail, roomId, requiredRole);
     }
 
@@ -83,7 +83,7 @@ public class RoomAuthorizationService {
         var auth = authenticatedUserProvider.getAuthenticationOrThrow();
         if (hasGlobalAdminRights(auth)) return true;
 
-        var participation = chatParticipantsRepository.findByEmailAndRoom(auth.getName(), roomId);
-        return participation.isPresent() && participation.get().getRole() != RoomRoles.BANNED;
+        var participant = chatParticipantsRepository.findByEmailAndRoom(auth.getName(), roomId);
+        return participant.isPresent() && participant.get().getRole() != RoomRoles.BANNED;
     }
 }

@@ -42,7 +42,7 @@ public class MessageReadService {
             return CompletableFuture.completedFuture(null);
         }
 
-        var unreadMessageIds = messageRequest.messageIds().stream()
+        List<String> unreadMessageIds = messageRequest.messageIds().stream()
                 .filter(messageId -> !messageReadRepository.existsByMessageIdAndUserId(messageId, userId))
                 .toList();
         log.info("User {} has {} unread messages to mark as read", userId, unreadMessageIds.size());

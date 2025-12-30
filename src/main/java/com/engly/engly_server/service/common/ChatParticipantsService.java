@@ -53,7 +53,7 @@ public class ChatParticipantsService {
             @CacheEvict(value = CacheName.PARTICIPANT_EXISTS, allEntries = true)
     })
     public void removeParticipant(String participantId) {
-        ChatParticipants chatParticipants = chatParticipantRepository.findById(participantId)
+        var chatParticipants = chatParticipantRepository.findById(participantId)
                 .orElseThrow(() -> new NotFoundException(PARTICIPANT_NOT_FOUND.formatted(participantId)));
         chatParticipantRepository.deleteById(chatParticipants.getId());
         log.info("User with email {} removed from room", chatParticipants.getUser().getEmail());

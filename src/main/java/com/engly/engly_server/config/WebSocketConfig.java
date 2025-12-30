@@ -29,41 +29,30 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic")
-                .setHeartbeatValue(new long[]{10000, 10000})
-                .setTaskScheduler(heartbeatTaskScheduler());
-        config.setApplicationDestinationPrefixes("/app");
+        config.setApplicationDestinationPrefixes("/app").enableSimpleBroker("/topic")
+              .setHeartbeatValue(new long[]{10000, 10000}).setTaskScheduler(heartbeatTaskScheduler());
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chat")
-                .setAllowedOriginPatterns(frontendUrl, "http://localhost:3000");
+        registry.addEndpoint("/chat").setAllowedOriginPatterns(frontendUrl, "http://localhost:3000");
     }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(authChannelInterceptor, new SecurityContextChannelInterceptor());
-        registration.taskExecutor()
-                .corePoolSize(8)
-                .maxPoolSize(16)
-                .queueCapacity(200);
+        registration.interceptors(authChannelInterceptor, new SecurityContextChannelInterceptor())
+                .taskExecutor().corePoolSize(8).maxPoolSize(16).queueCapacity(200);
     }
 
     @Override
     public void configureClientOutboundChannel(ChannelRegistration registration) {
-        registration.taskExecutor()
-                .corePoolSize(8)
-                .maxPoolSize(16)
-                .queueCapacity(200);
+        registration.taskExecutor().corePoolSize(8).maxPoolSize(16).queueCapacity(200);
     }
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.addDecoratorFactory(CustomExceptionWebSocketHandlerDecorator::new);
-        registration.setMessageSizeLimit(128 * 1024);
-        registration.setSendBufferSizeLimit(1024 * 1024);
-        registration.setSendTimeLimit(30000);
+        registration.setSendBufferSizeLimit(1024 * 1024).setMessageSizeLimit(128 * 1024).setSendTimeLimit(30000)
+                    .addDecoratorFactory(CustomExceptionWebSocketHandlerDecorator::new);
     }
 
     @Bean("heartbeatTaskScheduler")

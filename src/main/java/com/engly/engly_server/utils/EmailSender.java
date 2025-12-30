@@ -32,7 +32,7 @@ public record EmailSender(
         var token = generateSecureToken();
         tokenRepo.save(new VerifyToken(token, email, tokenType));
 
-        var message = messageGenerator.generate(
+        String message = messageGenerator.generate(
                 Map.of("[email]", email, "[link]", urlTemplate.formatted(token)),
                 messageTemplate);
 

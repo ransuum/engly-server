@@ -39,14 +39,10 @@ public class UserService {
             @CacheEvict(value = CacheName.ALL_USER, allEntries = true),
             @CacheEvict(value = CacheName.USER_EXISTS_BY_ID, key = "#id")
     })
-    public ApiResponse delete(String id) {
-        return userRepository.findById(id)
-                .map(users -> {
-                    clearUserSpecificCaches(users.getEmail(), users.getUsername());
-                    userRepository.delete(users);
-                    return new ApiResponse("User deleted successfully");
-                })
-                .orElseThrow(() -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
+    public void delete(String id) {
+        var user = userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(USER_NOT_FOUND_BY_ID.formatted(id)));
+        userRepository.delete(user);
     }
 
 
