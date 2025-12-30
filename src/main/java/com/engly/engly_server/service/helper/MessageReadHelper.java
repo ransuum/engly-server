@@ -44,7 +44,7 @@ public class MessageReadHelper {
 
         log.info("Batch saving {} message reads", messageReads.size());
 
-        final List<CompletableFuture<List<MessageRead>>> futures = IntStream.range(0, messageReads.size())
+        List<CompletableFuture<List<MessageRead>>> futures = IntStream.range(0, messageReads.size())
                 .boxed()
                 .collect(Collectors.groupingBy(i -> i / 100))
                 .values()
@@ -55,16 +55,16 @@ public class MessageReadHelper {
                             .toList();
 
                     try {
-                        var saved = messageReadRepository.saveAll(batch);
+                        var savedMessageReaders = messageReadRepository.saveAll(batch);
                         log.info("Saved batch of {} message reads", batch.size());
-                        return saved;
+                        return savedMessageReaders;
                     } catch (Exception e) {
-                        throw new RepositoryException("Batch save failed: " +  e.getMessage());
+                        throw new RepositoryException("Batch save failed: " + e.getMessage());
                     }
                 }))
                 .toList();
 
-        final List<MessageRead> savedReads = futures.stream()
+        List<MessageRead> savedReads = futures.stream()
                 .map(CompletableFuture::join)
                 .flatMap(List::stream)
                 .toList();
@@ -74,7 +74,7 @@ public class MessageReadHelper {
 
 
     private void updateCacheForSavedReads(List<MessageRead> savedReads) {
-        final var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
+        var cache = cacheManager.getCache(CacheName.MESSAGE_READ_STATUS);
         if (cache != null) savedReads.forEach(mr ->
                 cache.put(mr.getMessageId() + "_" + mr.getUser().getId(), true));
     }

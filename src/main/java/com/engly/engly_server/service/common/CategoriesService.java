@@ -38,12 +38,12 @@ public class CategoriesService {
         if (categoriesRepository.existsByName(categoryRequest.name()))
             throw new EntityAlreadyExistsException(CATEGORY_ALREADY_EXISTS.formatted(categoryRequest.name().name()));
 
-        var save = categoriesRepository.save(Categories.builder()
+        var category = categoriesRepository.save(Categories.builder()
                 .description(categoryRequest.description())
                 .name(categoryRequest.name())
                 .build());
 
-        return categoryMapper.toCategoriesDto(save);
+        return categoryMapper.toCategoriesDto(category);
     }
 
     @Caching(

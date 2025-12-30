@@ -38,21 +38,17 @@ public final class RoomSpecification {
 
     public static Specification<Rooms> createdAfter(@Nullable LocalDate date) {
         return (root, _, cb) -> date != null
-                ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
-                : cb.conjunction();
+                ? cb.greaterThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date)) : cb.conjunction();
     }
 
     public static Specification<Rooms> createdBefore(@Nullable LocalDate date) {
         return ((root, _, criteriaBuilder) -> date != null
-                ? criteriaBuilder.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date))
-                : criteriaBuilder.conjunction());
+                ? criteriaBuilder.lessThan(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(date)) : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> between(@Nullable LocalDate min, @Nullable LocalDate max) {
         return ((root, _, criteriaBuilder) -> min != null && max != null
-                ? criteriaBuilder.between(
-                root.get(CREATED_AT_FIELD),
-                toInstantPlusOneDay(min), toInstantPlusOneDay(max))
+                ? criteriaBuilder.between(root.get(CREATED_AT_FIELD), toInstantPlusOneDay(min), toInstantPlusOneDay(max))
                 : criteriaBuilder.conjunction());
     }
 
@@ -70,8 +66,7 @@ public final class RoomSpecification {
 
     public static Specification<Rooms> categoryEquals(@Nullable String categoryId) {
         return ((root, _, criteriaBuilder) -> StringUtils.isNotBlank(categoryId)
-                ? criteriaBuilder.equal(root.get(CATEGORY_FIELD), categoryId)
-                : criteriaBuilder.conjunction());
+                ? criteriaBuilder.equal(root.get(CATEGORY_FIELD), categoryId) : criteriaBuilder.conjunction());
     }
 
     public static Specification<Rooms> creatorUsernameLike(@Nullable String creatorUsername) {

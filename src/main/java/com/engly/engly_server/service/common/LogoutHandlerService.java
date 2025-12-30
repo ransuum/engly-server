@@ -30,7 +30,7 @@ public class LogoutHandlerService implements LogoutHandler {
         if (StringUtils.isBlank(authCookie) &&
                 !Objects.requireNonNull(authCookie).startsWith(TokenType.BEARER.name())) return;
 
-        final String refreshToken = Objects.requireNonNull(authCookie).substring(7);
+        String refreshToken = Objects.requireNonNull(authCookie).substring(7);
 
         refreshTokenRepository.updateRevokeByToken(refreshToken);
 

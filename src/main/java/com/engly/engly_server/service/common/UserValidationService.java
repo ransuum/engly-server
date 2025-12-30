@@ -19,12 +19,12 @@ public class UserValidationService {
     }
 
     public AvailabilityResponseDto isUsernameAvailable(String username) {
-        var isAvailable = !userRepository.existsByUsername(username);
+        boolean isAvailable = !userRepository.existsByUsername(username);
         return new AvailabilityResponseDto(isAvailable) ;
     }
 
     public AvailabilityResponseDto isEmailAvailable(String email) {
-        var isAvailable = !userRepository.existsByEmail(email);
+        boolean isAvailable = !userRepository.existsByEmail(email);
         return new AvailabilityResponseDto(isAvailable);
     }
 }

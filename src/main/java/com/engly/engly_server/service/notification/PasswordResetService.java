@@ -71,7 +71,6 @@ public class PasswordResetService {
                                 tokenRepo.delete(verifyToken);
 
                                 var jwtHolder = jwtAuthenticationService.authentication(user, response);
-
                                 return new AuthResponseDto(jwtHolder.accessToken(),
                                         12,
                                         TokenType.BEARER,
